@@ -1,0 +1,3 @@
+<isif  condition="${pdict.CurrentSession.privacy.auth_type.equals('password')}">
+    <div id="profile-editor"></div>
+</isif>

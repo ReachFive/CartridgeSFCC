@@ -1,0 +1,73 @@
+<isdecorate template="common/layout/page">
+    <isscript>
+        var assets = require('*/cartridge/scripts/assets.js');
+        assets.addCss('/css/login.css');
+        assets.addJs('/js/login.js');
+    </isscript>
+
+    <div class="hero slant-down login-banner">
+        <h1 class="page-title">${Resource.msg('header.hero.image.login', 'login', null)}</h1>
+    </div>
+    <div class="container login-page">
+        <!---Breadcrumbs--->
+        <isinclude template="components/breadcrumbs/pageBreadcrumbs"/>
+        <div class="row justify-content-center equal-height">
+            <div class="col-sm-8 col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="login-form-nav">
+                            <isinclude template="account/components/navTabs" />
+                            <div class="tab-content">
+                                <div class="tab-pane ${pdict.navTabValue === 'login' ? 'active' : ''}" id="login" role="tabpanel" aria-labelledby="login-tab">
+                                	<isif condition="${!empty(pdict.errorMsg)}">
+                                		<div class="error-form">${pdict.errorMsg}</div>
+                                	</isif>
+                                    <isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveEnabled')}">
+                                        <isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveLoginAllowed')
+                                            && require('*/cartridge/scripts/helpers/reachFiveHelper').getReachFiveConversionMute()}">
+                                                <isif condition="${'reachFivePasswordReset' in pdict}">
+                                                    <div id="reset-password"></div>
+                                                <iselse/>
+                                                    <div id="load-social-connect-login"></div>
+                                                    <isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveTransitionActive')}">
+                                                        <isinclude template="account/forgotPassword"/>
+                                                    </isif>
+                                                </isif>
+                                        <iselse/>
+    	                                    <isinclude template="account/components/loginForm" />
+	                                        <isinclude template="account/password/requestPasswordResetModal"/>
+                                            <div id="load-social-connect"></div>
+                                        </isif>
+                                    <iselse/>
+	                                    <isinclude template="account/components/loginForm" />
+	                                    <isinclude template="account/password/requestPasswordResetModal"/>
+                                        <isinclude template="account/components/oauth" />
+                                    </isif>
+                                </div>
+                                <div class="tab-pane ${pdict.navTabValue === "register" ? 'active' : ''}" id="register" role="tabpanel" aria-labelledby="register-tab">
+                                    <isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveEnabled')
+                                        && !('formRequired' in pdict && pdict.formRequired)}">
+                                        <isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveLoginAllowed')
+                                            && !require('*/cartridge/scripts/helpers/reachFiveHelper').isReachFiveTransitionActive()}">
+                                            <div id="load-social-connect-signup"></div>
+                                        <iselse/>
+                                            <isinclude template="account/components/registerForm" />
+                                            <div id="load-social-connect2"></div>
+                                        </isif>
+                                    <iselse/>
+                                        <isinclude template="account/components/registerForm" />
+                                    </isif>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-8 col-md-6">
+                <div class="card">
+                    <isinclude template="account/components/trackOrderForm" />
+                </div>
+            </div>
+        </div>
+    </div>
+</isdecorate>

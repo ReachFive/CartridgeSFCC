@@ -1,0 +1,16 @@
+<!--- TEMPLATENAME: reachfiveaccountlinks.isml --->
+
+<link rel="stylesheet" href="${URLUtils.staticURL('/css/reachfive.css')}" />
+
+<div class='socialLogin'>
+
+	<h3 class="title">
+		<isprint value="${Resource.msg('reachfive.account.link.title','reachfive',null)}" />
+	</h3>
+
+    <p> <isprint value="${Resource.msg('reachfive.account.link.description','reachfive',null)}" /> </p>
+	
+</div>
+<div id="re-auth-container"></div>
+<div id="social-accounts-container"></div>
+

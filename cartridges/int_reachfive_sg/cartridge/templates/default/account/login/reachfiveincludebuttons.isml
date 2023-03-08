@@ -1,0 +1,27 @@
+<!--- TEMPLATENAME: reachfiveincludebuttons.isml --->
+
+<isif condition="${ customer.externallyAuthenticated}  ">
+	<h1>${Resource.msg('account.user.registration.social','account',null)}</h1>
+
+	<div id="re-auth-container"></div>
+	<div id="social-accounts-container"></div>
+<iselseif condition="${customer.authenticated}">
+	<!-- <p><isprint value="${Resource.msg('global.or', 'locale', null)}" /></p> -->
+	<div class="error-message-r5"></div>
+	<div id="load-social-connect"></div>
+<iselse/>
+	<isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveLoginAllowed') && require('*/cartridge/scripts/helpers/reachFiveHelper').getReachFiveConversionMute()}" >
+		<isif condition="${'passwordReset' in pdict.CurrentSession.custom && pdict.CurrentSession.custom.passwordReset}">
+			<isinclude template="account/login/reachfiveresetpassword"/>
+		<iselse/>
+			<div id="load-social-connect-login"></div>
+		</isif>
+	<iselse/>
+        <div id="load-social-connect"></div>
+	</isif>
+    <isif condition="${require('*/cartridge/scripts/helpers/reachFiveHelper').isReachFiveTransitionActive() && require('*/cartridge/scripts/helpers/reachFiveHelper').getReachFiveConversionMute()}">
+        <a id="password-reset" href="${URLUtils.url('Account-PasswordResetDialog')}" title="${Resource.msg('account.login.logininclude.forgotpassword.label','account',null)}">
+            ${Resource.msg('account.login.logininclude.forgotpassword','account',null)}
+        </a>
+    </isif>
+</isif>

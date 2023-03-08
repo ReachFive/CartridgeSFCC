@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
+
+    <type-extension type-id="Profile">
+        <custom-attribute-definitions>
+            <attribute-definition attribute-id="isNewsletter">
+                <display-name xml:lang="x-default">Newsletter consent</display-name>
+                <description xml:lang="x-default">"true" if customer has Newsletter consent</description>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="reachfiveError">
+                <display-name xml:lang="x-default">ReachFive request error</display-name>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="reachfiveSendVerificationEmail">
+                <display-name xml:lang="x-default">ReachFive send verification email</display-name>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="reachfiveUpdateEmailAddress">
+                <display-name xml:lang="x-default">ReachFive update email address</display-name>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="reachfiveUpdateProfile">
+                <display-name xml:lang="x-default">ReachFive update profile</display-name>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+        </custom-attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="ReachFive">
+                <display-name xml:lang="x-default">ReachFive</display-name>
+                <attribute attribute-id="reachfiveSendVerificationEmail"/>
+                <attribute attribute-id="reachfiveUpdateEmailAddress"/>
+                <attribute attribute-id="reachfiveUpdateProfile"/>
+                <attribute attribute-id="reachfiveError"/>
+            </attribute-group>
+        </group-definitions>
+    </type-extension>
+
+    <type-extension type-id="SitePreferences">
+        <custom-attribute-definitions>
+            <attribute-definition attribute-id="cartridgeControllersName">
+                <display-name xml:lang="x-default">Cartridge name with controllers</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <default-value>app_storefront_controllers</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="isReach5ThemeActive">
+                <display-name xml:lang="x-default">Active or not default reach five theme </display-name>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>true</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="isReachFiveEnabled">
+                <display-name xml:lang="x-default">Is Reach Five Enabled</display-name>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>false</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="isReachFiveFastRegister">
+                <display-name xml:lang="x-default">is Reach Five Fast Register</display-name>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>true</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="isReachFiveLoginAllowed">
+                <display-name xml:lang="x-default">is Reach Five Login Allowed</display-name>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>false</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="isReachFiveSessionForcedAuth">
+                <display-name xml:lang="x-default">Session Forced Authentication</display-name>
+                <description xml:lang="x-default">Automatic user authentication from any page</description>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>true</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="isReachFiveTransitionActive">
+                <display-name xml:lang="x-default">is Reach Five Transition Active</display-name>
+                <description xml:lang="x-default">Enable the transition state of the Reach Five integration</description>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>false</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="reach5ApiKey">
+                <display-name xml:lang="x-default">Define the API KEY for the Identity API</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="reach5ClientSecret">
+                <display-name xml:lang="x-default">Define the Client Secret for the Identity API</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="reach5CoreSdkUrl">
+                <display-name xml:lang="x-default">Web Core SDK Url</display-name>
+                <description xml:lang="x-default">ReachFive Web Core SDK Url.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <default-value>https://cdn.jsdelivr.net/npm/@reachfive/identity-core@latest/umd/identity-core.min.js</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="reach5DefaulLanguageCode">
+                <display-name xml:lang="x-default">Defaul ReachFive LanguageCode</display-name>
+                <description xml:lang="x-default">Defaul ReachFive LanguageCodes. It sets the language of ReachFive Form. The language lowercase ISO 639-1 code. e.g: en, es, fr, it, nl ... It is used when current site language is not supported.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <default-value>en</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="reach5Domain">
+                <display-name xml:lang="x-default">Reach Five Domain</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="reach5ManagementApiKey">
+                <display-name xml:lang="x-default">Define the API KEY for the Management API</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="reach5ManagementClientSecret">
+                <display-name xml:lang="x-default">Define the Client Secret for the Management API</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="reach5ManagementScope">
+                <display-name xml:lang="x-default">Reach Five Management scope</display-name>
+                <description xml:lang="x-default">Space-delimited list of Management permissions.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <default-value>manage:users read:users</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="reach5ProfileFieldsJSON">
+                <display-name xml:lang="x-default">ReachFive profile fields JSON</display-name>
+                <description xml:lang="x-default">ReachFive JSON which contains fields to synchronize and mapping between SFCC and ReachFive profile fields</description>
+                <type>text</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="reach5SupportedLanguageCodes">
+                <display-name xml:lang="x-default">Supported ReachFive LanguageCodes</display-name>
+                <description xml:lang="x-default">Supported ReachFive LanguageCodes. They set the language of ReachFive Form. The language lowercase ISO 639-1 codes. e.g: en, es, fr, it, nl ...</description>
+                <type>set-of-string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="reach5UiSdkUrl">
+                <display-name xml:lang="x-default">Web UI SDK Url</display-name>
+                <description xml:lang="x-default">ReachFive Web UI SDK Url.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <default-value>https://cdn.jsdelivr.net/npm/@reachfive/identity-ui@latest/umd/identity-ui.min.js</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="reachFiveProviderId">
+                <display-name xml:lang="x-default">Reach Five provider ID</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <default-value>ReachFive</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="reachFiveTransitionCookieDuration">
+                <display-name xml:lang="x-default">Reach Five Transition Cookie Duration</display-name>
+                <description xml:lang="x-default">Duration of the Transition cookie in days. Required to identify the user already migrated to ReachFive.</description>
+                <type>int</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>365</default-value>
+            </attribute-definition>
+        </custom-attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="ReachFive">
+                <display-name xml:lang="x-default">Reach Five configuration</display-name>
+                <attribute attribute-id="cartridgeControllersName"/>
+                <attribute attribute-id="isReachFiveEnabled"/>
+                <attribute attribute-id="isReachFiveTransitionActive"/>
+                <attribute attribute-id="reachFiveTransitionCookieDuration"/>
+                <attribute attribute-id="isReachFiveSessionForcedAuth"/>
+                <attribute attribute-id="isReach5ThemeActive"/>
+                <attribute attribute-id="reach5Domain"/>
+                <attribute attribute-id="reach5ApiKey"/>
+                <attribute attribute-id="reach5ClientSecret"/>
+                <attribute attribute-id="reachFiveProviderId"/>
+                <attribute attribute-id="isReachFiveFastRegister"/>
+                <attribute attribute-id="isReachFiveLoginAllowed"/>
+                <attribute attribute-id="reach5ManagementApiKey"/>
+                <attribute attribute-id="reach5ManagementClientSecret"/>
+                <attribute attribute-id="reach5ManagementScope"/>
+                <attribute attribute-id="reach5ProfileFieldsJSON"/>
+                <attribute attribute-id="reach5UiSdkUrl"/>
+                <attribute attribute-id="reach5CoreSdkUrl"/>
+                <attribute attribute-id="reach5SupportedLanguageCodes"/>
+                <attribute attribute-id="reach5DefaulLanguageCode"/>
+            </attribute-group>
+        </group-definitions>
+    </type-extension>
+
+</metadata>

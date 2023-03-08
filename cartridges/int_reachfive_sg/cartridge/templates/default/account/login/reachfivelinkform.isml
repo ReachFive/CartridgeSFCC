@@ -1,0 +1,13 @@
+<!--- TEMPLATENAME: reachfivelinkform.isml --->
+<iscontent type="text/html" charset="UTF-8" compact="true"/>
+<isdecorate template="account/pt_account">
+	<isinclude template="util/modules"/>
+
+	<h1><isprint value="${Resource.msg('account.header','account',null)}" encoding="jshtml" /> Login</h1>
+	<div class="col-1">
+		<isif condition="${!empty(pdict.ReachFivesocialName)}">
+			<p><isprint value="${Resource.msgf('reachfive.accountfound','reachfive',null, pdict.ReachFivesocialName)}" encoding="jshtml" /></p>
+		</isif>
+		<isinclude template="account/login/logininclude"/>
+	</div><!-- END: page column -->
+</isdecorate>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jobs xmlns="http://www.demandware.com/xml/impex/jobs/2015-07-01">
+    <job job-id="ReachFive-Synchronization" priority="0">
+        <description>ReachFive Profiles Synchronization</description>
+        <parameters/>
+        <flow>
+            <context site-id="RefArch"/>
+            <step step-id="ReachFiveSynchronization" type="custom.ReachFiveSynchronization" enforce-restart="false">
+                <description>ReachFive Profiles Synchronization</description>
+                <parameters/>
+                <rules>
+                    <on-exit status="ERROR">
+                        <stop-job/>
+                    </on-exit>
+                </rules>
+            </step>
+        </flow>
+        <flow>
+            <context site-id="RefArch"/>
+            <step step-id="userSynchronization" type="custom.userSynchronization" enforce-restart="false">
+                <description>ReachFive Profiles Synchronization with SFCC</description>
+                <parameters/>
+                <rules>
+                    <on-exit status="ERROR">
+                        <stop-job/>
+                    </on-exit>
+                </rules>
+            </step>
+        </flow>
+        <rules/>
+        <triggers>
+            <run-recurring enabled="true">
+                <recurrence>
+                    <date-from>2020-04-26Z</date-from>
+                    <start-time>04:00:00.000Z</start-time>
+                    <interval>5m</interval>
+                    <day-of-week/>
+                </recurrence>
+            </run-recurring>
+        </triggers>
+    </job>
+</jobs>

@@ -1,0 +1,186 @@
+<!--- TEMPLATENAME: reachfiveinitglobal --->
+<isif condition="${pdict.loginRedirectUrl}">
+    <script>
+        window.location.href = decodeURIComponent('${dw.crypto.Encoding.toURI(pdict.loginRedirectUrl)}');
+    </script>
+<iselse/>
+    <isif condition="${pdict.reachFiveCoreSdkUrl}">
+        <script src="${pdict.reachFiveCoreSdkUrl}"></script>
+
+        <script>
+            window.sdkCoreClient = reach5.createClient({
+                // Required parameters
+                domain: '${pdict.reachFiveDomain}',
+                clientId: '${pdict.reachFiveApiKey}',
+                // Optional parameter
+                language: '${pdict.reachFiveLanguageCode}' || 'en'
+            });
+
+            window.reach5Const = {
+                callbackUrl: '${pdict.callbackUrl}',
+                reachFiveLogoutUrl: '${pdict.reachFiveLogoutUrl}',
+                siteID: '${pdict.siteID}',
+                stateUrl: '${pdict.stateUrl}',
+                stateObjBase64: '${pdict.stateObjBase64}',
+                reachFiveCookieName: '${pdict.reachFiveCookieName}',
+                reachFiveLoginCookieName: '${pdict.reachFiveLoginCookieName}'
+            }
+
+            <isif condition="${'isSessionAuthRequired' in pdict}">
+                window.reach5Const.isSessionAuthRequired = ${pdict.isSessionAuthRequired};
+            </isif>
+        </script>
+
+        <isinclude url="${URLUtils.url('ReachFiveController-UncachedContext')}" />
+
+        <iscomment>	load global client side R5 lib </iscomment>
+        <script defer type="text/javascript" src="${URLUtils.staticURL('/js/reachfiveglobal.js')}"></script>
+    </isif>
+
+    <isif condition="${pdict.loadUISDK && pdict.reachFiveUiSdkUrl}">
+        <script src="${pdict.reachFiveUiSdkUrl}"></script>
+
+        <script type="text/javascript">
+            window.sdkUiClient = reach5Widgets.createClient({
+                // Required parameters
+                domain: '${pdict.reachFiveDomain}',
+                clientId: '${pdict.reachFiveApiKey}',
+                // Optional parameter
+                language: '${pdict.reachFiveLanguageCode}' || 'en'
+            });
+        </script>
+
+        <script type="text/javascript">
+            if(document.getElementById("load-social-connect-login")) {
+                console.log('load-social-connect-login');
+
+                sdkUiClient.showAuth({
+                    container: 'load-social-connect-login',
+                    allowSignup: false,
+                    allowForgotPassword: ${pdict.isTransitionActive ? 'false' : 'true'},
+                    auth: {
+                        responseType: 'code',
+                        redirectUri: '${pdict.callbackUrl}',
+                        origin : '${pdict.siteID}',
+                        state: '${pdict.stateObjBase64}'
+                    }
+                });
+            }
+
+            if(document.getElementById("load-social-connect-signup")) {
+                console.log('load-social-connect-signup');
+
+                sdkUiClient.showAuth({
+                    container: 'load-social-connect-signup',
+                    initialScreen: 'signup',
+                    allowLogin: false,
+                    allowForgotPassword: ${pdict.isTransitionActive ? 'false' : 'true'},
+                    auth: {
+                        responseType: 'code',
+                        redirectUri: '${pdict.callbackUrl}',
+                        origin : '${pdict.siteID}',
+                        state: '${pdict.signUpStateObjBase64}'
+                    },
+                    signupFields: [
+                        "given_name",
+                        "family_name",
+                        "email",
+                        "password",
+                        "password_confirmation",
+                        "consents.newsletter"
+                    ]
+                });
+            }
+
+            if(document.getElementById("load-social-connect")) {
+                console.log('load-social-connect')
+
+                sdkUiClient.showSocialLogin({
+                    container: 'load-social-connect',
+                    auth: {
+                        responseType: 'code',
+                        redirectUri: '${pdict.callbackUrl}',
+                        origin : '${pdict.siteID}',
+                        state: '${pdict.stateObjBase64}'
+                    }
+                });
+            }
+
+
+            if(document.getElementById("load-social-connect2")) {
+                console.log('load-social-connect2')
+
+                sdkUiClient.showSocialLogin({
+                    container: 'load-social-connect2',
+                    auth: {
+                        responseType: 'code',
+                        redirectUri: '${pdict.callbackUrl}',
+                        origin : '${pdict.siteID}'
+                    }
+                });
+            }
+
+            if (document.getElementById("reset-password")) {
+                sdkUiClient.showPasswordReset({
+                    container: 'reset-password',
+                    loginLink: '${pdict.resetPassLoginUrl}',
+                    canShowPassword: true
+                });
+            }
+        </script>
+
+        <isif condition="${!empty(pdict.reachFiveAccess_token)}">
+            <script type="text/javascript">
+                if(document.getElementById("password-editor")) {
+                    console.log('password-editor');
+
+                    sdkUiClient.showPasswordEditor({
+                        container: 'password-editor',
+                        accessToken: '${pdict.reachFiveAccess_token}',
+                        promptOldPassword: 'true',
+                        onSuccess: function () {
+                            window.location.href = decodeURIComponent('${dw.crypto.Encoding.toURI(pdict.stateUrl)}');
+                        }
+                    });
+                }
+            </script>
+            <iscomment> 
+                TODO: This functionality related to "imlicid flow"
+                    and it is normally disabled becasue of security issues
+            <script type="text/javascript">
+                var reAuthContainer = document.getElementById("re-auth-container");
+                var socialAccountsContainer = document.getElementById("social-accounts-container");
+
+                if(reAuthContainer && socialAccountsContainer) {
+                    var idToken = null;
+
+                    try{
+                        idToken = '${pdict.CurrentSession.privacy.id_token}';
+                    } catch(err) {
+                        console.log(err)
+                    }
+
+                    console.log('social-accounts-container');
+
+                    sdkUiClient.showAuth({
+                        container: 're-auth-container',
+                        allowSignup: false,
+                        allowForgotPassword: false,
+                        auth: {
+                            prompt: 'login',
+                            idTokenHint: idToken
+                        }
+                    });
+
+                    sdkCoreClient.on('authenticated', function(authResult) {
+                        sdkUiClient.showSocialAccounts({
+                            accessToken: authResult.accessToken,
+                            container: 'social-accounts-container'
+                        });
+                    });
+                }
+            </script>
+            </iscomment>
+        </isif>
+    </isif>
+</isif>

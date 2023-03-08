@@ -1,0 +1,27 @@
+<div class="row justify-content-center">
+    <div class="col-sm-6">
+        <!---Profile--->
+        <isinclude template="account/profileCard"/>
+
+        <isif condition="${!pdict.CurrentSession.isCustomerExternallyAuthenticated()
+            || ('auth_type' in pdict.CurrentSession.privacy
+                && ['password', 'sfcc'].indexOf(pdict.CurrentSession.privacy.auth_type) !== -1)}">
+            <!---Password--->
+            <isinclude template="account/passwordCard"/>
+        </isif>
+		<isif  condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveEnabled') && ('access_token' in pdict.CurrentSession.privacy) && pdict.CurrentSession.isCustomerExternallyAuthenticated}">
+			<isinclude template="account/login/reachfiveaccounts"/>
+		</isif>
+        <!---Address Book--->
+        <isinclude template="account/addressBookCard"/>
+    </div>
+    <div class="col-sm-6">
+        <!---Order History--->
+        <isif condition="${pdict.account.orderHistory}">
+            <isset name="order" value="${pdict.account.orderHistory}" scope="page"/>
+            <isinclude template="account/order/orderHistoryCard"/>
+        </isif>
+        <!---Payment--->
+        <isinclude template="account/paymentCard"/>
+    </div>
+</div>

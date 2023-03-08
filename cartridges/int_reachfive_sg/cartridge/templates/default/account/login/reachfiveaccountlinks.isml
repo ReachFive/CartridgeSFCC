@@ -1,0 +1,22 @@
+<!--- TEMPLATENAME: reachfiveaccountlinks.isml --->
+
+<link rel="stylesheet" href="${URLUtils.staticURL('/css/reachfive.css')}" />
+
+<div class='socialLogin'>
+
+	<h3 class="title">
+		<isprint value="${Resource.msg('reachfive.account.link.title','reachfive',null)}" />
+	</h3>
+
+    <p> <isprint value="${Resource.msg('reachfive.account.link.description','reachfive',null)}" /> </p>
+	
+	<ul class='social-link' data-externalid="${(pdict.ExternalID)}" data-url="${URLUtils.url('ReachFiveController-LinkAccounts').toString()}"
+	data-get-token="${pdict.AccessToken}" data-domain="${dw.system.Site.getCurrent().getCustomPreferenceValue('reach5Domain')}" data-callbackurl="${pdict.CallbackUrl}" data-isreachfiveloginallowed="${pdict.IsReachFiveLoginAllowed}"   >
+		<li id='social-login-facebook' class='nav-ico-before'> Facebook <button class='switch'></button></li>
+		<li id='social-login-google' class='nav-ico-before'> Google <button class='switch'></button></li>
+		<iscomment> Add Other Social Network Here </iscomment>
+	</ul>
+</div>
+
+<div id="re-auth-container"></div>
+<div id="social-accounts-container"></div>

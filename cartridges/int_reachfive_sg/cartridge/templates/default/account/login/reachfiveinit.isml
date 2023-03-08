@@ -1,0 +1,146 @@
+<!--- TEMPLATENAME: reachfiveinit.isml --->
+<isif condition="${pdict.isReachFiveEnabled && pdict.reachFiveUiSdkUrl}">
+    <script src="${pdict.reachFiveUiSdkUrl}"></script>
+
+    <script type="text/javascript">
+        var sdkUiClient = reach5Widgets.createClient({
+            // Required parameters
+            domain: '${pdict.reachFiveDomain}',
+            clientId: '${pdict.reachFiveApiKey}',
+            // Optional parameter
+            language: '${pdict.reachFiveLanguageCode}' || 'en'
+        });
+    </script>
+
+    <iscomment>	load JQuery lib - if not already loaded.
+    !!!! This include concurent with existing one jquery, so we can not use it
+    <script src="${URLUtils.staticURL('/js/lib/jquery-2.1.1.min.js')}"></script>
+    </iscomment>
+
+    <iscomment>	load client side R5 lib </iscomment>
+    <script src="${URLUtils.staticURL('/js/reachfive.js')}"></script>
+
+    <script type="text/javascript">
+        var el_signup = document.getElementById("load-social-connect-login");
+
+        if(el_signup && ${!pdict.disableSocialLogin}) {
+
+            sdkUiClient.showAuth({
+                container: 'load-social-connect-login',
+                allowForgotPassword: ${!pdict.reachFiveTransition},
+                auth: {
+                    responseType: 'code',
+                    redirectUri: '${pdict.callbackUrl}',
+                    origin : '${pdict.siteID}'
+                }
+            });
+        }
+
+        var el_signup = document.getElementById("load-social-connect-signup");
+
+        if(el_signup && ${!pdict.disableSocialLogin}) {
+
+            sdkUiClient.showAuth({
+                container: 'load-social-connect-signup',
+                initialScreen: 'signup',
+                auth: {
+                    responseType: 'code',
+                    redirectUri: '${pdict.callbackUrl}',
+                    origin : '${pdict.siteID}'
+                },
+                signupFields: [
+                    "given_name",
+                    "family_name",
+                    "email",
+                    "password",
+                    "consents.newsletter"
+                ]
+            });
+        }
+
+        var el_signup = document.getElementById("load-social-connect");
+
+        if(el_signup && ${!pdict.disableSocialLogin}) {
+
+            sdkUiClient.showSocialLogin({
+                container: 'load-social-connect',
+                auth: {
+                    responseType: 'code',
+                    redirectUri: '${pdict.callbackUrl}',
+                    origin : '${pdict.siteID}'
+                }
+            });
+        }
+    </script>
+
+    <isif condition="${'passwordReset' in pdict.CurrentSession.custom && pdict.CurrentSession.custom.passwordReset}">
+        <script type="text/javascript">
+            var el = document.getElementById("reset-password");
+
+            if (el) {
+                sdkUiClient.showPasswordReset({
+                    container: 'reset-password',
+                    loginLink: '${pdict.ajaxLoginUrl}',
+                    canShowPassword: true
+                });
+            }
+        </script>
+    </isif>
+
+    <isif condition="${!empty(pdict.CurrentSession.privacy.access_token)}">
+        <script type="text/javascript">
+            var el = document.getElementById("profile-editor");
+
+            if(el) {
+
+                sdkUiClient.showProfileEditor({
+                    container: 'profile-editor',
+                    accessToken: '${pdict.CurrentSession.privacy.access_token}',
+                    fields: [
+                        'given_name',
+                        'family_name',
+                        'birthdate',
+                        'consents.newsletter'
+                    ]
+                });
+            }
+        </script>
+
+        <script type="text/javascript">
+            var el = document.getElementById("password-editor");
+
+            if(el) {
+
+                sdkUiClient.showPasswordEditor({
+                    container: 'password-editor',
+                    accessToken: '${pdict.CurrentSession.privacy.access_token}',
+                    promptOldPassword: 'true'
+                });
+            }
+        </script>
+
+        <script type="text/javascript">
+            var reAuthContainer = document.getElementById("re-auth-container");
+            var socialAccountsContainer = document.getElementById("social-accounts-container");
+
+            if(reAuthContainer && socialAccountsContainer) {
+                var idToken = null;
+
+                try{
+                    idToken = '${pdict.CurrentSession.privacy.id_token}';
+                } catch(err) {
+                }
+
+                sdkUiClient.showAuth({
+                    container: 're-auth-container',
+                    allowSignup: false,
+                    allowForgotPassword: false,
+                    auth: {
+                        prompt: 'login',
+                        idTokenHint: idToken
+                    }
+                });
+            }
+        </script>
+    </isif>
+</isif>

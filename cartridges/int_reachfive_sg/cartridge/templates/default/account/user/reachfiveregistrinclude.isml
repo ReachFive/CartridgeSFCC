@@ -1,0 +1,46 @@
+<!--- TEMPLATENAME: reachfiveregistrinclude.isml --->
+<isif condition="${customer.authenticated}">
+    <isif condition="${!dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveLoginAllowed') ||
+                        dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveTransitionActive') ||
+                        !pdict.CurrentSession.isCustomerExternallyAuthenticated()}">
+        <isinclude template="account/login/reachfiveprofilesg" />
+    <iselse/>
+        <isinclude template="account/login/reachfiveeditaccount" />
+    </isif>
+<iselse/>
+    <isif condition="${!dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveLoginAllowed') ||
+                        dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveTransitionActive') ||
+                        pdict.disableSocialLogin}">
+        <isinclude template="account/login/reachfiveprofilesg" />
+    <iselse/>
+        <div id="load-social-connect-signup"></div>
+    </isif>
+    
+</isif>
+
+<isinclude template="account/login/reachfiveincludebuttons" />
+
+<isif condition="${customer.authenticated && customer.registered}">
+    <isif condition="${!pdict.CurrentSession.isCustomerExternallyAuthenticated() ||
+                        dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveTransitionActive')}">
+        <form action="${URLUtils.httpsContinue()}" method="post" class="form-horizontal" id="ChangePassowrdForm">
+            <fieldset>
+                <legend>
+                    ${Resource.msg('account.user.registration.logininfo','account',null)}
+                    <div class="dialog-required"> <span class="required-indicator">&#8226; <em>${Resource.msg('global.requiredfield','locale',null)}</em></span></div>
+                </legend>
+                <isinputfield formfield="${pdict.CurrentForms.profile.login.currentpassword}" type="password" dynamicname="true" attributes="${autocomplete_attributes}"/>
+                <isinputfield formfield="${pdict.CurrentForms.profile.login.newpassword}" type="password" dynamicname="true" attributes="${autocomplete_attributes}"/>
+                <isinputfield formfield="${pdict.CurrentForms.profile.login.newpasswordconfirm}" type="password" dynamicname="true" attributes="${autocomplete_attributes}"/>
+                <div class="form-row form-row-button">
+                    <button type="submit" value="${Resource.msg('global.apply','locale',null)}" name="${pdict.CurrentForms.profile.changepassword.htmlName}">
+                        ${Resource.msg('global.apply','locale',null)}
+                    </button>
+                </div>
+                <input type="hidden" name="${dw.web.CSRFProtection.getTokenName()}" value="${dw.web.CSRFProtection.generateToken()}"/>
+            </fieldset>
+        </form>
+    <iselse/>
+        <isinclude template="account/login/reachfivechangepassword" />
+    </isif>
+</isif>

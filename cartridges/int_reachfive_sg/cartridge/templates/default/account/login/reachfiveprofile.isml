@@ -1,0 +1,6 @@
+			
+			<isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveLoginAllowed') &&  pdict.CurrentSession.isCustomerExternallyAuthenticated() && pdict.CurrentSession.privacy.externalProfile.auth_type.equals('password')}" >
+			<h1>${Resource.msg('account.user.registration.consent','account',null)}</h1>
+
+							<div id="profile-editor"></div>
+			</isif>	

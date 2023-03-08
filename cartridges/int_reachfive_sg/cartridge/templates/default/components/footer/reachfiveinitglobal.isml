@@ -1,0 +1,31 @@
+<!--- TEMPLATENAME: reachfiveinit.isml --->
+<isif condition="${pdict.isReachFiveEnabled && pdict.reachFiveCoreSdkUrl}">
+    <script src="${pdict.reachFiveCoreSdkUrl}"></script>
+
+    <script>
+        var sdkCoreClient = reach5.createClient({
+            // Required parameters
+            domain: '${pdict.reachFiveDomain}',
+            clientId: '${pdict.reachFiveApiKey}',
+            // Optional parameter
+            language: '${pdict.reachFiveLanguageCode}' || 'en'
+        });
+
+        var reach5Const = {
+            ajaxLoginUrl: '${pdict.ajaxLoginUrl}',
+            ajaxSignUpUrl: '${pdict.ajaxSignUpUrl}',
+            callbackUrl: '${pdict.callbackUrl}',
+            reachFiveLogoutUrl: '${pdict.reachFiveLogoutUrl}',
+            siteID: '${pdict.siteID}',
+            checkSessionRedirectUrl: "${pdict.checkSessionRedirectUrl}",
+            isSessionAccessToken: ${!empty(pdict.CurrentSession.privacy.access_token)},
+            stateUrl: '${pdict.stateUrl}',
+            isSessionAuthRequired: ${pdict.isSessionAuthRequired},
+            reachFiveCookieName: '${pdict.reachFiveCookieName}',
+            reachFiveLoginCookieName: '${pdict.reachFiveLoginCookieName}'
+        }
+    </script>
+
+    <iscomment>	load global client side R5 lib </iscomment>
+    <script src="${URLUtils.staticURL('/js/reachfiveglobal.js')}"></script>
+</isif>

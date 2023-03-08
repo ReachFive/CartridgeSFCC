@@ -1,0 +1,6 @@
+<!--- TEMPLATENAME: reachfiveincludebuttons.isml --->
+<isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveLoginAllowed')}" >
+    <div id="load-social-connect-login"></div>
+<iselse>
+    <div id="load-social-connect2"></div>
+</isif>

@@ -1,0 +1,6 @@
+<div class="card-body">
+    <isif condition="${!dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveLoginAllowed')
+        || !require('*/cartridge/scripts/helpers/reachFiveHelper').getReachFiveConversionMute()}" >
+        <div id="load-social-connect"></div>
+    </isif>
+</div>

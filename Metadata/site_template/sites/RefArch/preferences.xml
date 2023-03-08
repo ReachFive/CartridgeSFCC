@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<preferences xmlns="http://www.demandware.com/xml/impex/preferences/2007-03-31">
+    <custom-preferences>
+        <all-instances/>
+        <development>
+            <preference preference-id="isReach5ThemeActive">true</preference>
+            <preference preference-id="isReachFiveEnabled">true</preference>
+            <preference preference-id="isReachFiveFastRegister">true</preference>
+            <preference preference-id="isReachFiveLoginAllowed">false</preference>
+            <preference preference-id="reach5ApiKey">enterYourAPIKey</preference>
+            <preference preference-id="reach5ClientSecret">enterYourAPIsecret</preference>
+            <preference preference-id="reach5Domain">yourdomain.og4.me</preference>
+            <preference preference-id="reach5ManagementApiKey">enterYourMGMTAPIKey</preference>
+            <preference preference-id="reach5ManagementClientSecret">enterYourMGMTAPIsecret</preference>
+            <preference preference-id="reachFiveProviderId">ReachFive</preference>
+            <preference preference-id="reach5ManagementScope">manage:users read:users</preference>
+            <preference preference-id="reach5ProfileFieldsJSON">{
+    "profile": {
+        "firstName": "given_name",
+        "lastName": "family_name",
+        "birthday": "birthdate",
+        "gender": "gender",
+        "companyName": "company",
+        "phoneHome": "phone_number"
+    },
+    "address": {
+        "ID": "title",
+        "fullName": "recipient",
+        "address1": "street_address",
+        "city": "locality",
+        "postalCode": "postal_code",
+        "stateCode": "region",
+        "countryCode": "country",
+        "phone": "phone_number"
+    },
+    "consents": {
+        "custom.isNewsletter": "newsletter"
+    },
+    "custom_fields": {
+        "custom.cardNo": "loyalty_card_number"
+    }
+}</preference>
+            <preference preference-id="reach5SupportedLanguageCodes">
+                <value>en</value>
+                <value>es</value>
+                <value>fr</value>
+                <value>it</value>
+                <value>nl</value>
+            </preference>
+        </development>
+        <staging/>
+        <production/>
+    </custom-preferences>
+</preferences>

@@ -1,0 +1,10 @@
+<!--- TEMPLATENAME: reachfiveinituncached --->
+<script>
+    if (!window.reach5Const) {
+        window.reach5Const = {}
+    };
+
+    if (!Object.hasOwnProperty.call(window.reach5Const, 'isSessionAuthRequired')) {
+        window.reach5Const.isSessionAuthRequired = ${pdict.isSessionAuthRequired};
+    }
+</script>

@@ -1,0 +1,12 @@
+cartridges/app_storefront_base/cartridge/static/
+cartridges/bm_app_storefront_base/cartridge/static/
+coverage/
+codecept.conf.js
+
+# ReachFive static files
+cartridges/int_reachfive/cartridge/static/
+
+# SiteGenesis cartridges
+cartridges/app_storefront_controllers/
+cartridges/app_storefront_core/
+cartridges/app_storefront_pipelines/
