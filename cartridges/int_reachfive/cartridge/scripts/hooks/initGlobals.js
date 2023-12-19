@@ -9,15 +9,15 @@ function initGlobal() {}
 
 /**
  * render footer resource content for Attentive Mobile
- * @returns {string} html string
  * @param {Object} pdict Pipeline dictionary
+ * @returns {string} html string
 */
 initGlobal.afterFooter = function (pdict) {
     var ISML = require('dw/template/ISML');
     var URLUtils = require('dw/web/URLUtils');
-    // var dwStringUtils = require('dw/util/StringUtils');
     var System = require('dw/system/Site');
     var reachFiveHelper = require('*/cartridge/scripts/helpers/reachFiveHelper');
+    var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
 
     if (!reachFiveHelper.isReachFiveEnabled()) {
         return '';
@@ -26,26 +26,31 @@ initGlobal.afterFooter = function (pdict) {
     var context = {};
     var handleCustomerRoute = false;
     var targetPage = request.httpURL.https();
-    var oneTimeLoginTkn = reachFiveHelper.cutOnetimeTknFromSession();
+    var reachfiveSession = new ReachfiveSessionModel();
 
-    if (oneTimeLoginTkn) {
-        context.loginRedirectUrl = reachFiveHelper.createLoginRedirectUrl(oneTimeLoginTkn, targetPage.toString());
+    if (reachfiveSession.isOneTimeTkn()) {
+        context.loginRedirectUrl = reachFiveHelper.createLoginRedirectUrl(reachfiveSession.one_time_token, targetPage.toString());
     } else {
         // List of the pages where ReachFive UI sdk need to be loaded
-        var UI_INIT_ACTIONS = [
+        var UI_INIT_PAGES = [
             'Order-Track',
             'Login-Show',
             'Account-Show',
             'Account-EditPassword',
-            'Account-EditProfile',
+            // 'Account-EditProfile',
             'Checkout-Begin'
         ];
+        var ACCOUNT_REDIRECT_PAGES = [
+            'Login-Show',
+            'Account-EditPassword',
+            'CSRF-Fail'
+        ];
 
-        var isLoadUISDK = UI_INIT_ACTIONS.indexOf(pdict.action) !== -1;
+        var isLoadUISDK = UI_INIT_PAGES.indexOf(pdict.action) !== -1;
 
         // Modify target page in order to correct processing after-login and after-register redirect
         var signUpTargetPage = request.httpURL.https();
-        if (['Login-Show', 'Account-EditPassword'].indexOf(pdict.action) !== -1) {
+        if (ACCOUNT_REDIRECT_PAGES.indexOf(pdict.action) !== -1) {
             targetPage = URLUtils.url('Account-Show', 'registration', false).relative();
             signUpTargetPage = URLUtils.url('Account-Show', 'registration', 'submitted').relative();
         } else if (['Checkout-Begin'].indexOf(pdict.action) !== -1) {
@@ -54,8 +59,8 @@ initGlobal.afterFooter = function (pdict) {
             signUpTargetPage = URLUtils.url('Account-Show', 'registration', 'submitted').relative();
         }
 
-        var stateObjBase64 = reachFiveHelper.getStateObjBase64(targetPage.toString(), handleCustomerRoute);
-        var signUpStateObjBase64 = reachFiveHelper.getStateObjBase64(signUpTargetPage.toString(), handleCustomerRoute);
+        var stateObjBase64 = reachFiveHelper.getStateObjBase64(targetPage.toString(), pdict.action, handleCustomerRoute);
+        var signUpStateObjBase64 = reachFiveHelper.getStateObjBase64(signUpTargetPage.toString(), pdict.action, handleCustomerRoute);
 
         if (pdict.disableSSOLogin) {
             context.isSessionAuthRequired = false;
@@ -73,7 +78,7 @@ initGlobal.afterFooter = function (pdict) {
         context.stateObjBase64 = stateObjBase64;
         context.reachFiveCookieName = reachFiveHelper.getReachFiveCookieName();
         context.reachFiveLoginCookieName = reachFiveHelper.getReachFiveLoginCookieName();
-        context.reachFiveAccess_token = session.privacy.access_token;
+        context.reachFiveAccess_token = reachfiveSession.access_token;
 
         if (isLoadUISDK) {
             context.isReachFiveLoginAllowed = reachFiveHelper.isReachFiveLoginAllowed();
@@ -81,6 +86,7 @@ initGlobal.afterFooter = function (pdict) {
             context.signUpStateObjBase64 = signUpStateObjBase64;
             context.resetPassLoginUrl = URLUtils.https('Login-Show');
             context.isTransitionActive = reachFiveHelper.isReachFiveTransitionActive();
+            context.updateProfileUrl = URLUtils.url('ReachFiveController-UpdateCustomer');
         }
     }
 

@@ -6,7 +6,6 @@
 <iselse/>
     <isif condition="${pdict.reachFiveCoreSdkUrl}">
         <script src="${pdict.reachFiveCoreSdkUrl}"></script>
-
         <script>
             window.sdkCoreClient = reach5.createClient({
                 // Required parameters
@@ -26,6 +25,7 @@
                 reachFiveLoginCookieName: '${pdict.reachFiveLoginCookieName}'
             }
 
+            <iscomment>Required to cancel forced authentication</iscomment>
             <isif condition="${'isSessionAuthRequired' in pdict}">
                 window.reach5Const.isSessionAuthRequired = ${pdict.isSessionAuthRequired};
             </isif>
@@ -34,13 +34,13 @@
         <isinclude url="${URLUtils.url('ReachFiveController-UncachedContext')}" />
 
         <iscomment>	load global client side R5 lib </iscomment>
-        <script defer type="text/javascript" src="${URLUtils.staticURL('/js/reachfiveglobal.js')}"></script>
+        <script defer src="${URLUtils.staticURL('/js/reachfiveglobal.js')}"></script>
     </isif>
 
     <isif condition="${pdict.loadUISDK && pdict.reachFiveUiSdkUrl}">
         <script src="${pdict.reachFiveUiSdkUrl}"></script>
 
-        <script type="text/javascript">
+        <script>
             window.sdkUiClient = reach5Widgets.createClient({
                 // Required parameters
                 domain: '${pdict.reachFiveDomain}',
@@ -50,100 +50,89 @@
             });
         </script>
 
-        <script type="text/javascript">
+        <script>
+            let allowForgotPassword = ${!pdict.isTransitionActive};
+            let redirectUri = '${pdict.callbackUrl}';
+            let origin ='${pdict.siteID}';
+            let state = '${pdict.stateObjBase64}';
+            let loginLink = '${pdict.resetPassLoginUrl}';
+            let accessToken = '${pdict.reachFiveAccess_token}';
+            let stateUrl = decodeURIComponent('${dw.crypto.Encoding.toURI(pdict.stateUrl)}')
+
             if(document.getElementById("load-social-connect-login")) {
                 console.log('load-social-connect-login');
-
-                sdkUiClient.showAuth({
-                    container: 'load-social-connect-login',
-                    allowSignup: false,
-                    allowForgotPassword: ${pdict.isTransitionActive ? 'false' : 'true'},
-                    auth: {
-                        responseType: 'code',
-                        redirectUri: '${pdict.callbackUrl}',
-                        origin : '${pdict.siteID}',
-                        state: '${pdict.stateObjBase64}'
-                    }
-                });
+                <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('load-social-connect-login')}" encoding="off">
             }
 
             if(document.getElementById("load-social-connect-signup")) {
                 console.log('load-social-connect-signup');
-
-                sdkUiClient.showAuth({
-                    container: 'load-social-connect-signup',
-                    initialScreen: 'signup',
-                    allowLogin: false,
-                    allowForgotPassword: ${pdict.isTransitionActive ? 'false' : 'true'},
-                    auth: {
-                        responseType: 'code',
-                        redirectUri: '${pdict.callbackUrl}',
-                        origin : '${pdict.siteID}',
-                        state: '${pdict.signUpStateObjBase64}'
-                    },
-                    signupFields: [
-                        "given_name",
-                        "family_name",
-                        "email",
-                        "password",
-                        "password_confirmation",
-                        "consents.newsletter"
-                    ]
-                });
+                <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('load-social-connect-signup')}" encoding="off">
+                
             }
 
             if(document.getElementById("load-social-connect")) {
                 console.log('load-social-connect')
-
-                sdkUiClient.showSocialLogin({
-                    container: 'load-social-connect',
-                    auth: {
-                        responseType: 'code',
-                        redirectUri: '${pdict.callbackUrl}',
-                        origin : '${pdict.siteID}',
-                        state: '${pdict.stateObjBase64}'
-                    }
-                });
+                <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('load-social-connect')}" encoding="off">
+                
             }
 
 
             if(document.getElementById("load-social-connect2")) {
                 console.log('load-social-connect2')
-
-                sdkUiClient.showSocialLogin({
-                    container: 'load-social-connect2',
-                    auth: {
-                        responseType: 'code',
-                        redirectUri: '${pdict.callbackUrl}',
-                        origin : '${pdict.siteID}'
-                    }
-                });
+                <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('load-social-connect2')}" encoding="off">
             }
 
             if (document.getElementById("reset-password")) {
-                sdkUiClient.showPasswordReset({
-                    container: 'reset-password',
-                    loginLink: '${pdict.resetPassLoginUrl}',
-                    canShowPassword: true
-                });
+                <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('reset-password')}" encoding="off">
             }
         </script>
 
         <isif condition="${!empty(pdict.reachFiveAccess_token)}">
-            <script type="text/javascript">
+            <script>
                 if(document.getElementById("password-editor")) {
                     console.log('password-editor');
-
-                    sdkUiClient.showPasswordEditor({
-                        container: 'password-editor',
-                        accessToken: '${pdict.reachFiveAccess_token}',
-                        promptOldPassword: 'true',
-                        onSuccess: function () {
-                            window.location.href = decodeURIComponent('${dw.crypto.Encoding.toURI(pdict.stateUrl)}');
-                        }
-                    });
+                    <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('password-editor')}" encoding="off">
                 }
+
+                // if(document.getElementById("profile-editor")) {
+                //     sdkUiClient.showProfileEditor({
+                //         container: 'profile-editor',
+                //         accessToken: '${pdict.reachFiveAccess_token}',
+                //         fields: [
+                //             'given_name',
+                //             'family_name',
+                //             'birthdate',
+                //             'consents.newsletter'
+                //         ],
+                //         onSuccess: function() {
+                //             var el = document.getElementsByTagName('body');
+                //             var event = new CustomEvent('reachfive-profile-update', {
+                //                     bubbles: true,
+                //                     detail: {
+                //                         source: 'profileEditor',
+                //                         updateUrl: decodeURIComponent('${dw.crypto.Encoding.toURI(pdict.updateProfileUrl)}')
+                //                     }
+                //                 });
+                //             el[0].dispatchEvent(event);
+                //         }
+                //     });
+                // }
+
+                if(document.getElementById("email-editor")) {
+                    <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('email-editor')}" encoding="off">
+                }
+
+                if(document.getElementById("phone-editor")) {
+                    <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('phone-editor')}" encoding="off">
+                }
+
+                var socialAccountsContainer = document.getElementById("social-accounts-container");
+                if (socialAccountsContainer) {
+                    <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('social-accounts-container')}" encoding="off">
+                }
+
             </script>
+
             <iscomment> 
                 TODO: This functionality related to "imlicid flow"
                     and it is normally disabled becasue of security issues
@@ -161,22 +150,11 @@
                     }
 
                     console.log('social-accounts-container');
-
-                    sdkUiClient.showAuth({
-                        container: 're-auth-container',
-                        allowSignup: false,
-                        allowForgotPassword: false,
-                        auth: {
-                            prompt: 'login',
-                            idTokenHint: idToken
-                        }
-                    });
+                    <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('re-auth-container')}" encoding="off">
 
                     sdkCoreClient.on('authenticated', function(authResult) {
-                        sdkUiClient.showSocialAccounts({
-                            accessToken: authResult.accessToken,
-                            container: 'social-accounts-container'
-                        });
+                        let accessToken = authResult.accessToken;
+                        <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('authenticated')}" encoding="off">
                     });
                 }
             </script>

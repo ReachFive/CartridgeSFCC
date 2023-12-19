@@ -1,5 +1,10 @@
 /* eslint-disable indent */
 /* eslint-disable no-use-before-define */
+
+// TODO: After refactoring this helper should be splitted by 3 module
+// TODO: 1. Preferences model
+// TODO: 2. API interface helper (all interfaces of the API calls)
+// TODO: 3. Functions helper (real helpers for code and frequently used functions)
 'use strict';
 
 /**
@@ -9,8 +14,6 @@ var Encoding = require('dw/crypto/Encoding');
 var Calendar = require('dw/util/Calendar');
 var Site = require('dw/system/Site');
 var Cookie = require('dw/web/Cookie');
-
-var ONE_TIME_TKN_PROP_NAME = 'reachFiveOnetimeTkn';
 
 /**
  * @function
@@ -465,7 +468,7 @@ function getProfileRequestObjFromForm(customerForm) {
 /**
  * @function
  * @description Update reach five profile with given customer request object
- * @param {dw.customer.Customer} customerObj Customer Profile
+ * @param {Object} customerObj reachfive profile object
  * @return {Object|null} update service call
  * */
 function updateReachFiveProfile(customerObj) {
@@ -476,7 +479,7 @@ function updateReachFiveProfile(customerObj) {
 
         result = reachFiveServiceInterface.updateProfileIdentityAPI(customerObj);
         if (!result.ok) {
-            LOGGER.error('Error during ReachFive reset password: {0}', result.errorMessage);
+            LOGGER.error('Error during update ReachFive profile: {0}', result.errorMessage);
         }
     }
 
@@ -485,46 +488,17 @@ function updateReachFiveProfile(customerObj) {
 
 /**
  * @function
- * @description Converts the ReachFive externalProfile object to a settled object.
- * @param {Object|null} externalProfile ReachFive profile object
- * @return {Object|null} settled object
- * */
-function settleReachFiveProfileObject(externalProfile) {
-    var profileObj = null;
-    if (externalProfile) {
-        var propertyList = [
-            'given_name',
-            'family_name',
-            'email',
-            'birthdate',
-            'gender'
-        ];
-
-        profileObj = {
-            externalID: externalProfile.sub.trim()
-        };
-        var prop;
-        for (var i = 0, l = propertyList.length; i < l; i++) {
-            prop = propertyList[i];
-            if (Object.hasOwnProperty.call(externalProfile, prop)) {
-                profileObj[prop] = externalProfile[prop];
-            }
-        }
-    }
-    return profileObj;
-}
-
-/**
- * @function
  * @description Prepare BASE64 string object for redirect
  * @param {string} redirectURL redirect url
- * @param {boolean|string} handleCustomerRoute handle flag
+ * @param {string} action Controller endpoint action
+ * @param {boolean} [handleCustomerRoute] handle flag
  * @return {string} result
  * */
-function getStateObjBase64(redirectURL, handleCustomerRoute) {
+function getStateObjBase64(redirectURL, action, handleCustomerRoute) {
     var dwStringUtils = require('dw/util/StringUtils');
     var stateObj = {
-        redirectURL: redirectURL
+        redirectURL: redirectURL,
+        action: action
     };
 
     if (handleCustomerRoute) {
@@ -532,36 +506,6 @@ function getStateObjBase64(redirectURL, handleCustomerRoute) {
     }
 
     return dwStringUtils.encodeBase64(JSON.stringify(stateObj));
-}
-
-
-/**
- * @function
- * @description Set one-time token in specific sessin property
- * @param {string} tkn The one-time use authentication token
- * @return {boolean} result
- * */
-function setOnetimeTknInSession(tkn) {
-    if (tkn) {
-        session.privacy[ONE_TIME_TKN_PROP_NAME] = tkn;
-        return true;
-    }
-    return false;
-}
-
-/**
- * @function
- * @description Withdrawn one-time token from session
- * @param {string} tkn The one-time use authentication token
- * @return {string|null} result
- * */
-function cutOnetimeTknFromSession() {
-    var tkn = null;
-    if (session.privacy[ONE_TIME_TKN_PROP_NAME]) {
-        tkn = session.privacy[ONE_TIME_TKN_PROP_NAME];
-        delete session.privacy[ONE_TIME_TKN_PROP_NAME];
-    }
-    return tkn;
 }
 
 /**
@@ -611,6 +555,237 @@ function createLoginRedirectUrl(tkn, stateTarget) {
 }
 
 /**
+ * @function
+ * @description Checks/updates the current tokens from the session for a 5 minute horizon
+ * @param {boolean} [updateFlag] is update access token required
+ * @return {Object} result
+ * */
+function verifySessionAccessTkn(updateFlag) {
+    var Resource = require('dw/web/Resource');
+    var reachFiveService = require('*/cartridge/scripts/interfaces/reachFiveInterface');
+    var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
+    var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
+    var status = {
+        success: false,
+        msg: Resource.msg('reachfive.access_tkn.expired', 'reachfive', null)
+    };
+
+    var updateToken = true;
+    if (typeof updateFlag !== 'undefined') {
+        updateToken = updateFlag;
+    }
+
+    var reachfiveSession = new ReachfiveSessionModel();
+
+    if (reachfiveSession.isAccessToken5MinLimit()) {
+        status.success = true;
+    } else if (updateToken) {
+        if (reachfiveSession.refresh_token) {
+            var tokenObj = reachFiveService.retrieveAccessTokenWithRefresh(reachfiveSession.refresh_token);
+
+            if (tokenObj.ok) {
+                status.success = true;
+                reachfiveSession.initialize(tokenObj.object);
+            } else {
+                LOGGER.error('Error. Unable to update access_token with refresh_token, error: {0}', tokenObj.errorMessage);
+                status.msg = Resource.msg('reachfive.server.error', 'reachfive', null);
+            }
+        } else {
+            LOGGER.error('Error. access_token has expired and can not be updated. Check reachfive client preferences scope for "offline_access".');
+        }
+    }
+
+    return status;
+}
+
+/**
+ * @function
+ * @description Update Reachfive customer login/email with token.
+ * @param {string} login new login
+ * @return {Object} Result of call
+ * */
+function updateReachfiveLoginWithTkn(login) {
+    var reachFiveService = require('*/cartridge/scripts/interfaces/reachFiveInterface');
+    var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
+    var result = reachFiveService.updateEmail({ email: login });
+
+    if (!result.ok) {
+        LOGGER.error('Error during update ReachFive login: {0}', result.errorMessage);
+
+        if (result.errorMessage) {
+            try {
+                result.errorObj = JSON.parse(result.errorMessage);
+            } catch (error) {
+                LOGGER.error('Error during parse ReachFive login update error: {0}', error);
+            }
+        }
+    }
+
+    return result;
+}
+
+/**
+ * @function
+ * @description Update Reachfive customer phone with token.
+ * @param {string} phone new login
+ * @return {Object} Result of call
+ * */
+function updateReachfivePhoneWithTnk(phone) {
+    var reachFiveService = require('*/cartridge/scripts/interfaces/reachFiveInterface');
+    var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
+    var result = reachFiveService.updatePhone({ phone_number: phone });
+
+    if (!result.ok) {
+        LOGGER.error('Error during update ReachFive phone number: {0}', result.errorMessage);
+
+        if (result.errorMessage) {
+            try {
+                result.errorObj = JSON.parse(result.errorMessage);
+
+                if (result.errorObj && Object.prototype.hasOwnProperty.call(result.errorObj, 'error_details')) {
+                    var errorObj = Array.prototype.find.call(result.errorObj.error_details, function (element) {
+                        return element.field === 'phone_number';
+                    });
+
+                    if (errorObj) {
+                        result.errorObj.error_description = errorObj.message;
+                    }
+                }
+            } catch (error) {
+                LOGGER.error('Error during parse ReachFive phone number update error: {0}', error);
+            }
+        }
+    }
+
+    return result;
+}
+
+/**
+ * @function
+ * @description Get Reachfive user profile object.
+ * @param {string} [profileFields] Comma separated profile user fields
+ * @return {Object} Result of call
+ * */
+function getUserProfile(profileFields) {
+    var fields = profileFields || 'id,consents,has_password,emails';
+    var reachFiveService = require('*/cartridge/scripts/interfaces/reachFiveInterface');
+    var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
+
+    var result = reachFiveService.getUserProfile(fields);
+
+    if (!result.ok) {
+        LOGGER.error('Error during get ReachFive user Profile: {0}', result.errorMessage);
+    }
+
+    return result;
+}
+
+/**
+ * Update Reach Five password for account.
+ * @param {string} email customer mail
+ * @param {string} newPassword new customer password
+ * @param {string} oldPassword old customer password
+ * @return {Object} Result of call
+ */
+function updatePassword(email, newPassword, oldPassword) {
+    var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
+    var reachFiveService = require('*/cartridge/scripts/interfaces/reachFiveInterface');
+    var clientId = getReachFiveApiKey();
+
+    var result = reachFiveService.updatePassword(email, newPassword, oldPassword, clientId);
+
+    if (!result.ok) {
+        try {
+            result.errorObj = JSON.parse(result.errorMessage);
+        } catch (error) {
+            LOGGER.error('Error during parse updatePassword error object: {0}', error);
+        }
+        LOGGER.error('Error during get ReachFive update password: {0}', result.errorMessage);
+    }
+
+    return result;
+}
+
+/**
+ * Request access token with customer password
+ * @param {string} login reachfive customer login
+ * @param {string} password reachfive customer password
+ * @return {Object} Result of call
+ */
+function getTokenWithPassword(login, password) {
+    var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
+    var reachFiveService = require('*/cartridge/scripts/interfaces/reachFiveInterface');
+    var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
+
+    var requestObj = {
+        grant_type: 'password',
+        username: login,
+        password: password,
+        scope: 'email openid profile test offline_access full_write'
+    };
+
+    var result = reachFiveService.oauthToken(requestObj);
+
+    if (result.ok & !empty(result.object)) {
+        var reachfiveSession = new ReachfiveSessionModel();
+        reachfiveSession.initialize(result.object);
+    } else {
+        try {
+            result.errorObj = JSON.parse(result.errorMessage);
+        } catch (error) {
+            LOGGER.error('Error during parse getTokenWithPassword error object: {0}', error);
+        }
+        LOGGER.error('Error during request access token with customer password: {0}', result.errorMessage);
+    }
+
+    return result;
+}
+
+/**
+ * @function
+ * @description Return profile object.
+ * @param {string} [profileFields] Comma separated profile user fields
+ * @return {Object} Result of call
+ * */
+function getReachfiveProfileFields(profileFields) {
+    // TODO: This object should be taken from site preferences
+    // Temporal static answer
+    var result = profileFields || 'id,email,emails.verified,given_name,family_name,birthdate,phone_number,gender,addresses,consents';
+    return result;
+}
+
+/**
+ * @function
+ * @description Compare phones number on digits basis.
+ * @param {string|undefined} oldPhone old phone number
+ * @param {string|undefined} newPhone new phone number
+ * @return {Object} Result of call
+ * */
+function isNewPhone(oldPhone, newPhone) {
+    var result = false;
+
+    /**
+     * @function
+     * @description Extract digits from string, normally used for phone compare
+     * @param {string} value string with digits
+     * @return {string} result of function
+     * */
+    function digitsOnly(value) {
+        return String.prototype.replace.call(value, /[^+\d]/g, '');
+    }
+
+    // Compare 2 phone numbers
+    if (oldPhone && newPhone) {
+        result = digitsOnly(oldPhone) !== digitsOnly(newPhone);
+    // Phone number does not exist, but we got new one
+    } else if (newPhone) {
+        result = true;
+    }
+
+    return result;
+}
+
+/**
  * Export modules
  * */
 module.exports.getReachFiveDomain = getReachFiveDomain;
@@ -647,8 +822,14 @@ module.exports.getReachFiveCookieName = getReachFiveCookieName;
 module.exports.getReachFiveLoginCookieName = getReachFiveLoginCookieName;
 module.exports.setReachFiveLoginCookie = setReachFiveLoginCookie;
 module.exports.getReachFiveUserCustomObjectType = getReachFiveUserCustomObjectType;
-module.exports.settleReachFiveProfileObject = settleReachFiveProfileObject;
 module.exports.getStateObjBase64 = getStateObjBase64;
-module.exports.setOnetimeTknInSession = setOnetimeTknInSession;
-module.exports.cutOnetimeTknFromSession = cutOnetimeTknFromSession;
 module.exports.createLoginRedirectUrl = createLoginRedirectUrl;
+module.exports.verifySessionAccessTkn = verifySessionAccessTkn;
+module.exports.updateReachfiveLoginWithTkn = updateReachfiveLoginWithTkn;
+module.exports.updateReachfivePhoneWithTnk = updateReachfivePhoneWithTnk;
+module.exports.getUserProfile = getUserProfile;
+module.exports.getReachfiveProfileFields = getReachfiveProfileFields;
+module.exports.isNewPhone = isNewPhone;
+module.exports.updatePassword = updatePassword;
+module.exports.getTokenWithPassword = getTokenWithPassword;
+

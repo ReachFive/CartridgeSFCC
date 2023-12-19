@@ -3,15 +3,14 @@
         <!---Profile--->
         <isinclude template="account/profileCard"/>
 
-        <isif condition="${!pdict.CurrentSession.isCustomerExternallyAuthenticated()
-            || ('auth_type' in pdict.CurrentSession.privacy
-                && ['password', 'sfcc'].indexOf(pdict.CurrentSession.privacy.auth_type) !== -1)}">
+        <isif condition="${pdict.reachfive.passwordUpdateCTA}">
             <!---Password--->
             <isinclude template="account/passwordCard"/>
         </isif>
-		<isif  condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveEnabled') && ('access_token' in pdict.CurrentSession.privacy) && pdict.CurrentSession.isCustomerExternallyAuthenticated}">
-			<isinclude template="account/login/reachfiveaccounts"/>
-		</isif>
+        <isif condition="${pdict.reachfive.socialNetworksCTA}">
+            <!---Reachfive Social Network--->
+            <isinclude template="account/login/reachfiveaccounts"/>
+        </isif>
         <!---Address Book--->
         <isinclude template="account/addressBookCard"/>
     </div>

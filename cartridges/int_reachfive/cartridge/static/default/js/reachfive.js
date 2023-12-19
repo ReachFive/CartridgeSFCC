@@ -3,28 +3,31 @@
 /* eslint-disable no-undef */
 'use strict';
 
-$(function () {
-    jQuery(document).ready(function () {
-        var dataToken = $('.social-link').data('get-token');
-        var domain = $('.social-link').data('domain');
-        var demandWareId = $('.social-link').data('externalid');
-        var urlLink = $('.social-link').data('url');
-        var callbackUrl = $('.social-link').data('callbackurl');
-        var isReachFiveLoginAllowed = $('.social-link').data('isreachfiveloginallowed');
+window.addEventListener('DOMContentLoaded', function() {
+    var socialLink = document.querySelector('.social-link');
+    var dataToken = socialLink ? socialLink.getAttribute('data-get-token') : undefined;
+    var domain = socialLink ? socialLink.getAttribute('data-domain') : undefined;
+    var demandWareId = socialLink ? socialLink.getAttribute('data-externalid'): undefined;
+    var urlLink = socialLink ? socialLink.getAttribute('data-url') : undefined;
+    var callbackUrl = socialLink ? socialLink.getAttribute('data-callbackurl') : undefined;
+    var isReachFiveLoginAllowed = socialLink ? socialLink.getAttribute('data-isreachfiveloginallowed') : undefined;
 
-        var has_password = "false";
-        var nbProvider = 0;
-        var token = dataToken;
+    var has_password = "false";
+    var nbProvider = 0;
+    var token = dataToken;
 
-        if (dataToken !== undefined && demandWareId != null) {
-            makeCallToActiveSwitch();
-        }
+    if (dataToken !== undefined && demandWareId != null) {
+        makeCallToActiveSwitch();
+    }
 
-        $('ul.social-link li .switch').click(function (e) {
+    var socialLinksSwitches = document.querySelectorAll('ul.social-link li .switch');
+
+    socialLinksSwitches.forEach(function(socialLinksSwitch) {
+        socialLinksSwitch.addEventListener('click', function(e) {
             e.preventDefault();
-            var parent = $(this).parent();
-            var active = parent.attr('class');
-            var social = parent.attr('id').replace('social-login-', '');
+            var parent = this.parentNode;
+            var active = parent.getAttribute('class');
+            var social = parent.getAttribute('id').replace('social-login-', '');
 
             if (active.indexOf('active') > -1) {
                 if (nbProvider === 1 && !isReachFiveLoginAllowed) {
@@ -44,32 +47,26 @@ $(function () {
                     var sub = jsonDecodedToken.sub;
 
                     if (demandWareId && demandWareId !== sub) {
-                        $.ajax({
-                            url: 'https://'
-                                + domain
-                                + '/api/v2/users/'
-                                + demandWareId
-                                + '/merge/'
-                                + sub,
-                            type: 'POST',
-                            headers: { Authorization: 'Bearer ' + token },
-                            success: function (responseLink) {
-                                nbProvider++;
-                                parent.addClass('active');
-                                demandWareId = sub;
-                            }
-                        });
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('POST', 'https://' + domain + '/api/v2/users/' + demandWareId + '/merge/' + sub);
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                        xhr.onload = function() {
+                            nbProvider++;
+                            parent.classList.add('active');
+                            demandWareId = sub;
+                        };
+                        xhr.send();
                     } else {
-                        $.ajax({
-                            url: urlLink + '?externalid=' + sub,
-                            type: 'GET',
-                            success: function(responseLink) {
-                                if (responseLink.isSaved) {
-                                    nbProvider++;
-                                    parent.addClass('active');
-                                }
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('GET', urlLink + '?externalid=' + sub);
+                        xhr.onload = function() {
+                            var responseLink = JSON.parse(xhr.responseText);
+                            if (responseLink.isSaved) {
+                                nbProvider++;
+                                parent.classList.add('active');
                             }
-                        });
+                        };
+                        xhr.send();
                     }
                 });
 
@@ -90,106 +87,113 @@ $(function () {
                 });
             }
         });
-
-        function makeCallToActiveSwitch() {
-            $.ajax({
-                url: urlCall(demandWareId),
-                type: 'GET',
-                headers: { Authorization: 'Bearer ' + token }
-            })
-
-            .done(function(response) {
-                var identities = response.social_identities;
-                nbProvider = identities.length;
-
-                for (var i = 0; i < identities.length; i++) {
-                    var el = document.getElementById('social-login-' + identities[i].provider);
-                    if (el) {
-                        el.className = 'active';
-                    }
-                }
-
-                has_password = response.has_password;
-            })
-
-            .fail(function(xhr, textStatus) {
-            });
-        }
-
-        function makeCallToDeleteSocialAccount(parent) {
-            $.ajax({
-                url: urlCall(demandWareId),
-                type: 'DELETE',
-                headers: { Authorization: 'Bearer ' + token },
-                success: function(responseDelete) {
-                    $.ajax({
-                        url: urlLink + '?externalid=0',
-                        type: 'GET',
-                        success: function(responseLink) {
-                            if (responseLink.isSaved) {
-                                parent.removeClass('active');
-                                nbProvider = 0;
-                                demandWareId = 0;
-                            }
-                        }
-                    });
-                }
-            });
-        }
-
-        function makeCallUnlinkSocialAccount(parent, social) {
-            $.ajax({
-                url: 'https://'
-                    + domain
-                    + '/api/v2/users/'
-                    + demandWareId
-                    + '/providers/'
-                    + social,
-                type: 'DELETE',
-                headers: { Authorization: 'Bearer ' + token },
-                success: function (responseUnlink) {
-                    parent.removeClass('active');
-                    nbProvider--;
-                }
-            });
-        }
-
-        function reachFiveTokenDecode(idToken) {
-            var partsofidtoken = idToken.split('.')[1];
-
-            if (!partsofidtoken) {
-                return null;
-            }
-
-            var s = decode_base64(partsofidtoken);
-
-            return s;
-        }
-
-        function decode_base64(s) {
-            var b = 0;
-            var l = 0;
-            var r = '';
-            s = s.split('');
-            var m = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.split('');
-
-            for (var i in s) {
-                b = (b << 6) + m.indexOf(s[i]);
-                l += 6;
-                while (l >= 8) r += String.fromCharCode((b >>> (l -= 8)) & 0xff);
-            }
-
-            return r.trimRight();
-        }
-
-        function urlCall(externalId) {
-            var urlCall = 'https://'
-                + domain
-                + '/api/v2/users/'
-                + externalId
-                + '?fields=social_identities,has_password';
-
-            return urlCall;
-        }
     });
+
+    function makeCallToActiveSwitch() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    var identities = response.social_identities;
+                    nbProvider = identities.length;
+
+                    for (var i = 0; i < identities.length; i++) {
+                        var el = document.getElementById('social-login-' + identities[i].provider);
+                        if (el) {
+                            el.className = 'active';
+                        }
+                    }
+
+                    has_password = response.has_password;
+                } else {
+                    console.log('Request failed. Status:', xhr.status);
+                }
+            }
+        };
+        xhr.open('GET', urlCall(demandWareId));
+        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+        xhr.send();
+    }
+
+    function makeCallToDeleteSocialAccount(parent) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('DELETE', urlCall(demandWareId));
+        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                var xhr2 = new XMLHttpRequest();
+                xhr2.open('GET', urlLink + '?externalid=0');
+                xhr2.onload = function() {
+                    if (xhr2.status === 200) {
+                    var responseLink = JSON.parse(xhr2.responseText);
+                        if (responseLink.isSaved) {
+                            parent.classList.remove('active');
+                            nbProvider = 0;
+                            demandWareId = 0;
+                        }
+                    }
+                };
+                xhr2.send();
+            }
+        };
+        xhr.send();
+    }
+
+    function makeCallUnlinkSocialAccount(parent, social) {
+        var url = 'https://' + domain + '/api/v2/users/' + demandWareId + '/providers/' + social;
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('DELETE', url);
+        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                parent.classList.remove('active');
+                nbProvider--;
+            }
+        };
+
+        xhr.send();
+    }
+
+    function reachFiveTokenDecode(idToken) {
+        var partsofidtoken = idToken.split('.')[1];
+        
+        if (!partsofidtoken) {
+            return null;
+        }
+        
+        var s = decode_base64(partsofidtoken);
+        
+        return s;
+    }
+        
+        function decode_base64(s) {
+        var b = 0;
+        var l = 0;
+        var r = '';
+        s = s.split('');
+        var m = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.split('');
+        
+        for (var i = 0; i < s.length; i++) {
+            b = (b << 6) + m.indexOf(s[i]);
+            l += 6;
+            while (l >= 8) {
+                r += String.fromCharCode((b >>> (l -= 8)) & 0xff);
+            }
+        }
+        
+        return r.trim();
+    }
+
+    function urlCall(externalId) {
+        var urlCall = 'https://'
+            + domain
+            + '/api/v2/users/'
+            + externalId
+            + '?fields=social_identities,has_password';
+
+        return urlCall;
+    }
 });

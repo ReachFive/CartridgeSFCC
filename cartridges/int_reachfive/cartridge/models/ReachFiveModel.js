@@ -31,10 +31,10 @@ var ReachFiveModel = ({
      * Create a new external customer with reach five provider ID and external ID
      *
      * @alias module:models/ReachFiveModel~ReachFiveModel/createReachFiveCustomer
-     * @return {boolean} true if operation succeedeed
+     * @return {dw.customer.Profile|null} true if operation succeeded
      * @param {string} externalID External Identifier
      * @param {Object} externalProfile External Profile Object
-     * @param {Object} reachFiveConsents Consents Object from external Profile
+     * @param {Object} [reachFiveConsents] Consents Object from external Profile
      */
     createReachFiveCustomer: function (externalID, externalProfile, reachFiveConsents) {
 		if (!externalID || !externalProfile) {
@@ -45,8 +45,8 @@ var ReachFiveModel = ({
 
 		try {
 			// Create Externally customer
-			customer = CustomerMgr.createExternallyAuthenticatedCustomer(this.reachFiveProviderId, externalID);
-			var profile = customer.getProfile();
+			var newCustomer = CustomerMgr.createExternallyAuthenticatedCustomer(this.reachFiveProviderId, externalID);
+			var profile = newCustomer.getProfile();
 
 			// Complete customer's profile with firstname, lastname, email and birthday if exists
 			if (reachFiveHelper.isFieldExist(externalProfile, 'given_name')) {
@@ -55,6 +55,10 @@ var ReachFiveModel = ({
 
 			if (reachFiveHelper.isFieldExist(externalProfile, 'family_name')) {
 				profile.setLastName(externalProfile.family_name);
+			}
+
+            if (reachFiveHelper.isFieldExist(externalProfile, 'phone_number')) {
+				profile.setPhoneHome(externalProfile.phone_number);
 			}
 
 			if (reachFiveHelper.isFieldExist(externalProfile, 'email')) {
@@ -96,40 +100,27 @@ var ReachFiveModel = ({
      * @alias module:models/ReachFiveModel~ReachFiveModel/loginReachFiveCustomer
      * @param {string} externalID External ID
      * @param {dw.customer.Profile} profile Customer Profile Object
-     * @param {string} email Customer Email
      * @return {dw.customer.Customer|null} logged in customer or null
      */
-    loginReachFiveCustomer: function (externalID, profile, email) {
+    loginReachFiveCustomer: function (externalID, profile) {
 		var credentials = profile.getCredentials();
+        var currentcustomer = null;
 		if (!credentials.isEnabled()) {
 			LOGGER.warn('Customer attempting to login into a disabled profile: {0} with external id: {1}',
 				profile.getCustomer().getCustomerNo(),
 				externalID
 			);
-			return null;
-		}
+		} else {
+            var reachFiveProviderId = this.reachFiveProviderId;
+            Transaction.wrap(function () {
+                currentcustomer = CustomerMgr.loginExternallyAuthenticatedCustomer(reachFiveProviderId, externalID, true);
+            });
 
-        var currentcustomer = null;
-        try {
-			Transaction.begin();
-			// Login customer
-			currentcustomer = CustomerMgr.loginExternallyAuthenticatedCustomer(this.reachFiveProviderId, externalID, true);
+            if (currentcustomer) {
+                reachFiveHelper.setReachFiveConversionCookie();
+            }
+        }
 
-			if (!empty(email)) {
-				var customerCredential = currentcustomer.getProfile().getCredentials();
-				var fakePassword = dw.web.Resource.msg('reachfive.temporarypassword', 'configuration', null);
-				customerCredential.setPassword(fakePassword, fakePassword, false);
-				customerCredential.setLogin(email, fakePassword);
-				var passwordSecure = fakePassword + dw.util.UUIDUtils.createUUID();
-				customerCredential.setPassword(passwordSecure, passwordSecure, false);
-			}
-			LOGGER.debug('Logged in external customer with id: {0}', externalID);
-			Transaction.commit();
-            reachFiveHelper.setReachFiveConversionCookie();
-		} catch (e) {
-			LOGGER.error('Logged in external customer with id: {0} failed with this exception : {1}', externalID, e);
-			Transaction.rollback();
-		}
         return currentcustomer;
     },
 

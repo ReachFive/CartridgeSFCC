@@ -1,5 +1,5 @@
 <form
-    action="${pdict.createAccountUrl}"
+    action="${pdict.actionUrl}"
     class="registration"
     method="POST"
     name="${pdict.profileForm.htmlName}">
@@ -53,7 +53,7 @@
         <div class="invalid-feedback" id="form-phone-error"></div>
     </div>
 
-    <div class="form-group required">
+    <div class="form-group">
         <label class="form-control-label" for="registration-form-email">
              <isprint value="${pdict.profileForm.customer.email.label}" encoding="htmlcontent" />
         </label>
@@ -82,40 +82,6 @@
             aria-describedby="form-email-confirm-error"
             <isprint value=${pdict.profileForm.customer.emailconfirm.attributes} encoding="off" />>
         <div class="invalid-feedback" id="form-email-confirm-error"></div>
-    </div>
-
-    <div class="form-group
-        <isif condition="${!!pdict.profileForm.login.password.mandatory === true}">required</isif>">
-        <label class="form-control-label" for="registration-form-password">
-            <isprint value="${pdict.profileForm.login.password.label}" encoding="htmlcontent" />
-        </label>
-        <input
-            type="password"
-            class="form-control"
-            id="registration-form-password"
-            data-missing-error="${Resource.msg('error.message.required','forms',null)}"
-            data-range-error="${Resource.msg('error.message.8_255characters','forms',null)}"
-            aria-describedby="form-password-error"
-            autocomplete="off"
-            <isprint value=${pdict.profileForm.login.password.attributes} encoding="off" />>
-        <div class="invalid-feedback" id="form-password-error"></div>
-    </div>
-
-    <div class="form-group
-        <isif condition="${!!pdict.profileForm.login.passwordconfirm.mandatory === true}">required</isif>">
-        <label class="form-control-label" for="registration-form-password-confirm">
-            <isprint value="${pdict.profileForm.login.passwordconfirm.label}" encoding="htmlcontent" />
-        </label>
-        <input
-            type="password"
-            class="form-control"
-            id="registration-form-password-confirm"
-            data-missing-error="${Resource.msg('error.message.required','forms',null)}"
-            data-range-error="${Resource.msg('error.message.8_255characters','forms',null)}"
-            aria-describedby="form-password-confirm-error"
-            autocomplete="off"
-            <isprint value=${pdict.profileForm.login.passwordconfirm.attributes} encoding="off" />>
-        <div class="invalid-feedback" id="form-password-confirm-error"></div>
     </div>
 
     <div class="form-group custom-control custom-checkbox">

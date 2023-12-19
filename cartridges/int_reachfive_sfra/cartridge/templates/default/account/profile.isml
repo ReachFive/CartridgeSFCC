@@ -17,13 +17,13 @@
                         <h2>${Resource.msg('label.profile.edit','account',null)}</h2>
                     </div>
                     <div class="card-body">
-                    <isif condition="${'auth_type' in pdict.CurrentSession.privacy && ['password', 'refresh'].indexOf(pdict.CurrentSession.privacy.auth_type) !== -1}">
-                    	<isinclude template="account/editProfileFormR5"/>
-                    <iselseif condition="${'auth_type' in pdict.CurrentSession.privacy && ['password', 'refresh', 'sfcc'].indexOf(pdict.CurrentSession.privacy.auth_type) === -1}">
-                    	<isinclude template="account/editProfileFormSocialLogin"/>
-                    <iselse>
-                        <isinclude template="account/editProfileForm"/>
-                    </isif>
+                        <isif condition="${pdict.formTemplate === 'ACCOUNT_SALESFORCE_PASSWORD'}">
+                            <isinclude template="account/editProfileForm/password"/>
+                        <iselseif condition="${pdict.formTemplate === 'ACCOUNT_SOCIAL'}">
+                            <isinclude template="account/editProfileForm/social"/>
+                        <iselse>
+                            <isinclude template="account/editProfileForm"/>
+                        </isif>
                     </div>
                 </div>
             </div>
