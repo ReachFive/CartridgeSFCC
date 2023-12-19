@@ -12,14 +12,74 @@
  * API Includes
  * */
 var LocalServiceRegistry = require('dw/svc/LocalServiceRegistry');
-var LOGGER = require('dw/system/Logger');
 var URLUtils = require('dw/web/URLUtils');
 
 /**
  * Script Modules
  */
 var reachFiveHelper = require('~/cartridge/scripts/helpers/reachFiveHelper');
+var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
 
+/**
+ * Constructs and configures a service with a callback.
+ * @param {string} serviceName Service Name
+ * @param {Object} [substObj] Replaceable value object
+ * @returns {dw.svc.HTTPService} Service Object
+ */
+function configureService(serviceName, substObj) {
+	return LocalServiceRegistry.createService(serviceName, {
+        createRequest: function (svc, params) {
+            svc.setAuthentication('NONE');
+            svc.addHeader('Content-type', 'application/json');
+            svc.addHeader('charset', 'UTF-8');
+
+            var svcUrl = svc.configuration.credential.URL;
+
+            if (svcUrl) {
+                svcUrl = svcUrl.replace('{reach5Domain}', reachfiveSettings.reach5Domain);
+
+                if (substObj && Object.keys(substObj).length !== 0) {
+                    Object.keys(substObj).forEach(function (key) {
+                        if (String.prototype.indexOf.call(svcUrl, '{' + key + '}') !== -1) {
+                            svcUrl = svcUrl.replace('{' + key + '}', substObj[key]);
+                        } else {
+                            svcUrl += '&' + key + '=' + substObj[key];
+                        }
+                    });
+                }
+
+                svc.setURL(svcUrl);
+            }
+
+			var jsonArgs = JSON.stringify(params);
+			return jsonArgs;
+        },
+        parseResponse: function (svc, client) {
+			var jsonResponse = client.text;
+			var objResponse = JSON.parse(jsonResponse);
+			return objResponse;
+		}
+	});
+}
+
+/**
+ * @description Merge 2 objects in one result with overriding
+ * @param {Object} obj1 - first redefinable object to merge
+ * @param {Object} obj2 = second object to merge
+ * @returns {Object} result of the merging
+ */
+function mergeObjects(obj1, obj2) {
+    var result = obj1;
+    var keys = Object.keys(obj2);
+
+    keys.forEach(function (key) {
+        result[key] = obj2[key];
+    });
+
+    return result;
+}
+
+// TODO: Need to be refactored in order to use: oauthToken function
 /**
  * @function
  * @description Call Service Registry ReachFive. This method is not exposed
@@ -37,6 +97,7 @@ function generateToken() {
 	return result.object.access_token;
 }
 
+// TODO: Need to be refactored in order to use: oauthToken function
 /**
  * @function
  * @description Call Service to have access_token for management API
@@ -62,6 +123,7 @@ function generateTokenForManagementAPI() {
 	return result;
 }
 
+// TODO: Need to be refactored in order to use: oauthToken function
 /**
  * @function
  * @description Call Service Registry ReachFive. This method is not exposed
@@ -82,45 +144,30 @@ function exchangeAuthorizationCodeForIDToken(customFields) {
 	return result.object;
 }
 
+// TODO: Need to be refactored in order to use: oauthToken function
 /**
  * @function
- * @description Call Service Registry reachfive.setcustomfields.post to save custom fields in reachfive backoffice.
- * First of all,We need configure mapping fields in reachfive backoffice.
- * In data object the key is the field was set in reachfive backoffice
- * @param {Object} customFields Custom Fields
- * @return {boolean} response.status
+ * @description Retrieve new access_token with refresh_token
+ * @param {Object} refreshToken Refresh token
+ * @return {Object} response.auth.accessToken
  * */
-function saveCustomFields(customFields) {
-	LOGGER.debug('saveCustomFields START');
-	LOGGER.debug('customerCode: ' + customFields.data.external_id);
-
-	// Generate token before save custom fields. The token is mandatory for the next steps
-	var token = generateTokenForManagementAPI().token;
-	LOGGER.debug('token: ' + token);
-	if (!token) {
-		LOGGER.error('No token generated before call reachfive.setcustomfields.post : ');
-		return null;
-	}
-
+function retrieveAccessTokenWithRefresh(refreshToken) {
 	var requestParams = {
-		customerParams: customFields,
-		token: token
+		client_id: reachFiveHelper.getReachFiveApiKey(),
+		client_secret: reachFiveHelper.getReachFiveClientSecret(),
+		grant_type: 'refresh_token',
+        refresh_token: refreshToken
 	};
 	// Service Call
-	var service = configureService('reachfive.setcustomfields.post');
-	var httpServiceResult = service.call(requestParams);
+	var service = configureService('reachfive.rest.auth');
+	var serviceResult = service.call(requestParams);
+    var result = {
+		ok: serviceResult.ok,
+		object: serviceResult.object,
+		errorMessage: (!serviceResult.ok) ? serviceResult.error + ' ' + serviceResult.errorMessage : ''
+	};
 
-	LOGGER.debug('httpServiceResult: ' + httpServiceResult);
-
-	if (!httpServiceResult.ok || !httpServiceResult.object) {
-		LOGGER.error('Error during reachfive call : ', httpServiceResult.errorMessage);
-		return null;
-	}
-
-    var response = JSON.parse(httpServiceResult.object);
-    LOGGER.debug('response.external_id: ' + response.external_id);
-
-	return (response.external_id === customFields.data.external_id);
+	return result;
 }
 
 /**
@@ -131,19 +178,55 @@ function saveCustomFields(customFields) {
  * @return {Object} Result Obj which contains response result with errorMessage if error
  * */
 function sendVerificationEmail(managementToken, reachFiveExternalID) {
-	var reach5Domain = reachFiveHelper.getReachFiveDomain();
-
-	var service = configureService('reachfive.verifyemail.post');
+	var service = configureService('reachfive.verifyemail.post', { user_id: reachFiveExternalID });
 	service.addHeader('Authorization', 'Bearer ' + managementToken);
-
-	var serviceUrl = service.configuration.credential.URL;
-	serviceUrl = serviceUrl.replace('{reach5Domain}', reach5Domain).replace('{user_id}', reachFiveExternalID);
-	service.setURL(serviceUrl);
 
 	var serviceResult = service.call();
 	var result = {
 		ok: serviceResult.ok,
 		errorMessage: (!serviceResult.ok) ? serviceResult.error + ' ' + serviceResult.errorMessage : ''
+	};
+
+	return result;
+}
+
+/**
+ * @function
+ * @description Call Service to update ReachFive profile
+ * @param {Object} requestObj Request Object with new login
+ * @return {Object} Result Obj which contains response result with errorMessage if error
+ * */
+function updateEmail(requestObj) {
+	var service = configureService('reachfive.updateemail.post');
+	service.setRequestMethod('POST');
+	service.addHeader('Authorization', 'Bearer ' + session.privacy.access_token);
+
+	var serviceResult = service.call(requestObj);
+	var result = {
+		ok: serviceResult.ok,
+		object: serviceResult.object,
+		errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : ''
+	};
+
+	return result;
+}
+
+/**
+ * @function
+ * @description Call Service to update ReachFive phone
+ * @param {Object} requestObj Request Object with new login
+ * @return {Object} Result Obj which contains response result with errorMessage if error
+ * */
+function updatePhone(requestObj) {
+    var service = configureService('reachfive.updatephone.post');
+    service.setRequestMethod('POST');
+	service.addHeader('Authorization', 'Bearer ' + session.privacy.access_token);
+
+    var serviceResult = service.call(requestObj);
+	var result = {
+		ok: serviceResult.ok,
+		object: serviceResult.object,
+		errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : ''
 	};
 
 	return result;
@@ -158,15 +241,9 @@ function sendVerificationEmail(managementToken, reachFiveExternalID) {
  * @return {Object} Result Obj which contains response result with errorMessage if error
  * */
  function updateProfile(requestObj, managementToken, reachFiveExternalID) {
-	var reach5Domain = reachFiveHelper.getReachFiveDomain();
-
-	var service = configureService('reachfive.updateprofile.put');
+	var service = configureService('reachfive.updateprofile.put', { user_id: reachFiveExternalID });
 	service.setRequestMethod('PUT');
 	service.addHeader('Authorization', 'Bearer ' + managementToken);
-
-	var serviceUrl = service.configuration.credential.URL;
-	serviceUrl = serviceUrl.replace('{reach5Domain}', reach5Domain).replace('{user_id}', reachFiveExternalID);
-	service.setURL(serviceUrl);
 
 	var serviceResult = service.call(requestObj);
 	var result = {
@@ -185,15 +262,9 @@ function sendVerificationEmail(managementToken, reachFiveExternalID) {
  * @return {Object} Result Obj which contains response result with errorMessage if error
  * */
  function updateProfileIdentityAPI(requestObj) {
-	var reach5Domain = reachFiveHelper.getReachFiveDomain();
-
 	var service = configureService('reachfive.update.profile.post');
 	service.setRequestMethod('POST');
 	service.addHeader('Authorization', 'Bearer ' + session.privacy.access_token);
-
-    var serviceUrl = service.configuration.credential.URL;
-    serviceUrl = serviceUrl.replace('{reach5Domain}', reach5Domain);
-    service.setURL(serviceUrl);
 
     var serviceResult = service.call(requestObj);
     var servResObject;
@@ -216,19 +287,13 @@ function sendVerificationEmail(managementToken, reachFiveExternalID) {
 /**
  * @function
  * @description Call Service to get ReachFive profile info
- * @param {string} identityAccessToken Identity API access token
+ * @param {string} profileFields Comma separated profile user fields
  * @return {Object} Result Obj which contains response result or errorMessage if error
  * */
-function getUserInfo(identityAccessToken) {
-	var reach5Domain = reachFiveHelper.getReachFiveDomain();
-
-	var service = configureService('reachfive.userinfo.get');
-	service.setRequestMethod('Get');
-	service.addHeader('Authorization', 'Bearer ' + identityAccessToken);
-
-	var serviceUrl = service.configuration.credential.URL;
-	serviceUrl = serviceUrl.replace('{reach5Domain}', reach5Domain);
-	service.setURL(serviceUrl);
+function getUserProfile(profileFields) {
+	var service = configureService('reachfive.userinfo.get', { profile_fields: profileFields });
+	service.setRequestMethod('GET');
+	service.addHeader('Authorization', 'Bearer ' + session.privacy.access_token);
 
 	var serviceResult = service.call();
 	var result = {
@@ -249,11 +314,8 @@ function getUserInfo(identityAccessToken) {
  * @return {Object} Result Obj which contains response result or errorMessage if error
  * */
 function signUp(login, password, profile) {
-    // Generate token before save custom fields. The token is mandatory for the next steps
-    var reach5Domain = reachFiveHelper.getReachFiveDomain();
-
 	var requestParams = {
-        client_id: reachFiveHelper.getReachFiveApiKey(),
+        client_id: reachfiveSettings.reach5ApiKey,
         scope: 'openid profile email phone',
         data: {
             given_name: profile.firstName,
@@ -273,40 +335,14 @@ function signUp(login, password, profile) {
 	var service = configureService('reachfive.signup.post');
     service.setRequestMethod('POST');
 
-    var serviceUrl = service.configuration.credential.URL;
-	serviceUrl = serviceUrl.replace('{reach5Domain}', reach5Domain);
-	service.setURL(serviceUrl);
-
     var serviceResult = service.call(requestParams);
     var result = {
         ok: serviceResult.ok,
         object: serviceResult.object,
-        errorMessage: (!serviceResult.ok) ? serviceResult.error + ' ' + serviceResult.errorMessage : ''
+        errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : ''
     };
 
     return result;
-}
-
-/**
- * Constructs and configures a service with a callback.
- * @param {string} serviceName Service Name
- * @returns {dw.svc.Service} Service Object
- */
-function configureService(serviceName) {
-	return LocalServiceRegistry.createService(serviceName, {
-        createRequest: function (svc, params) {
-			svc.setAuthentication('NONE');
-			svc.addHeader('Content-type', 'application/json');
-			svc.addHeader('charset', 'UTF-8');
-			var jsonArgs = JSON.stringify(params);
-			return jsonArgs;
-        },
-        parseResponse: function (svc, client) {
-			var jsonResponse = client.text;
-			var objResponse = JSON.parse(jsonResponse);
-			return objResponse;
-		}
-	});
 }
 
 /**
@@ -314,12 +350,12 @@ function configureService(serviceName) {
  * @param {string} email customer mail
  * @param {string} newPassword new customer password
  * @param {string} oldPassword old customer password
- * @returns {dw.svc.Service} Service Object
+ * @param {string} clientId Api client Id
+ * @returns {Object} Service Object
  */
-function updatePassword(email, newPassword, oldPassword) {
-    var reach5Domain = reachFiveHelper.getReachFiveDomain();
+function updatePassword(email, newPassword, oldPassword, clientId) {
     var requestParams = {
-        client_id: reachFiveHelper.getReachFiveApiKey(),
+        client_id: clientId || reachFiveHelper.getReachFiveApiKey(),
         email: email,
         password: newPassword,
         old_password: oldPassword
@@ -330,16 +366,71 @@ function updatePassword(email, newPassword, oldPassword) {
     service.setRequestMethod('POST');
     service.addHeader('Authorization', 'Bearer ' + session.privacy.access_token);
 
-    var serviceUrl = service.configuration.credential.URL;
-    serviceUrl = serviceUrl.replace('{reach5Domain}', reach5Domain);
-    service.setURL(serviceUrl);
-
     var serviceResult = service.call(requestParams);
 
     var result = {
         ok: serviceResult.ok,
         object: serviceResult.object,
-        errorMessage: (!serviceResult.ok) ? serviceResult.error + ' ' + serviceResult.errorMessage : ''
+        errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : ''
+    };
+
+    return result;
+}
+
+/**
+ * @function
+ * @description Retrieve an access token (authorization code flow)
+ * @param {Object} requestObj Object with request fields
+ * @return {Object} result Obj which contains response.auth.accessToken or errorMessage
+ * */
+function oauthToken(requestObj) {
+    var requestParams = {
+        client_id: reachfiveSettings.reach5ApiKey,
+        client_secret: reachfiveSettings.reach5ClientSecret
+    };
+
+    var keys = Object.keys(requestObj);
+
+    if (keys.length) {
+        keys.forEach(function (key) {
+            requestParams[key] = requestObj[key];
+        });
+    }
+
+    // Service Call
+    var service = configureService('reachfive.rest.auth');
+    var serviceResult = service.call(requestParams);
+
+    var result = {
+        ok: serviceResult.ok,
+        object: serviceResult.object,
+        errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : ''
+    };
+
+    return result;
+}
+
+/**
+ * @description User logs in with a password
+ * @param {Object} requestFields request fields object
+ * @returns {Object} request result
+ */
+function passwordLogin(requestFields) {
+    var baseFields = {
+        client_id: reachfiveSettings.reach5ApiKey
+    };
+
+    var requestObj = mergeObjects(baseFields, requestFields);
+
+    var service = configureService('reachfive.passwordlogin.post');
+    service.setRequestMethod('POST');
+
+    var serviceResult = service.call(requestObj);
+
+    var result = {
+        ok: serviceResult.ok,
+        object: serviceResult.object,
+        errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : ''
     };
 
     return result;
@@ -347,12 +438,16 @@ function updatePassword(email, newPassword, oldPassword) {
 
 /* Expose Methods */
 exports.generateTokenForManagementAPI = generateTokenForManagementAPI;
-exports.saveCustomFields = saveCustomFields;
 exports.exchangeAuthorizationCodeForIDToken = exchangeAuthorizationCodeForIDToken;
+exports.retrieveAccessTokenWithRefresh = retrieveAccessTokenWithRefresh;
 exports.generateToken = generateToken;
+exports.updateEmail = updateEmail;
+exports.updatePhone = updatePhone;
 exports.updateProfile = updateProfile;
 exports.updateProfileIdentityAPI = updateProfileIdentityAPI;
 exports.sendVerificationEmail = sendVerificationEmail;
-exports.getUserInfo = getUserInfo;
+exports.getUserProfile = getUserProfile;
 exports.signUp = signUp;
 exports.updatePassword = updatePassword;
+exports.oauthToken = oauthToken;
+exports.passwordLogin = passwordLogin;

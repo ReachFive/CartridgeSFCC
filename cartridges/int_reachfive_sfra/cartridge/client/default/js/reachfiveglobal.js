@@ -1,19 +1,17 @@
 'use strict';
 
-var customerHelpers = require('base/checkout/customer');
-
 $(function () {
     var SELECTOR = {
         BTN: {
-            LOGOUT: 'a[href$="Login-Logout"]',
-            CHECKOUT_LOGIN: '.js-submit-reachfive-login'
-        },
-        FORM: {
-            LOGIN: 'form.login',
-            CHECKOUT_LOGIN: '#registered-customer'
+            LOGOUT: 'a[href$="Login-Logout"]'
         }
     };
 
+    var TARGET = {
+        BODY: document.querySelector('body')
+    };
+
+    // Check session handler
     if (reach5Const.isSessionAuthRequired) {
         sdkCoreClient.getSessionInfo()
         .then(function (sessionInfo) {
@@ -27,72 +25,60 @@ $(function () {
     }
 
     // Logout handler
-    $('body').on('click', SELECTOR.BTN.LOGOUT, function (event) {
-        event.preventDefault();
-        sdkCoreClient.getSessionInfo()
-        .then(function (sessionInfo) {
-            if (sessionInfo && sessionInfo.isAuthenticated) {
-                sdkCoreClient.logout({
-                    redirectTo: reach5Const.reachFiveLogoutUrl
-                });
-            } else {
-                window.location.href = $(event.target).attr('href');
-            }
-        });
-    });
+    TARGET.BODY.addEventListener('click', function (event) {
+        if (event.target.matches(SELECTOR.BTN.LOGOUT)) {
+            event.preventDefault();
 
-    // Login handler
-    $(SELECTOR.FORM.LOGIN).on('login:error', function (event, data) {
-        if (data.reachFiveLogin) {
-            var $form = $(event.currentTarget);
-            sdkCoreClient.loginWithPassword({
-                email: $form.find('#login-form-email').val(),
-                password: $form.find('#login-form-password').val(),
-                auth: {
-                    redirectUri: reach5Const.callbackUrl,
-                    origin: reach5Const.siteID,
-                    state: data.reachFiveStateObj
+            sdkCoreClient.getSessionInfo()
+            .then(function (sessionInfo) {
+                if (sessionInfo && sessionInfo.isAuthenticated) {
+                    sdkCoreClient.logout({
+                        redirectTo: reach5Const.reachFiveLogoutUrl
+                    });
+                } else {
+                    window.location.href = event.target.href;
                 }
             })
             .catch(function () {
-                // console.error(err);
+                window.location.href = event.target.href;
             });
         }
     });
 
-    // Checkout login handler
-    $('body').on('click', SELECTOR.BTN.CHECKOUT_LOGIN, function (event) {
-        event.preventDefault();
-        customerHelpers.methods.clearErrors();
+    // TARGET.BODY.addEventListener('reachfive-profile-update', function (event) {
+    //     var data = event.detail;
 
-        var $customerForm = $(SELECTOR.FORM.CHECKOUT_LOGIN);
-        $.ajax({
-            url: $customerForm.attr('action'),
-            type: 'post',
-            data: $customerForm.serialize(),
-            success: function (data) {
-                if (data.error) {
-                    customerHelpers.methods.customerFormResponse(new $.Deferred(), data);
-                } else {
-                    sdkCoreClient.loginWithPassword({
-                        email: $customerForm.find('#email').val(),
-                        password: $customerForm.find('#password').val(),
-                        auth: {
-                            redirectUri: reach5Const.callbackUrl,
-                            origin: reach5Const.siteID,
-                            state: data.stateObjBase64
-                        }
-                    })
-                    .catch(function () {
-                        // console.error(err);
-                    });
-                }
-            },
-            error: function (err) {
-                if (err.responseJSON && err.responseJSON.redirectUrl) {
-                    window.location.href = err.responseJSON.redirectUrl;
-                }
-            }
-        });
-    });
+    //     if (data && data.updateUrl) {
+    //         var tokenEl = document.querySelector('#csrf-token');
+    //         var tokenName = tokenEl.getAttribute('name');
+    //         var tokenValue = tokenEl.value;
+
+    //         var formObj = {
+    //             source: data.source
+    //         };
+    //         formObj[tokenName] = tokenValue;
+
+    //         var formData = '';
+    //         Object.keys(formObj).forEach(function (key, index) {
+    //             formData += (index ? '&' : '') + key + '=' + formObj[key];
+    //         });
+
+    //         var xhr = new XMLHttpRequest();
+    //         xhr.responseType = 'json';
+    //         xhr.open('POST', data.updateUrl);
+    //         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    //         xhr.onload = function () {
+    //             if (xhr.status === 200 && xhr.response.success) {
+    //                 window.location.href = xhr.response.redirectUrl;
+    //             }
+    //             // TODO: Remove this console logs also for error scenario
+    //             // console.table(xhr.response.data); // eslint-disable-line no-console
+    //         };
+    //         xhr.onerror = function () {
+    //             // DO NOTHING? because of widget form process
+    //             // console.log('Error', resp);
+    //         };
+    //         xhr.send(formData);
+    //     }
+    // });
 });

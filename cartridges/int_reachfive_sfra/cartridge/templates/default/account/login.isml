@@ -22,14 +22,13 @@
                                 	<isif condition="${!empty(pdict.errorMsg)}">
                                 		<div class="error-form">${pdict.errorMsg}</div>
                                 	</isif>
-                                    <isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveEnabled')}">
-                                        <isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveLoginAllowed')
-                                            && require('*/cartridge/scripts/helpers/reachFiveHelper').getReachFiveConversionMute()}">
-                                                <isif condition="${'reachFivePasswordReset' in pdict}">
+                                    <isif condition="${pdict.isReachFiveEnabled}">
+                                        <isif condition="${pdict.isReachFiveLoginAllowed && pdict.isReachFiveConversionMute}">
+                                                <isif condition="${pdict.isReachFivePasswordReset}">
                                                     <div id="reset-password"></div>
                                                 <iselse/>
                                                     <div id="load-social-connect-login"></div>
-                                                    <isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveTransitionActive')}">
+                                                    <isif condition="${pdict.isReachFiveTransitionActive}">
                                                         <isinclude template="account/forgotPassword"/>
                                                     </isif>
                                                 </isif>
@@ -45,10 +44,8 @@
                                     </isif>
                                 </div>
                                 <div class="tab-pane ${pdict.navTabValue === "register" ? 'active' : ''}" id="register" role="tabpanel" aria-labelledby="register-tab">
-                                    <isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveEnabled')
-                                        && !('formRequired' in pdict && pdict.formRequired)}">
-                                        <isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveLoginAllowed')
-                                            && !require('*/cartridge/scripts/helpers/reachFiveHelper').isReachFiveTransitionActive()}">
+                                    <isif condition="${pdict.isReachFiveEnabled}">
+                                        <isif condition="${pdict.isReachFiveLoginAllowed && !pdict.isReachFiveTransitionActive}">
                                             <div id="load-social-connect-signup"></div>
                                         <iselse/>
                                             <isinclude template="account/components/registerForm" />

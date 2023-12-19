@@ -1,6 +1,6 @@
 {
   "name": "reachfive",
-  "version": "20.4.0",
+  "version": "20.4.3",
   "description": "Reachfive Cartridge for Salesforce B2C Commerce",
   "main": "index.js",
   "engines": {

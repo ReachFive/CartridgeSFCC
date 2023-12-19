@@ -40,7 +40,7 @@
             </div>
         </div>
     <iselse/>
-        <form autocomplete="on" id="registered-customer" method="POST" class="registered-form d-none" action="${URLUtils.url('CheckoutServices-LoginCustomerReachFive')}"
+        <form autocomplete="on" id="registered-customer" method="POST" class="registered-form d-none" action="${URLUtils.url('CheckoutServices-LoginCustomer')}"
             <isprint value=${pdict.forms.registeredCustomerForm.attributes} encoding="off" /> novalidate>
             <fieldset class="customer-information-block">
                 <div class="row">
@@ -68,7 +68,7 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="mb-sm-3">
-                            <button class="btn btn-primary btn-block js-submit-reachfive-login" type="submit" name="submit" value="submit-login">
+                            <button class="btn btn-primary btn-block submit-customer-login" type="submit" name="submit" value="submit-login">
                                 ${Resource.msg('button.customer.login', 'checkout', null)}
                             </button>
 

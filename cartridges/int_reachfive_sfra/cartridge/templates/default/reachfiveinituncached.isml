@@ -4,6 +4,7 @@
         window.reach5Const = {}
     };
 
+    <iscomment>Forced authentication could be overridden by calling the page with the "query" parameter</iscomment>
     if (!Object.hasOwnProperty.call(window.reach5Const, 'isSessionAuthRequired')) {
         window.reach5Const.isSessionAuthRequired = ${pdict.isSessionAuthRequired};
     }
