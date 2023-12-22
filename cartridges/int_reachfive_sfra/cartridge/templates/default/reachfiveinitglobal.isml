@@ -12,7 +12,12 @@
                 domain: '${pdict.reachFiveDomain}',
                 clientId: '${pdict.reachFiveApiKey}',
                 // Optional parameter
+<<<<<<< Updated upstream
                 language: '${pdict.reachFiveLanguageCode}' || 'en'
+=======
+                language: '${pdict.reachFiveLanguageCode}' || 'en',
+                locale: '${pdict.reachFivelocaleCode}'
+>>>>>>> Stashed changes
             });
 
             window.reach5Const = {
@@ -46,7 +51,12 @@
                 domain: '${pdict.reachFiveDomain}',
                 clientId: '${pdict.reachFiveApiKey}',
                 // Optional parameter
+<<<<<<< Updated upstream
                 language: '${pdict.reachFiveLanguageCode}' || 'en'
+=======
+                language: '${pdict.reachFiveLanguageCode}' || 'en',
+                locale: '${pdict.reachFivelocaleCode}'
+>>>>>>> Stashed changes
             });
         </script>
 
@@ -57,6 +67,10 @@
             let state = '${pdict.stateObjBase64}';
             let loginLink = '${pdict.resetPassLoginUrl}';
             let accessToken = '${pdict.reachFiveAccess_token}';
+<<<<<<< Updated upstream
+=======
+            let providerAccessToken = '${pdict.reachFiveProviderAccessToken}';
+>>>>>>> Stashed changes
             let stateUrl = decodeURIComponent('${dw.crypto.Encoding.toURI(pdict.stateUrl)}')
 
             if(document.getElementById("load-social-connect-login")) {
@@ -67,13 +81,21 @@
             if(document.getElementById("load-social-connect-signup")) {
                 console.log('load-social-connect-signup');
                 <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('load-social-connect-signup')}" encoding="off">
+<<<<<<< Updated upstream
                 
+=======
+
+>>>>>>> Stashed changes
             }
 
             if(document.getElementById("load-social-connect")) {
                 console.log('load-social-connect')
                 <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('load-social-connect')}" encoding="off">
+<<<<<<< Updated upstream
                 
+=======
+
+>>>>>>> Stashed changes
             }
 
 
@@ -133,7 +155,11 @@
 
             </script>
 
+<<<<<<< Updated upstream
             <iscomment> 
+=======
+            <iscomment>
+>>>>>>> Stashed changes
                 TODO: This functionality related to "imlicid flow"
                     and it is normally disabled becasue of security issues
             <script type="text/javascript">

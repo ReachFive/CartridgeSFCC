@@ -1,6 +1,10 @@
 {
   "name": "reachfive",
+<<<<<<< Updated upstream
   "version": "20.4.3",
+=======
+  "version": "20.5.0",
+>>>>>>> Stashed changes
   "description": "Reachfive Cartridge for Salesforce B2C Commerce",
   "main": "index.js",
   "engines": {

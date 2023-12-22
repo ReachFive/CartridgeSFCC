@@ -304,6 +304,21 @@ function getReachFiveLanguageCode() {
 
 /**
  * @function
+<<<<<<< Updated upstream
+=======
+ * @description Send SFCC locale in order to be retrieve by the ReachFive
+ * @return {string} The country lowercase ISO 639-1 code
+ */
+function getReachFiveLocaleCode() {
+	var Locale = require('dw/util/Locale');
+	var localeCode = Locale.getLocale(request.getLocale()).getCountry();
+
+	return localeCode;
+}
+
+/**
+ * @function
+>>>>>>> Stashed changes
  * @description Get Reach Five Conversion period value based on request cookie and preference. True - no changes. False - change flow.
  * @return {boolean} True or False
  * */
@@ -494,7 +509,11 @@ function updateReachFiveProfile(customerObj) {
  * @param {boolean} [handleCustomerRoute] handle flag
  * @return {string} result
  * */
+<<<<<<< Updated upstream
 function getStateObjBase64(redirectURL, action, handleCustomerRoute) {
+=======
+function getStateObjBase64(redirectURL, action, handleCustomerRoute, data) {
+>>>>>>> Stashed changes
     var dwStringUtils = require('dw/util/StringUtils');
     var stateObj = {
         redirectURL: redirectURL,
@@ -505,6 +524,14 @@ function getStateObjBase64(redirectURL, action, handleCustomerRoute) {
         stateObj.handleCustomerRoute = handleCustomerRoute;
     }
 
+<<<<<<< Updated upstream
+=======
+    //Put the data query param as a JSON object in the state
+    if (data) {
+        stateObj.data = data;
+    }
+
+>>>>>>> Stashed changes
     return dwStringUtils.encodeBase64(JSON.stringify(stateObj));
 }
 
@@ -810,6 +837,10 @@ module.exports.getReachFiveExternalID = getReachFiveExternalID;
 module.exports.getReachFiveManagementScope = getReachFiveManagementScope;
 module.exports.getReachFiveProfileFieldsJSON = getReachFiveProfileFieldsJSON;
 module.exports.getReachFiveLanguageCode = getReachFiveLanguageCode;
+<<<<<<< Updated upstream
+=======
+module.exports.getReachFiveLocaleCode = getReachFiveLocaleCode;
+>>>>>>> Stashed changes
 module.exports.getReachFiveConversionMute = getReachFiveConversionMute;
 module.exports.setReachFiveConversionCookie = setReachFiveConversionCookie;
 module.exports.getCustomerReachFiveExtProfile = getCustomerReachFiveExtProfile;
@@ -832,4 +863,7 @@ module.exports.getReachfiveProfileFields = getReachfiveProfileFields;
 module.exports.isNewPhone = isNewPhone;
 module.exports.updatePassword = updatePassword;
 module.exports.getTokenWithPassword = getTokenWithPassword;
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes

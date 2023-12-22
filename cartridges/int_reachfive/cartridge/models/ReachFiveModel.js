@@ -18,6 +18,10 @@ var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
  * Reach Five Modules
  *  */
 var reachFiveHelper = require('~/cartridge/scripts/helpers/reachFiveHelper');
+<<<<<<< Updated upstream
+=======
+var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
+>>>>>>> Stashed changes
 
 /**
  * ReachFive helper providing enhanced profile functionality
@@ -36,7 +40,11 @@ var ReachFiveModel = ({
      * @param {Object} externalProfile External Profile Object
      * @param {Object} [reachFiveConsents] Consents Object from external Profile
      */
+<<<<<<< Updated upstream
     createReachFiveCustomer: function (externalID, externalProfile, reachFiveConsents) {
+=======
+    createReachFiveCustomer: function (externalID, externalProfile, reachFiveConsents, data) {
+>>>>>>> Stashed changes
 		if (!externalID || !externalProfile) {
 			return null;
 		}
@@ -44,9 +52,34 @@ var ReachFiveModel = ({
 		Transaction.begin();
 
 		try {
+<<<<<<< Updated upstream
 			// Create Externally customer
 			var newCustomer = CustomerMgr.createExternallyAuthenticatedCustomer(this.reachFiveProviderId, externalID);
 			var profile = newCustomer.getProfile();
+=======
+			//Create an internal profile linked to the customer in order to avoid the duplicate profiles
+			if ( reachFiveHelper.isFieldExist(externalProfile, 'email') && reachfiveSettings.isReachFiveEmailAsLogin )
+			{
+				var temporaryPassword = 'Matthias2023&';//Math.random().toString(36).substr(2, 10);
+
+				var newCustomer = CustomerMgr.createCustomer(externalProfile.email, temporaryPassword);
+				var profile = newCustomer.getProfile();
+
+				var credentials = profile.getCredentials();
+				credentials.setAuthenticationProviderID(this.reachFiveProviderId);
+				credentials.setExternalID(externalID);
+
+				LOGGER.info('Customer created with credentials and an external profile {0} with the external ID {1}', this.reachFiveProviderId, externalID);
+			}
+			else
+			{
+				// Create Externally customer
+				var newCustomer = CustomerMgr.createExternallyAuthenticatedCustomer(this.reachFiveProviderId, externalID);
+				var profile = newCustomer.getProfile();
+
+				LOGGER.info('Customer created with an external profile {0} with the external ID {1}', this.reachFiveProviderId, externalID);
+			}
+>>>>>>> Stashed changes
 
 			// Complete customer's profile with firstname, lastname, email and birthday if exists
 			if (reachFiveHelper.isFieldExist(externalProfile, 'given_name')) {
@@ -80,13 +113,27 @@ var ReachFiveModel = ({
 				}
 			}
 
+<<<<<<< Updated upstream
             // TODO: Check this attribute "isNewsletter" looks like it is not used
             //       Also check it in system attributes
+=======
+      // TODO: Check this attribute "isNewsletter" looks like it is not used
+      //       Also check it in system attributes
+>>>>>>> Stashed changes
 			if (reachFiveConsents && reachFiveConsents.newsletter) {
 				profile.custom.isNewsletter = reachFiveConsents.newsletter.granted;
 			}
 
+<<<<<<< Updated upstream
             // Finish Transaction with success
+=======
+			//Store the data from the beginning of the authentication flow
+			if ( data != null ) {
+				profile.custom.data = data;
+			}
+
+			// Finish Transaction with success
+>>>>>>> Stashed changes
 			Transaction.commit();
 			return profile;
 		} catch (e) {

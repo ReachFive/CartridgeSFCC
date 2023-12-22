@@ -69,6 +69,10 @@ function initReachFive() {
         reachFiveDomain: reachFiveHelper.getReachFiveDomain(),
         reachFiveApiKey: reachFiveHelper.getReachFiveApiKey(),
         reachFiveLanguageCode: reachFiveHelper.getReachFiveLanguageCode(),
+<<<<<<< Updated upstream
+=======
+        reachFivelocaleCode: reachFiveHelper.getReachFiveLocaleCode(),
+>>>>>>> Stashed changes
         callbackUrl: URLUtils.https('ReachFiveController-CallbackReachFiveRequest'),
         theme: reachFiveHelper.getReachFiveTheme(),
         siteID: System.getCurrent().getID(),
@@ -98,6 +102,10 @@ function initReachFive() {
         reachFiveDomain: reachFiveHelper.getReachFiveDomain(),
         reachFiveApiKey: reachFiveHelper.getReachFiveApiKey(),
         reachFiveLanguageCode: reachFiveHelper.getReachFiveLanguageCode(),
+<<<<<<< Updated upstream
+=======
+        reachFivelocaleCode: reachFiveHelper.getReachFiveLocaleCode(),
+>>>>>>> Stashed changes
         callbackUrl: URLUtils.https('ReachFiveController-CallbackReachFiveRequest'),
         ajaxLoginUrl: URLUtils.https('ReachFiveController-AjaxLogin'),
         ajaxSignUpUrl: URLUtils.https('ReachFiveController-AjaxSignUp'),

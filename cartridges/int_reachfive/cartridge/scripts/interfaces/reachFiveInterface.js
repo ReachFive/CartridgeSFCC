@@ -89,7 +89,11 @@ function generateToken() {
 	var requestParams = {
 		grant_type: 'client_credentials',
 		client_id: reachFiveHelper.getReachFiveApiKey(),
+<<<<<<< Updated upstream
 		client_secret: reachFiveHelper.getReachFiveClientSecret()
+=======
+        client_secret: reachFiveHelper.getReachFiveClientSecret()
+>>>>>>> Stashed changes
 	};
 	// Service Call
 	var service = configureService('reachfive.rest.auth');
@@ -135,7 +139,12 @@ function exchangeAuthorizationCodeForIDToken(customFields) {
 		code: customFields.code,
 		client_id: reachFiveHelper.getReachFiveApiKey(),
 		client_secret: reachFiveHelper.getReachFiveClientSecret(),
+<<<<<<< Updated upstream
 		grant_type: 'authorization_code',
+=======
+    grant_type: 'authorization_code',
+    return_provider_token: reachfiveSettings.isReachFiveReturnProviderToken,
+>>>>>>> Stashed changes
 		redirect_uri: customFields.redirectUrl || URLUtils.https('ReachFiveController-CallbackReachFiveRequest').toString()
 	};
 	// Service Call
@@ -156,7 +165,11 @@ function retrieveAccessTokenWithRefresh(refreshToken) {
 		client_id: reachFiveHelper.getReachFiveApiKey(),
 		client_secret: reachFiveHelper.getReachFiveClientSecret(),
 		grant_type: 'refresh_token',
+<<<<<<< Updated upstream
         refresh_token: refreshToken
+=======
+    refresh_token: refreshToken
+>>>>>>> Stashed changes
 	};
 	// Service Call
 	var service = configureService('reachfive.rest.auth');

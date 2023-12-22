@@ -8,7 +8,12 @@
             domain: '${pdict.reachFiveDomain}',
             clientId: '${pdict.reachFiveApiKey}',
             // Optional parameter
+<<<<<<< Updated upstream
             language: '${pdict.reachFiveLanguageCode}' || 'en'
+=======
+            language: '${pdict.reachFiveLanguageCode}' || 'en',
+            locale: '${pdict.localeCode}'
+>>>>>>> Stashed changes
         });
 
         var reach5Const = {
