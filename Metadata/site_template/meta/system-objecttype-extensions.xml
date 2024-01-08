@@ -10,6 +10,13 @@
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
+            <attribute-definition attribute-id="data">
+                <display-name xml:lang="x-default">Data</display-name>
+                <description xml:lang="x-default"></description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
             <attribute-definition attribute-id="reachfiveError">
                 <display-name xml:lang="x-default">ReachFive request error</display-name>
                 <type>text</type>
@@ -42,6 +49,7 @@
                 <attribute attribute-id="reachfiveUpdateEmailAddress"/>
                 <attribute attribute-id="reachfiveUpdateProfile"/>
                 <attribute attribute-id="reachfiveError"/>
+                <attribute attribute-id="data"/>
             </attribute-group>
         </group-definitions>
     </type-extension>
@@ -90,6 +98,20 @@
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
                 <default-value>false</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="isReachFiveEmailAsLogin">
+                <display-name xml:lang="x-default">Create profile with login as an email or not</display-name>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>true</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="isReachFiveReturnProviderToken">
+                <display-name xml:lang="x-default">Retrieve the provider token in the SFCC session</display-name>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>true</default-value>
             </attribute-definition>
             <attribute-definition attribute-id="isReachFiveSessionForcedAuth">
                 <display-name xml:lang="x-default">Session Forced Authentication</display-name>
@@ -311,6 +333,8 @@
                 <attribute attribute-id="reachFiveProviderId"/>
                 <attribute attribute-id="isReachFiveFastRegister"/>
                 <attribute attribute-id="isReachFiveLoginAllowed"/>
+                <attribute attribute-id="isReachFiveEmailAsLogin"/>
+                <attribute attribute-id="isReachFiveReturnProviderToken"/>
                 <attribute attribute-id="reach5ManagementApiKey"/>
                 <attribute attribute-id="reach5ManagementClientSecret"/>
                 <attribute attribute-id="reach5ManagementScope"/>
