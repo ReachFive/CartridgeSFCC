@@ -304,6 +304,18 @@ function getReachFiveLanguageCode() {
 
 /**
  * @function
+ * @description Send SFCC locale in order to be retrieve by the ReachFive
+ * @return {string} The country lowercase ISO 639-1 code
+ */
+function getReachFiveLocaleCode() {
+	var Locale = require('dw/util/Locale');
+	var localeCode = Locale.getLocale(request.getLocale()).getCountry();
+
+	return localeCode;
+}
+
+/**
+ * @function
  * @description Get Reach Five Conversion period value based on request cookie and preference. True - no changes. False - change flow.
  * @return {boolean} True or False
  * */
@@ -494,7 +506,7 @@ function updateReachFiveProfile(customerObj) {
  * @param {boolean} [handleCustomerRoute] handle flag
  * @return {string} result
  * */
-function getStateObjBase64(redirectURL, action, handleCustomerRoute) {
+function getStateObjBase64(redirectURL, action, handleCustomerRoute, data) {
     var dwStringUtils = require('dw/util/StringUtils');
     var stateObj = {
         redirectURL: redirectURL,
@@ -503,6 +515,11 @@ function getStateObjBase64(redirectURL, action, handleCustomerRoute) {
 
     if (handleCustomerRoute) {
         stateObj.handleCustomerRoute = handleCustomerRoute;
+    }
+
+    //Put the data query param as a JSON object in the state
+    if (data) {
+        stateObj.data = data;
     }
 
     return dwStringUtils.encodeBase64(JSON.stringify(stateObj));
@@ -810,6 +827,7 @@ module.exports.getReachFiveExternalID = getReachFiveExternalID;
 module.exports.getReachFiveManagementScope = getReachFiveManagementScope;
 module.exports.getReachFiveProfileFieldsJSON = getReachFiveProfileFieldsJSON;
 module.exports.getReachFiveLanguageCode = getReachFiveLanguageCode;
+module.exports.getReachFiveLocaleCode = getReachFiveLocaleCode;
 module.exports.getReachFiveConversionMute = getReachFiveConversionMute;
 module.exports.setReachFiveConversionCookie = setReachFiveConversionCookie;
 module.exports.getCustomerReachFiveExtProfile = getCustomerReachFiveExtProfile;
@@ -832,4 +850,3 @@ module.exports.getReachfiveProfileFields = getReachfiveProfileFields;
 module.exports.isNewPhone = isNewPhone;
 module.exports.updatePassword = updatePassword;
 module.exports.getTokenWithPassword = getTokenWithPassword;
-
