@@ -7,11 +7,8 @@
             <preference preference-id="isReachFiveEnabled">true</preference>
             <preference preference-id="isReachFiveFastRegister">true</preference>
             <preference preference-id="isReachFiveLoginAllowed">false</preference>
-<<<<<<< Updated upstream
-=======
             <preference preference-id="isReachFiveEmailAsLogin">true</preference>
             <preference preference-id="isReachFiveReturnProviderToken">true</preference>
->>>>>>> Stashed changes
             <preference preference-id="reach5ApiKey">enterYourAPIKey</preference>
             <preference preference-id="reach5ClientSecret">enterYourAPIsecret</preference>
             <preference preference-id="reach5Domain">yourdomain.og4.me</preference>
