@@ -96,6 +96,11 @@ function getStateData(req) {
         if (stateObj.action) {
             stateData.action = stateObj.action;
         }
+
+        //Get the data param in the state object
+        if (stateObj.data) {
+            stateData.data = stateObj.data;
+        }
     }
 
     return stateData;
@@ -128,10 +133,11 @@ server.get(
 			loginFailed('genericerror', res);
 			return next();
 		}
-        var reachfiveSession = new ReachfiveSessionModel(authorizationResponse);
 
-        var externalProfileAddons = reachFiveHelper.getUserProfile();
-        reachfiveSession.has_password = externalProfileAddons.object && externalProfileAddons.object.has_password;
+    var reachfiveSession = new ReachfiveSessionModel(authorizationResponse);
+
+    var externalProfileAddons = reachFiveHelper.getUserProfile();
+    reachfiveSession.has_password = externalProfileAddons.object && externalProfileAddons.object.has_password;
 
 		var email = reachfiveSession.profile.email;
 		var externalID = reachfiveSession.profile.sub.trim();
@@ -140,8 +146,12 @@ server.get(
 		var loggedCustomer, existingCustomer;
 		var reachFiveConsents = null;
 
-        var stateObj = getStateData(req);
-        var target = stateObj.target;
+    var stateObj = getStateData(req);
+    var target = stateObj.target;
+
+    //Get the data from the state object
+    var data = stateObj.data;
+
 		// Logger debug for profile
 		LOGGER.debug('Parsed UserId "{0}" from response: {1}', externalID, reachfiveSession.profile);
 
@@ -190,20 +200,20 @@ server.get(
 					// Case : Create a new customer
 					// Create customer with external profile
 					// If we want to create a new customer without prefill form
-                    if (reachfiveSettings.isReachFiveFastRegister || reachfiveSession.has_password) {
+          if (reachfiveSettings.isReachFiveFastRegister || reachfiveSession.has_password) {
 						if (externalProfileAddons.ok) {
 							reachFiveConsents = externalProfileAddons.object.consents;
 						}
 
-						profile = ReachFiveModel.createReachFiveCustomer(externalID, reachfiveSession.profile, reachFiveConsents);
+						profile = ReachFiveModel.createReachFiveCustomer(externalID, reachfiveSession.profile, reachFiveConsents, data);
 					} else {
-                        var afterAuth = require('*/cartridge/models/afterAuthUrl');
+            var afterAuth = require('*/cartridge/models/afterAuthUrl');
 
-                        reachfiveSession.prefill_register = true;
+            reachfiveSession.prefill_register = true;
 
-                        var rurl = afterAuth.getRurlValue(stateObj.action);
+            var rurl = afterAuth.getRurlValue(stateObj.action);
 
-                        target = URLUtils.url('ReachFiveController-StartPrefillRegister', 'rurl', rurl).toString();
+            target = URLUtils.url('ReachFiveController-StartPrefillRegister', 'rurl', rurl).toString();
 
 						loginRedirect(target, res);
 						return next();
