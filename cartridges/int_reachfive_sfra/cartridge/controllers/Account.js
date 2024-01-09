@@ -84,7 +84,7 @@ server.append('Show', function (req, res, next) {
 
         if (reachfiveSession.profile) {
             if (!reachfiveSettings.isReachFiveLoginAllowed) {
-                profileUpdateCTA = false;
+                //profileUpdateCTA = false; //Comented in order to enabled the update profile in SLO mode
                 passwordUpdateCTA = false;
             }
 
@@ -413,7 +413,7 @@ server.replace(
 
             var reachfiveProfile = new ReachfiveProfile(req.currentCustomer.raw);
 
-            if (reachfiveProfile.salesforcePasswordSet) {
+            if (reachfiveProfile.salesforcePasswordSet && reachfiveSettings.isReachFiveLoginAllowed) {  //Display the profile update form only if the profile has a Password AND R5 is used as a CIAM
                 context.formTemplate = 'ACCOUNT_SALESFORCE_PASSWORD';
 
                 profileForm.customer.firstname.value = reachfiveProfile.profile.given_name;
