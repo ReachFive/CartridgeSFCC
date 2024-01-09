@@ -200,7 +200,7 @@ server.replace(
                     true
                 );
 
-                if (reachfiveSettings.isReachFiveEnabled) {
+                if (reachfiveSettings.isReachFiveEnabled && reachfiveSettings.isReachFiveLoginAllowed) {
                     response = reachFiveHelper.updatePassword(
                         customer.profile.credentials.login,
                         formInfo.newPassword,
