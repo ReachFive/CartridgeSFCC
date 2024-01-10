@@ -48,7 +48,7 @@ var ReachFiveModel = ({
 			//Create an internal profile linked to the customer in order to avoid the duplicate profiles
 			if ( reachFiveHelper.isFieldExist(externalProfile, 'email') && reachfiveSettings.isReachFiveEmailAsLogin )
 			{
-				var temporaryPassword = 'Matthias2023&';//Math.random().toString(36).substr(2, 10);
+				var temporaryPassword = Math.random().toString(36).substr(2, 10);
 
 				var newCustomer = CustomerMgr.createCustomer(externalProfile.email, temporaryPassword);
 				var profile = newCustomer.getProfile();
