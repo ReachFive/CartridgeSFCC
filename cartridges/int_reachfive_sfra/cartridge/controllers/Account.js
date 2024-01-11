@@ -70,6 +70,7 @@ server.append('Login', function (req, res, next) {
 
 server.append('Show', function (req, res, next) {
     var passwordUpdateCTA = true;
+    var passwordResetCTA = true;
     var profileUpdateCTA = true;
     var socialNetworksCTA = true;
 
@@ -82,13 +83,22 @@ server.append('Show', function (req, res, next) {
         var reachfiveSession = new ReachfiveSessionModel();
         var reachfiveProfile = new ReachfiveProfileModel(req.currentCustomer.raw);
 
-        if (reachfiveSession.profile) {
-            if (!reachfiveSettings.isReachFiveLoginAllowed) {
+        if (reachfiveSession.profile) //If ReachFive profile exist
+        {
+            if (!reachfiveSettings.isReachFiveLoginAllowed) //If Social Login only
+            {
                 //profileUpdateCTA = false; //Comented in order to enabled the update profile in SLO mode
+                passwordUpdateCTA = false;
+                passwordResetCTA = false;
+            }
+
+            if (reachfiveProfile.hasTechnicalPassword)  //If profile has no password set
+            {
                 passwordUpdateCTA = false;
             }
 
-            if (!reachfiveSession.has_password && !reachfiveProfile.salesforcePasswordSet) {
+            if (!reachfiveSession.has_password && !reachfiveProfile.salesforcePasswordSet)
+            {
                 passwordUpdateCTA = false;
             }
         } else {
@@ -102,11 +112,13 @@ server.append('Show', function (req, res, next) {
         socialNetworksCTA = false;
         profileUpdateCTA = !viewData.account.isExternallyAuthenticated;
         passwordUpdateCTA = !viewData.account.isExternallyAuthenticated;
+        passwordResetCTA = !viewData.account.isExternallyAuthenticated;
     }
 
     res.setViewData({
         reachfive: {
             passwordUpdateCTA: passwordUpdateCTA,
+            passwordResetCTA: passwordResetCTA,
             socialNetworksCTA: socialNetworksCTA,
             profileUpdateCTA: profileUpdateCTA
         }
@@ -117,16 +129,17 @@ server.append('Show', function (req, res, next) {
 
 server.append('EditPassword', function (req, res, next) {
     if (reachfiveSettings.isReachFiveEnabled) {
-        var ReachfiveProfileModel = require('*/cartridge/models/profile/customerOrigin');
+        //var ReachfiveProfileModel = require('*/cartridge/models/profile/customerOrigin');
         var context = {
             reachfive: {
                 formTemplate: 'ACCOUNT_WITH_PASSWORD'
             }
         };
 
-        var reachfiveProfile = new ReachfiveProfileModel(req.currentCustomer.raw);
+        //var reachfiveProfile = new ReachfiveProfileModel(req.currentCustomer.raw);
 
-        if (!reachfiveProfile.salesforcePasswordSet) {
+        //if (!reachfiveProfile.salesforcePasswordSet) {
+        if ( reachfiveSettings.isReachFiveLoginAllowed && !reachfiveSettings.isReachFiveTransitionActive ) {
             context.reachfive.formTemplate = 'ACCOUNT_SOCIAL';
         }
 
@@ -347,8 +360,25 @@ server.append('SaveNewPassword', function (req, res, next) {
             var data = res.getViewData();
             var tokenCustomer = data.reachFiveCache.tokenCustomer;
 
-            if (data.passwordForm.valid && !empty(tokenCustomer)) {
+            if (data.passwordForm.valid && !empty(tokenCustomer))
+            {
                 reachFiveHelper.passwordUpdateManagementAPI(tokenCustomer.profile, data.newPassword);
+
+                //If the password is not set by the customer
+                if( tokenCustomer.profile.custom.reachfiveHasTechnicalPassword )
+                {
+                  var profile = tokenCustomer.getProfile();
+
+                  Transaction.begin();
+
+                  try {
+                    profile.custom.reachfiveHasTechnicalPassword = false; //Update the flag value as the password is now a real one
+                    Transaction.commit();
+                  } catch (error) {
+                      LOGGER.error('Error during modify the reachfiveHasTechnicalPassword value to false : {0}', error);
+                      Transaction.rollback();
+                  }
+                }
             }
 
             delete data.reachFiveCache;
@@ -413,14 +443,14 @@ server.replace(
 
             var reachfiveProfile = new ReachfiveProfile(req.currentCustomer.raw);
 
-            if (reachfiveProfile.salesforcePasswordSet && reachfiveSettings.isReachFiveLoginAllowed) {  //Display the profile update form only if the profile has a Password AND R5 is used as a CIAM
+            /*if (reachfiveProfile.salesforcePasswordSet && reachfiveSettings.isReachFiveLoginAllowed) {  //Display the profile update form only if the profile has a Password AND R5 is used as a CIAM
                 context.formTemplate = 'ACCOUNT_SALESFORCE_PASSWORD';
 
                 profileForm.customer.firstname.value = reachfiveProfile.profile.given_name;
                 profileForm.customer.lastname.value = reachfiveProfile.profile.family_name;
                 profileForm.customer.phone.value = reachfiveProfile.profile.phone_number;
                 profileForm.customer.email.value = reachfiveProfile.profile.email;
-            } else {
+            } else {*/
                 context.formTemplate = 'ACCOUNT_SOCIAL';
 
                 context.showEmailEditor = true;
@@ -433,12 +463,13 @@ server.replace(
                 profileForm.customer.phoneNotStrict.value = reachfiveProfile.profile.phone_number;
                 profileForm.customer.email.value = reachfiveProfile.profile.email;
 
-                if (reachfiveSession.has_password) {
+                //If the profile has a ReachFive password AND don't have a technical password on SFCC
+                if (reachfiveSession.has_password && !reachfiveProfile.hasTechnicalPassword) {
                     if (String.prototype.indexOf.call(reachfiveSettings.reachFiveCheckCredentials, 'password') !== -1) {
                         context.showSocialPassword = true;
                     }
                 }
-            }
+            //}
         } else {
             var accountHelpers = require('*/cartridge/scripts/account/accountHelpers');
 

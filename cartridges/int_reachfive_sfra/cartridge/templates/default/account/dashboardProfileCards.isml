@@ -2,15 +2,17 @@
     <div class="col-sm-6">
         <!---Profile--->
         <isinclude template="account/profileCard"/>
-
-        <isif condition="${pdict.reachfive.passwordUpdateCTA}">
+        
+        <isif condition="${pdict.reachfive.passwordUpdateCTA} || ${pdict.reachfive.passwordResetCTA}">
             <!---Password--->
             <isinclude template="account/passwordCard"/>
         </isif>
+
         <isif condition="${pdict.reachfive.socialNetworksCTA}">
             <!---Reachfive Social Network--->
             <isinclude template="account/login/reachfiveaccounts"/>
         </isif>
+
         <!---Address Book--->
         <isinclude template="account/addressBookCard"/>
     </div>
