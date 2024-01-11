@@ -85,22 +85,16 @@ server.append('Show', function (req, res, next) {
 
         if (reachfiveSession.profile) //If ReachFive profile exist
         {
-            if (!reachfiveSettings.isReachFiveLoginAllowed) //If Social Login only
-            {
-                //profileUpdateCTA = false; //Comented in order to enabled the update profile in SLO mode
-                passwordUpdateCTA = false;
-                passwordResetCTA = false;
-            }
+          //If Social Login only or email null or mode CIAM without password already setted
+            if ( !reachfiveSettings.isReachFiveLoginAllowed || reachfiveProfile.profile.email == "" || (reachfiveSettings.isReachFiveLoginAllowed && !reachfiveSettings.isReachFiveTransitionActive && !reachfiveSession.has_password) ) {
+              passwordResetCTA = false;
+          }
 
-            if (reachfiveProfile.hasTechnicalPassword)  //If profile has no password set
-            {
-                passwordUpdateCTA = false;
-            }
-
-            if (!reachfiveSession.has_password && !reachfiveProfile.salesforcePasswordSet)
-            {
-                passwordUpdateCTA = false;
-            }
+          //If the profile doesn't has a ReachFive password
+          //AND has a technical password OR doesn't has a SFCC password
+          if ( !reachfiveSession.has_password && (reachfiveProfile.hasTechnicalPassword || !reachfiveProfile.salesforcePasswordSet) ) {
+              passwordUpdateCTA = false;
+          }
         } else {
             socialNetworksCTA = false;
 
@@ -442,21 +436,21 @@ server.replace(
             var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
 
             var reachfiveProfile = new ReachfiveProfile(req.currentCustomer.raw);
+            var reachfiveSession = new ReachfiveSessionModel();
 
-            /*if (reachfiveProfile.salesforcePasswordSet && reachfiveSettings.isReachFiveLoginAllowed) {  //Display the profile update form only if the profile has a Password AND R5 is used as a CIAM
+            //If the user didn't use ReachFive to login
+            if ( reachfiveSession.access_token == null ) {
                 context.formTemplate = 'ACCOUNT_SALESFORCE_PASSWORD';
 
                 profileForm.customer.firstname.value = reachfiveProfile.profile.given_name;
                 profileForm.customer.lastname.value = reachfiveProfile.profile.family_name;
                 profileForm.customer.phone.value = reachfiveProfile.profile.phone_number;
                 profileForm.customer.email.value = reachfiveProfile.profile.email;
-            } else {*/
+            } else {
                 context.formTemplate = 'ACCOUNT_SOCIAL';
 
                 context.showEmailEditor = true;
                 context.showPhoneNumberEditor = true;
-
-                var reachfiveSession = new ReachfiveSessionModel();
 
                 profileForm.customer.firstname.value = reachfiveProfile.profile.given_name;
                 profileForm.customer.lastname.value = reachfiveProfile.profile.family_name;
@@ -469,7 +463,7 @@ server.replace(
                         context.showSocialPassword = true;
                     }
                 }
-            //}
+            }
         } else {
             var accountHelpers = require('*/cartridge/scripts/account/accountHelpers');
 

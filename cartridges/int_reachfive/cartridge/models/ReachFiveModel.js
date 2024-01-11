@@ -37,7 +37,7 @@ var ReachFiveModel = ({
      * @param {Object} externalProfile External Profile Object
      * @param {Object} [reachFiveConsents] Consents Object from external Profile
      */
-    createReachFiveCustomer: function (externalID, externalProfile, reachFiveConsents, data) {
+    createReachFiveCustomer: function (externalID, externalProfile, has_password, reachFiveConsents, data) {
 		if (!externalID || !externalProfile) {
 			return null;
 		}
@@ -74,8 +74,7 @@ var ReachFiveModel = ({
 				LOGGER.info('Customer created with an external profile {0} with the external ID {1}', this.reachFiveProviderId, externalID);
 			}
 
-			if( !has_password )
-			{
+			if( !has_password ) {
 				profile.custom.reachfiveHasTechnicalPassword = true;
 			}
 
@@ -88,7 +87,7 @@ var ReachFiveModel = ({
 				profile.setLastName(externalProfile.family_name);
 			}
 
-            if (reachFiveHelper.isFieldExist(externalProfile, 'phone_number')) {
+      if (reachFiveHelper.isFieldExist(externalProfile, 'phone_number')) {
 				profile.setPhoneHome(externalProfile.phone_number);
 			}
 

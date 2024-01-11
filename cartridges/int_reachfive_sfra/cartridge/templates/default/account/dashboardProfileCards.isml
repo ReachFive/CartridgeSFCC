@@ -2,8 +2,8 @@
     <div class="col-sm-6">
         <!---Profile--->
         <isinclude template="account/profileCard"/>
-        
-        <isif condition="${pdict.reachfive.passwordUpdateCTA} || ${pdict.reachfive.passwordResetCTA}">
+
+        <isif condition="${pdict.reachfive.passwordUpdateCTA || pdict.reachfive.passwordResetCTA}">
             <!---Password--->
             <isinclude template="account/passwordCard"/>
         </isif>
