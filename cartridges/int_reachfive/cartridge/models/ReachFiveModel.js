@@ -37,7 +37,7 @@ var ReachFiveModel = ({
      * @param {Object} externalProfile External Profile Object
      * @param {Object} [reachFiveConsents] Consents Object from external Profile
      */
-    createReachFiveCustomer: function (externalID, externalProfile, reachFiveConsents, data) {
+    createReachFiveCustomer: function (externalID, externalProfile, has_password, reachFiveConsents, data) {
 		if (!externalID || !externalProfile) {
 			return null;
 		}
@@ -48,9 +48,15 @@ var ReachFiveModel = ({
 			//Create an internal profile linked to the customer in order to avoid the duplicate profiles
 			if ( reachFiveHelper.isFieldExist(externalProfile, 'email') && reachfiveSettings.isReachFiveEmailAsLogin )
 			{
-				var temporaryPassword = 'Matthias2023&';//Math.random().toString(36).substr(2, 10);
+				var temporaryPassword = Math.random().toString(36).substr(2, 8) + '!O)';
 
 				var newCustomer = CustomerMgr.createCustomer(externalProfile.email, temporaryPassword);
+
+				var Pipelet = require('dw/system/Pipelet');
+				var PipeletPasswordGeneration = new dw.system.Pipelet('ResetCustomerPassword').execute({
+				    Customer: newCustomer
+				});
+
 				var profile = newCustomer.getProfile();
 
 				var credentials = profile.getCredentials();
@@ -68,6 +74,10 @@ var ReachFiveModel = ({
 				LOGGER.info('Customer created with an external profile {0} with the external ID {1}', this.reachFiveProviderId, externalID);
 			}
 
+			if( !has_password ) {
+				profile.custom.reachfiveHasTechnicalPassword = true;
+			}
+
 			// Complete customer's profile with firstname, lastname, email and birthday if exists
 			if (reachFiveHelper.isFieldExist(externalProfile, 'given_name')) {
 				profile.setFirstName(externalProfile.given_name);
@@ -77,7 +87,7 @@ var ReachFiveModel = ({
 				profile.setLastName(externalProfile.family_name);
 			}
 
-            if (reachFiveHelper.isFieldExist(externalProfile, 'phone_number')) {
+      if (reachFiveHelper.isFieldExist(externalProfile, 'phone_number')) {
 				profile.setPhoneHome(externalProfile.phone_number);
 			}
 

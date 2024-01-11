@@ -37,6 +37,7 @@ function CustomerProfile(customer) {
         this.customerNo = customer.profile.getCustomerNo();
         this.login = customer.profile.credentials.getLogin();
         this.salesforcePasswordSet = customer.profile.credentials.isPasswordSet();
+        this.hasTechnicalPassword = customer.profile.custom.reachfiveHasTechnicalPassword;
 
         // Base class variables
         this.profile = {

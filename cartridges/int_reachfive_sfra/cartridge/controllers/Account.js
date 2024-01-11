@@ -70,6 +70,7 @@ server.append('Login', function (req, res, next) {
 
 server.append('Show', function (req, res, next) {
     var passwordUpdateCTA = true;
+    var passwordResetCTA = true;
     var profileUpdateCTA = true;
     var socialNetworksCTA = true;
 
@@ -82,15 +83,18 @@ server.append('Show', function (req, res, next) {
         var reachfiveSession = new ReachfiveSessionModel();
         var reachfiveProfile = new ReachfiveProfileModel(req.currentCustomer.raw);
 
-        if (reachfiveSession.profile) {
-            if (!reachfiveSettings.isReachFiveLoginAllowed) {
-                profileUpdateCTA = false;
-                passwordUpdateCTA = false;
-            }
+        if (reachfiveSession.profile) //If ReachFive profile exist
+        {
+          //If Social Login only or email null or mode CIAM without password already setted
+            if ( !reachfiveSettings.isReachFiveLoginAllowed || reachfiveProfile.profile.email == "" || (reachfiveSettings.isReachFiveLoginAllowed && !reachfiveSettings.isReachFiveTransitionActive && !reachfiveSession.has_password) ) {
+              passwordResetCTA = false;
+          }
 
-            if (!reachfiveSession.has_password && !reachfiveProfile.salesforcePasswordSet) {
-                passwordUpdateCTA = false;
-            }
+          //If the profile doesn't has a ReachFive password
+          //AND has a technical password OR doesn't has a SFCC password
+          if ( !reachfiveSession.has_password && (reachfiveProfile.hasTechnicalPassword || !reachfiveProfile.salesforcePasswordSet) ) {
+              passwordUpdateCTA = false;
+          }
         } else {
             socialNetworksCTA = false;
 
@@ -102,11 +106,13 @@ server.append('Show', function (req, res, next) {
         socialNetworksCTA = false;
         profileUpdateCTA = !viewData.account.isExternallyAuthenticated;
         passwordUpdateCTA = !viewData.account.isExternallyAuthenticated;
+        passwordResetCTA = !viewData.account.isExternallyAuthenticated;
     }
 
     res.setViewData({
         reachfive: {
             passwordUpdateCTA: passwordUpdateCTA,
+            passwordResetCTA: passwordResetCTA,
             socialNetworksCTA: socialNetworksCTA,
             profileUpdateCTA: profileUpdateCTA
         }
@@ -117,16 +123,17 @@ server.append('Show', function (req, res, next) {
 
 server.append('EditPassword', function (req, res, next) {
     if (reachfiveSettings.isReachFiveEnabled) {
-        var ReachfiveProfileModel = require('*/cartridge/models/profile/customerOrigin');
+        //var ReachfiveProfileModel = require('*/cartridge/models/profile/customerOrigin');
         var context = {
             reachfive: {
                 formTemplate: 'ACCOUNT_WITH_PASSWORD'
             }
         };
 
-        var reachfiveProfile = new ReachfiveProfileModel(req.currentCustomer.raw);
+        //var reachfiveProfile = new ReachfiveProfileModel(req.currentCustomer.raw);
 
-        if (!reachfiveProfile.salesforcePasswordSet) {
+        //if (!reachfiveProfile.salesforcePasswordSet) {
+        if ( reachfiveSettings.isReachFiveLoginAllowed && !reachfiveSettings.isReachFiveTransitionActive ) {
             context.reachfive.formTemplate = 'ACCOUNT_SOCIAL';
         }
 
@@ -200,7 +207,7 @@ server.replace(
                     true
                 );
 
-                if (reachfiveSettings.isReachFiveEnabled) {
+                if (reachfiveSettings.isReachFiveEnabled && reachfiveSettings.isReachFiveLoginAllowed) {
                     response = reachFiveHelper.updatePassword(
                         customer.profile.credentials.login,
                         formInfo.newPassword,
@@ -347,8 +354,25 @@ server.append('SaveNewPassword', function (req, res, next) {
             var data = res.getViewData();
             var tokenCustomer = data.reachFiveCache.tokenCustomer;
 
-            if (data.passwordForm.valid && !empty(tokenCustomer)) {
+            if (data.passwordForm.valid && !empty(tokenCustomer))
+            {
                 reachFiveHelper.passwordUpdateManagementAPI(tokenCustomer.profile, data.newPassword);
+
+                //If the password is not set by the customer
+                if( tokenCustomer.profile.custom.reachfiveHasTechnicalPassword )
+                {
+                  var profile = tokenCustomer.getProfile();
+
+                  Transaction.begin();
+
+                  try {
+                    profile.custom.reachfiveHasTechnicalPassword = false; //Update the flag value as the password is now a real one
+                    Transaction.commit();
+                  } catch (error) {
+                      LOGGER.error('Error during modify the reachfiveHasTechnicalPassword value to false : {0}', error);
+                      Transaction.rollback();
+                  }
+                }
             }
 
             delete data.reachFiveCache;
@@ -412,8 +436,10 @@ server.replace(
             var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
 
             var reachfiveProfile = new ReachfiveProfile(req.currentCustomer.raw);
+            var reachfiveSession = new ReachfiveSessionModel();
 
-            if (reachfiveProfile.salesforcePasswordSet) {
+            //If the user didn't use ReachFive to login
+            if ( reachfiveSession.access_token == null ) {
                 context.formTemplate = 'ACCOUNT_SALESFORCE_PASSWORD';
 
                 profileForm.customer.firstname.value = reachfiveProfile.profile.given_name;
@@ -426,14 +452,13 @@ server.replace(
                 context.showEmailEditor = true;
                 context.showPhoneNumberEditor = true;
 
-                var reachfiveSession = new ReachfiveSessionModel();
-
                 profileForm.customer.firstname.value = reachfiveProfile.profile.given_name;
                 profileForm.customer.lastname.value = reachfiveProfile.profile.family_name;
                 profileForm.customer.phoneNotStrict.value = reachfiveProfile.profile.phone_number;
                 profileForm.customer.email.value = reachfiveProfile.profile.email;
 
-                if (reachfiveSession.has_password) {
+                //If the profile has a ReachFive password AND don't have a technical password on SFCC
+                if (reachfiveSession.has_password && !reachfiveProfile.hasTechnicalPassword) {
                     if (String.prototype.indexOf.call(reachfiveSettings.reachFiveCheckCredentials, 'password') !== -1) {
                         context.showSocialPassword = true;
                     }
