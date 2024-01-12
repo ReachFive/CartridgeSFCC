@@ -205,7 +205,7 @@ server.get(
 							reachFiveConsents = externalProfileAddons.object.consents;
 						}
 
-						profile = ReachFiveModel.createReachFiveCustomer(externalID, reachfiveSession.profile, reachFiveConsents, data);
+						profile = ReachFiveModel.createReachFiveCustomer(externalID, reachfiveSession.profile, reachfiveSession.has_password, reachFiveConsents, data);
 					} else {
             var afterAuth = require('*/cartridge/models/afterAuthUrl');
 
