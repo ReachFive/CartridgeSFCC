@@ -109,6 +109,16 @@ server.append('Show', function (req, res, next) {
         passwordResetCTA = !viewData.account.isExternallyAuthenticated;
     }
 
+    //If Social Unlink / Link displayed
+    if( socialNetworksCTA )
+    {
+      var tknStatus = reachFiveHelper.verifySessionAccessTkn(); //Check and refresh the access token if needed
+      if( !tknStatus.success )
+      {
+        socialNetworksCTA = false;
+      }
+    }
+
     res.setViewData({
         reachfive: {
             passwordUpdateCTA: passwordUpdateCTA,
