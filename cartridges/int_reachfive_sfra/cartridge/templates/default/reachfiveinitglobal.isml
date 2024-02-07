@@ -39,9 +39,28 @@
     </isif>
 
     <isif condition="${pdict.loadUISDK && pdict.reachFiveUiSdkUrl}">
-        <script src="${pdict.reachFiveUiSdkUrl}"></script>
-
         <script>
+          function loadScript(url) {
+              return new Promise(function(resolve, reject) {
+                  var script = document.createElement("script");
+                  script.onload = resolve;
+                  script.onerror = reject;
+                  script.async = true;
+                  script.src = url;
+                  document.getElementsByTagName("head")[0].appendChild(script);
+              });
+          }
+
+          function loadSDKUI() {
+              if (window.sdkUiClient) {
+                  // already loaded and ready to go
+                  return Promise.resolve();
+              } else {
+                  return loadScript('${pdict.reachFiveUiSdkUrl}');
+              }
+          }
+
+          loadSDKUI().then(function() {
             window.sdkUiClient = reach5Widgets.createClient({
                 // Required parameters
                 domain: '${pdict.reachFiveDomain}',
@@ -50,9 +69,7 @@
                 language: '${pdict.reachFiveLanguageCode}' || 'en',
                 locale: '${pdict.reachFivelocaleCode}'
             });
-        </script>
 
-        <script>
             let allowForgotPassword = ${!pdict.isTransitionActive};
             let redirectUri = '${pdict.callbackUrl}';
             let origin ='${pdict.siteID}';
@@ -88,38 +105,12 @@
             if (document.getElementById("reset-password")) {
                 <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('reset-password')}" encoding="off">
             }
-        </script>
 
-        <isif condition="${!empty(pdict.reachFiveAccess_token)}">
-            <script>
+            <isif condition="${!empty(pdict.reachFiveAccess_token)}">
                 if(document.getElementById("password-editor")) {
                     console.log('password-editor');
                     <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('password-editor')}" encoding="off">
                 }
-
-                // if(document.getElementById("profile-editor")) {
-                //     sdkUiClient.showProfileEditor({
-                //         container: 'profile-editor',
-                //         accessToken: '${pdict.reachFiveAccess_token}',
-                //         fields: [
-                //             'given_name',
-                //             'family_name',
-                //             'birthdate',
-                //             'consents.newsletter'
-                //         ],
-                //         onSuccess: function() {
-                //             var el = document.getElementsByTagName('body');
-                //             var event = new CustomEvent('reachfive-profile-update', {
-                //                     bubbles: true,
-                //                     detail: {
-                //                         source: 'profileEditor',
-                //                         updateUrl: decodeURIComponent('${dw.crypto.Encoding.toURI(pdict.updateProfileUrl)}')
-                //                     }
-                //                 });
-                //             el[0].dispatchEvent(event);
-                //         }
-                //     });
-                // }
 
                 if(document.getElementById("email-editor")) {
                     <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('email-editor')}" encoding="off">
@@ -133,35 +124,10 @@
                 if (socialAccountsContainer) {
                     <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('social-accounts-container')}" encoding="off">
                 }
-
-            </script>
-
-            <iscomment>
-                TODO: This functionality related to "imlicid flow"
-                    and it is normally disabled becasue of security issues
-            <script type="text/javascript">
-                var reAuthContainer = document.getElementById("re-auth-container");
-                var socialAccountsContainer = document.getElementById("social-accounts-container");
-
-                if(reAuthContainer && socialAccountsContainer) {
-                    var idToken = null;
-
-                    try{
-                        idToken = '${pdict.CurrentSession.privacy.id_token}';
-                    } catch(err) {
-                        console.log(err)
-                    }
-
-                    console.log('social-accounts-container');
-                    <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('re-auth-container')}" encoding="off">
-
-                    sdkCoreClient.on('authenticated', function(authResult) {
-                        let accessToken = authResult.accessToken;
-                        <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('authenticated')}" encoding="off">
-                    });
-                }
-            </script>
-            </iscomment>
-        </isif>
+            </isif>
+          }, function(e) {
+              throw new Error('Unable to load ReachFive SDK Core Client');
+          });
+        </script>
     </isif>
 </isif>
