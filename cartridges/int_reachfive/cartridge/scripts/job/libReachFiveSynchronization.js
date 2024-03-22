@@ -144,8 +144,10 @@ function setReach5Obj(obj, profileFieldsObj, reach5ObjType) {
                 value = (empty(value)) ? null : value;
 
                 if (reach5ObjType === 'consents') {
-                    resultObj[key2] = {};
-                    resultObj[key2].granted = value;
+                    if (value !== null) {
+                        resultObj[key2] = {};
+                        resultObj[key2].granted = value;
+                    }
                 } else {
                     resultObj[key2] = value;
                 }
