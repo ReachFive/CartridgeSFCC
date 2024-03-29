@@ -20,6 +20,8 @@ var URLUtils = require('dw/web/URLUtils');
 var reachFiveHelper = require('~/cartridge/scripts/helpers/reachFiveHelper');
 var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
 
+var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
+
 /**
  * Constructs and configures a service with a callback.
  * @param {string} serviceName Service Name
@@ -437,6 +439,37 @@ function passwordLogin(requestFields) {
     return result;
 }
 
+/**
+ * @function
+ * @description Delete the user on Reachfive
+ * @param {Object} customerProfile Customer
+ * @return {Object} request result
+ */
+function deleteUser(customersIterator) {
+    var managementToken = generateTokenForManagementAPI();
+    while (customersIterator.hasNext()) {
+        var customerProfile = customersIterator.next();
+
+        try {
+            var clientId = reachFiveHelper.getReachFiveExternalID(customerProfile);
+            var service = configureService('reachfive.deleteuser', { user_id: clientId });
+            service.setRequestMethod('DELETE');
+            service.addHeader('Authorization', 'Bearer ' + managementToken.token);
+
+            var serviceResult = service.call();
+            var result = {
+                ok: serviceResult.ok,
+                errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : null
+            };
+        }
+        catch(e){
+            LOGGER.error("erreur"+e);
+        }  
+    }
+    return result;
+}
+
+
 /* Expose Methods */
 exports.generateTokenForManagementAPI = generateTokenForManagementAPI;
 exports.exchangeAuthorizationCodeForIDToken = exchangeAuthorizationCodeForIDToken;
@@ -452,3 +485,4 @@ exports.signUp = signUp;
 exports.updatePassword = updatePassword;
 exports.oauthToken = oauthToken;
 exports.passwordLogin = passwordLogin;
+exports.deleteUser = deleteUser; 

@@ -1,73 +1,104 @@
 {
-    "step-types":{
-        "script-module-step": [],
-        "chunk-script-module-step":[
-            {
-                "@type-id":"custom.ReachFiveSynchronization",
-                "@supports-parallel-execution":"false",
-                "@supports-site-context":"true",
-                "@supports-organization-context":"false",
-                "description":"ReachFive Profiles Synchronization",
-                "module":"int_reachfive/cartridge/scripts/job/reachFiveSynchronization.js",
-                "function":"ReachFiveSynch",
-                "before-step-function":"beforeStep",
-                "total-count-function":"getTotalCount",
-                "read-function":"read",
-                "process-function":"process",
-                "write-function":"write",
-                "after-step-function":"afterStep",
-                "chunk-size":500,
-                "transactional":"false",
-                "timeout-in-seconds":"300",
-                "parameters":{
-                    "parameter":[]
-                },
-                "status-codes":{
-                    "status":[
-                        {
-                            "@code":"ERROR",
-                            "description":"Used when the step failed with an error."
-                        },
-                        {
-                            "@code":"OK",
-                            "description":"Used when the step finished successfully."
-                        }
-                    ]
-                }
-            },
-            {
-                "@type-id":"custom.userSynchronization",
-                "@supports-parallel-execution":"false",
-                "@supports-site-context":"true",
-                "@supports-organization-context":"false",
-                "description":"ReachFive Profiles Synchronization",
-                "module":"int_reachfive/cartridge/scripts/job/userSynchronization.js",
-                "function":"ReachFiveSynch",
-                "before-step-function":"beforeStep",
-                "total-count-function":"getTotalCount",
-                "read-function":"read",
-                "process-function":"process",
-                "write-function":"write",
-                "after-step-function":"afterStep",
-                "chunk-size":500,
-                "transactional":"false",
-                "timeout-in-seconds":"300",
-                "parameters":{
-                    "parameter":[]
-                },
-                "status-codes":{
-                    "status":[
-                        {
-                            "@code":"ERROR",
-                            "description":"Used when the step failed with an error."
-                        },
-                        {
-                            "@code":"OK",
-                            "description":"Used when the step finished successfully."
-                        }
-                    ]
-                }
-            }
-        ]
+    "step-types": {
+      "script-module-step": [],
+      "chunk-script-module-step": [
+        {
+          "@type-id": "custom.ReachFiveSynchronization",
+          "@supports-parallel-execution": "false",
+          "@supports-site-context": "true",
+          "@supports-organization-context": "false",
+          "description": "ReachFive Profiles Synchronization",
+          "module": "int_reachfive/cartridge/scripts/job/reachFiveSynchronization.js",
+          "function": "ReachFiveSynch",
+          "before-step-function": "beforeStep",
+          "total-count-function": "getTotalCount",
+          "read-function": "read",
+          "process-function": "process",
+          "write-function": "write",
+          "after-step-function": "afterStep",
+          "chunk-size": 500,
+          "transactional": "false",
+          "timeout-in-seconds": "300",
+          "parameters": {
+            "parameter": []
+          },
+          "status-codes": {
+            "status": [
+              {
+                "@code": "ERROR",
+                "description": "Used when the step failed with an error."
+              },
+              {
+                "@code": "OK",
+                "description": "Used when the step finished successfully."
+              }
+            ]
+          }
+        },
+        {
+          "@type-id": "custom.userSynchronization",
+          "@supports-parallel-execution": "false",
+          "@supports-site-context": "true",
+          "@supports-organization-context": "false",
+          "description": "User Synchronization Process",
+          "module": "int_reachfive/cartridge/scripts/job/userSynchronization.js",
+          "function": "userSynch",
+          "before-step-function": "beforeStep",
+          "total-count-function": "getTotalCount",
+          "read-function": "read",
+          "process-function": "process",
+          "write-function": "write",
+          "after-step-function": "afterStep",
+          "chunk-size": 500,
+          "transactional": "false",
+          "timeout-in-seconds": "300",
+          "parameters": {
+            "parameter": []
+          },
+          "status-codes": {
+            "status": [
+              {
+                "@code": "ERROR",
+                "description": "Used when the step failed with an error."
+              },
+              {
+                "@code": "OK",
+                "description": "Used when the step finished successfully."
+              }
+            ]
+          }
+        },
+        {
+          "@type-id": "custom.deleteUsers",
+          "@supports-parallel-execution": "false",
+          "@supports-site-context": "true",
+          "@supports-organization-context": "false",
+          "description": "Delete users in Reachfive",
+          "module": "int_reachfive/cartridge/scripts/job/deleteUsers",
+          "function": "execute",
+          "read-function": "read",
+          "process-function": "process",
+          "write-function": "write",
+          "chunk-size": "500",
+          "transactional": "false",
+          "timeout-in-seconds": "300",
+          "parameters": {
+            "parameter": []
+          },
+          "status-codes": {
+            "status": [
+              {
+                "@code": "ERROR",
+                "description": "Utilisé lorsque l'étape a échoué avec une erreur."
+              },
+              {
+                "@code": "OK",
+                "description": "Utilisé lorsque l'étape s'est terminée avec succès."
+              }
+            ]
+          }
+        }
+      ]
     }
-}
+  }
+  

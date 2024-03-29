@@ -60,6 +60,11 @@
         <password encrypted="true" encryption-type="common.export">Q93BFhW07Rp8PkExyoAeEW7dmutxSKCLjGbonRiLbsg=</password>
     </service-credential>
 
+    <service-credential service-credential-id="reachfive.deleteuser">
+        <url>https://{reach5Domain}/api/v2/users/{user_id}</url>
+        <user-id/>
+    </service-credential>
+
     <service-profile service-profile-id="reachfive.profile">
         <timeout-millis>10000</timeout-millis>
         <rate-limit-enabled>false</rate-limit-enabled>
@@ -178,6 +183,17 @@
         <mock-mode-enabled>false</mock-mode-enabled>
         <profile-id>reachfive.profile</profile-id>
         <credential-id>reachfive.verifyemail.post.credentials</credential-id>
+    </service>
+
+     <service service-id="reachfive.deleteuser">
+        <service-type>HTTP</service-type>
+        <enabled>true</enabled>
+        <log-prefix>reachfive</log-prefix>
+        <comm-log-enabled>true</comm-log-enabled>
+        <force-prd-enabled>false</force-prd-enabled>
+        <mock-mode-enabled>false</mock-mode-enabled>
+        <profile-id>reachfive.profile</profile-id>
+        <credential-id>reachfive.deleteuser.credentials</credential-id>
     </service>
 
 </services>
