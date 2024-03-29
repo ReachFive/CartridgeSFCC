@@ -10,11 +10,23 @@ function execute() {
 }
 
 function read () {
-    var customer = CustomerMgr.queryProfiles('custom.toDelete = true', 'creationDate desc');
-    LOGGER.warn(customer)
-    if (customer) {
-        try {
-            var result = reachFiveServiceInterface.deleteUser(customer);
+    var customers = CustomerMgr.queryProfiles('custom.toDelete = true', 'creationDate desc');
+
+    if (customers) {
+        try { 
+            //var result = reachFiveServiceInterface.deleteUser(customer);
+            while (customers.hasNext()) {
+                var customerProfile = customers.next();
+                var customer = customerProfile.getCustomer(); 
+                if (customer && customer.registered && customerProfile.custom.toDelete) {
+                    try {
+                        var ocapiResult = reachFiveServiceInterface.deleteCustomerUsingOCAPI(customer);
+                    } catch (e) {
+                        Logger.error("Erreur lors de la suppression du client : " + customer.customerNo + ". Erreur : " + e.toString());
+                    }
+                }
+                var customerProfile = customers.next();
+            }
         } catch (e) {
             LOGGER.error("Erreur lors de la suppression du client : " + customerNo + ". Erreur : " + e.toString());
         }
