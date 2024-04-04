@@ -449,97 +449,26 @@ function passwordLogin(requestFields) {
 /**
  * @function
  * @description Delete the user on Reachfive
- * @param {Object} customerProfile Customer
+ * @param {Object} customer Customer
  * @return {Object} request result
  */
-function deleteUser(customersIterator) {
+function deleteUser(customer) {
     var managementToken = generateTokenForManagementAPI();
-    while (customersIterator.hasNext()) {
-        var customerProfile = customersIterator.next();
 
-            var clientId = reachFiveHelper.getReachFiveExternalID(customerProfile);
-            var service = configureService('reachfive.deleteuser', { user_id: clientId });
-            service.setRequestMethod('DELETE');
-            service.addHeader('Authorization', 'Bearer ' + managementToken.token);
-
-            var serviceResult = service.call();
-            var result = {
-                ok: serviceResult.ok,
-                errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : null
-            };
-    }
-    return result;
-}
-
-var ocapiService = ServiceRegistry.createService("reachfive.ocapiDeleteCustomer", {
-    createRequest: function (svc, args) {
-        svc.addHeader("Content-Type", "application/json");
-        svc.addHeader("Authorization", "Bearer " + bearer);
-        svc.setRequestMethod("DELETE");
-        svc.setURL("https://zzka-001.dx.commercecloud.salesforce.com/s/-/dw/data/v24_1/customer_lists/" + args.listId + "/customers/" + args.customerNo);
-    }, parseResponse: function (svc, client) {
-        LOGGER.warn("Réponse du serveur pour la suppression: " + client.text); 
-        return client.text;
-    },
-
-    filterLogMessage: function(msg) {
-        return msg;
-    }
-});
-
-var ocapiOauth = ServiceRegistry.createService("reachfive.ocapiOauth", {
-    createRequest: function (svc, args) {
-        var clientId = args.clientId; 
-        var clientPassword = args.clientPassword; 
-        var credentials = clientId + ':' + clientPassword;
-        var encodedCredentials = Encoding.toBase64(new Bytes(credentials));
-        
-        svc.addHeader('Authorization', 'Basic ' + encodedCredentials);
-        svc.addHeader("Content-Type", "application/x-www-form-urlencoded");
-        svc.setRequestMethod("POST");
-
-        svc.setURL("https://account.demandware.com/dw/oauth2/access_token");
-
-        return "grant_type=client_credentials";
-    },
-    parseResponse: function (svc, client) {
-        var response = JSON.parse(client.text);
-        bearer = response.access_token;
-        return response.access_token;
-    }
-});
-
-function getAccessToken(clientId, clientPassword) {
-    var result = ocapiOauth.call({
-        clientId: clientId,
-        clientPassword: clientPassword
-    });
-
-    if (result.ok) {
-        return result;
-    } else {
-        var error = result.errorMessage;
-        dw.system.Logger.error("Error getting access token: {0}", error);
-        return null;
-    }
-}
-function deleteCustomerUsingOCAPI(customer) {
-    var clientId = 'd6b6413f-688f-48e2-aa77-ba707895fe03'; 
-    var clientPassword = 'Developpeur123$'; 
-    var customerListId = CustomerMgr.getSiteCustomerList().ID; 
-    var customerNo = customer.profile.getCustomerNo(); 
-    var baseURL = Site.getCurrent().getCustomPreferenceValue('customInstanceURL');
-    var accessToken = getAccessToken(clientId, clientPassword);
-    var result = ocapiService.call({
-        listId: customerListId,
-        customerNo: customerNo
-    });
-
-    if (result.status === "OK") {
-        Logger.warn("Client supprimé avec succès: " + customerNo);
-    } else {
-        Logger.error("Erreur lors de la suppression du client: " + customerNo);
-    }
+            var clientId = reachFiveHelper.getReachFiveExternalID(customer);
+            if(clientId){
+                var service = configureService('reachfive.deleteuser', { user_id: clientId });
+                service.setRequestMethod('DELETE');
+                service.addHeader('Authorization', 'Bearer ' + managementToken.token);
+    
+                var serviceResult = service.call();
+                var result = {
+                    ok: serviceResult.ok,
+                    errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : null
+                };
+                return result;
+            }
+    return null;
 }
 
 /* Expose Methods */
@@ -558,4 +487,3 @@ exports.updatePassword = updatePassword;
 exports.oauthToken = oauthToken;
 exports.passwordLogin = passwordLogin;
 exports.deleteUser = deleteUser;
-exports.deleteCustomerUsingOCAPI = deleteCustomerUsingOCAPI;

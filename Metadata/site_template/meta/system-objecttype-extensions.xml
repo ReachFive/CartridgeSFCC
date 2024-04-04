@@ -333,6 +333,20 @@
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
+            <attribute-definition attribute-id="ocapiTokenClientId">
+                <display-name xml:lang="x-default">Ocapi Token Client Id</display-name>
+                <description xml:lang="x-default">The client id/username to get the access token for OCAPI</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="ocapiTokenClientPassword">
+                <display-name xml:lang="x-default">Ocapi Token Client Password</display-name>
+                <description xml:lang="x-default">The auth password to get the access token for OCAPI</description>
+                <type>password</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
         </custom-attribute-definitions>
         <group-definitions>
             <attribute-group group-id="ReachFive">
@@ -369,6 +383,8 @@
                 <attribute attribute-id="email-editor"/>
                 <attribute attribute-id="phone-editor"/>
                 <attribute attribute-id="social-accounts-container"/>
+                <attribute attribute-id="ocapiTokenClientId"/>
+                <attribute attribute-id="ocapiTokenClientPassword"/>
                 <attribute attribute-id="re-auth-container"/>
                 <attribute attribute-id="authenticated"/>
             </attribute-group>

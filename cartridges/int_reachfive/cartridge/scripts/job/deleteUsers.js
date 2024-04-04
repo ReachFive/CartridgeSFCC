@@ -4,48 +4,40 @@ var CustomerMgr = require('dw/customer/CustomerMgr');
 var Transaction = require('dw/system/Transaction');
 
 var reachFiveServiceInterface = require('int_reachfive/cartridge/scripts/interfaces/reachFiveInterface');
+var salesforceServiceInterface = require('int_reachfive/cartridge/scripts/interfaces/salesforceInterface');
 var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 
 function execute() {
-}
+    var profileIterator = CustomerMgr.queryProfiles('custom.toDelete = true', 'creationDate desc');
 
-function read () {
-    var customers = CustomerMgr.queryProfiles('custom.toDelete = true', 'creationDate desc');
-
-    if (customers) {
-        try { 
-            //var result = reachFiveServiceInterface.deleteUser(customer);
-            while (customers.hasNext()) {
-                var customerProfile = customers.next();
-                var customer = customerProfile.getCustomer(); 
-                if (customer && customer.registered && customerProfile.custom.toDelete) {
-                    try {
-                        var ocapiResult = reachFiveServiceInterface.deleteCustomerUsingOCAPI(customer);
-                    } catch (e) {
-                        Logger.error("Erreur lors de la suppression du client : " + customer.customerNo + ". Erreur : " + e.toString());
+    while (profileIterator.hasNext()) {
+        var customerProfile = profileIterator.next();
+        if (customerProfile.custom.toDelete) {
+            var customer = customerProfile.getCustomer();
+            if (customer && customer.registered) {
+                try {
+                    var result = reachFiveServiceInterface.deleteUser(customerProfile);
+                    var ocapiResult = salesforceServiceInterface.deleteCustomerUsingOCAPI(customer);
+                    if (result.ok && ocapiResult.ok) {
+                        LOGGER.info("Client supprimé avec succès: " + customerProfile.customerNo);
                     }
+                    else{
+                        if(!result.ok){
+                            LOGGER.warn("Problème lors de la suppression sur Reachfive du client : " + customerProfile.customerNo);
+                        }
+                        else{
+                            LOGGER.warn("Problème lors de la suppression sur SFCC du client : " + customerProfile.customerNo);
+                        }
+
+                    }
+                } catch (e) {
+                    LOGGER.error("Erreur lors de la suppression du client: " + customerProfile.customerNo + ". Erreur: " + e.toString());
                 }
-                var customerProfile = customers.next();
             }
-        } catch (e) {
-            LOGGER.error("Erreur lors de la suppression du client : " + customerNo + ". Erreur : " + e.toString());
         }
     }
-};
-
-function process() {
-   
-};
-
-function write () {
-
-};
-
-
+}
 
 module.exports = {
-    execute: execute,
-    read: read,
-    process: process,
-    write: write
+    execute: execute
 };
