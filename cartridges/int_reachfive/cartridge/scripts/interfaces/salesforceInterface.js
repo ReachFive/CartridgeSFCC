@@ -1,8 +1,5 @@
 'use strict';
 
-/**
- * API Includes
- * */
 var LocalServiceRegistry = require('dw/svc/LocalServiceRegistry');
 var URLUtils = require('dw/web/URLUtils');
 

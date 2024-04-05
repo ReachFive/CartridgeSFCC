@@ -50,8 +50,8 @@
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
              <attribute-definition attribute-id="toDelete">
-                <display-name xml:lang="x-default">Marquer pour suppression</display-name>
-                <description xml:lang="x-default">"true" si le client est marqué pour la suppression SFCC et Reachfive</description>
+                <display-name xml:lang="x-default">Mark for deletion</display-name>
+                <description xml:lang="x-default">"true" if the customer is marked for deletion in SFCC and Reachfive</description>
                 <type>boolean</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>

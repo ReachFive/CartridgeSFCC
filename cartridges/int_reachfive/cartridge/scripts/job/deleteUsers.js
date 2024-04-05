@@ -19,19 +19,19 @@ function execute() {
                     var result = reachFiveServiceInterface.deleteUser(customerProfile);
                     var ocapiResult = salesforceServiceInterface.deleteCustomerUsingOCAPI(customer);
                     if (result.ok && ocapiResult.ok) {
-                        LOGGER.info("Client supprimé avec succès: " + customerProfile.customerNo);
+                        LOGGER.info("Customer successfully deleted: " + customerProfile.customerNo);
                     }
                     else{
                         if(!result.ok){
-                            LOGGER.warn("Problème lors de la suppression sur Reachfive du client : " + customerProfile.customerNo);
+                            LOGGER.warn("Issue when deleting the profile on Reachfive: " + customerProfile.customerNo);
                         }
                         else{
-                            LOGGER.warn("Problème lors de la suppression sur SFCC du client : " + customerProfile.customerNo);
+                            LOGGER.warn("Issue when deleting the profile on SFCC : " + customerProfile.customerNo);
                         }
 
                     }
                 } catch (e) {
-                    LOGGER.error("Erreur lors de la suppression du client: " + customerProfile.customerNo + ". Erreur: " + e.toString());
+                    LOGGER.error("Issue when deleting the profile: " + customerProfile.customerNo + ". Erreur: " + e.toString());
                 }
             }
         }
