@@ -39,4 +39,31 @@
             </run-recurring>
         </triggers>
     </job>
+    <job job-id="Delete-Users-Marked" priority="0">
+        <description>Delete users in SFCC and in Reachfive</description>
+        <parameters/>
+        <flow>
+            <context site-id="RefArch"/>
+            <step step-id="deleteUsers" type="custom.deleteUsers" enforce-restart="false">
+                <description>Delete users in SFCC and in Reachfive</description>
+                <parameters/>
+                <rules>
+                    <on-exit status="ERROR">
+                        <stop-job/>
+                    </on-exit>
+                </rules>
+            </step>
+        </flow>
+        <rules/>
+        <triggers>
+            <run-recurring enabled="true">
+                <recurrence>
+                    <date-from>2020-04-26Z</date-from>
+                    <start-time>04:00:00.000Z</start-time>
+                    <interval>5m</interval>
+                    <day-of-week/>
+                </recurrence>
+            </run-recurring>
+        </triggers>
+    </job>
 </jobs>
