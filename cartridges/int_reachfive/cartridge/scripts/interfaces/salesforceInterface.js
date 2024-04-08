@@ -90,6 +90,19 @@ function deleteCustomerUsingOCAPI(customer) {
     return result;
 }
 
+/**
+ * Searches for the SFCC customer profile based on a ReachFive externalID and an authenticationProviderId.
+ * @param {string} authenticationProviderId The ID of the authentication provider configured in SFCC.
+ * @param {string} externalId The externalID provided by the ReachFive webhook.
+ * @return {dw.customer.Profile} The corresponding SFCC customer profile, if found.
+ */
+function findCustomerProfileByExternalID(authenticationProviderId, externalId) {
+    var profile = CustomerMgr.getExternallyAuthenticatedCustomerProfile(authenticationProviderId, externalId);
+
+    return profile;
+}
+
 /* Expose Methods */
 exports.getAccessToken = getAccessToken;
 exports.deleteCustomerUsingOCAPI = deleteCustomerUsingOCAPI;
+exports.findCustomerProfileByExternalID = findCustomerProfileByExternalID;
