@@ -51,7 +51,6 @@ module.exports.beforeStep = function () {
             var queryParams = [dateString];
             
             profilesIterator = CustomerMgr.queryProfiles(query, sortString, queryParams);
-            LOGGER.warn("liste customers " + profilesIterator.getCount());
             
         if (profilesIterator.hasNext()) {
             managementTokenObj = reachFiveServiceInterface.generateTokenForManagementAPI();
@@ -102,10 +101,9 @@ module.exports.read = function () {
  */
 module.exports.process = function (profile) {
     try {
-        LOGGER.warn("je suis dans process");
         var reachFiveExternalID = reachFiveHelper.getReachFiveExternalID(profile);
         if (!reachFiveExternalID) {
-            LOGGER.warn("External ID non trouvé pour le profil.");
+            LOGGER.warn("External ID not find for this profil.");
             return new Status(Status.ERROR);
         }
         var managementToken = managementTokenObj.token;
@@ -120,7 +118,7 @@ module.exports.process = function (profile) {
         }
         var userDataResult = reachFiveServiceInterface.getUserFields(reachFiveExternalID);
         if (!userDataResult.ok || !userDataResult.object) {
-            LOGGER.error("Impossible de récupérer les informations de l'utilisateur depuis ReachFive.");
+            LOGGER.error("not possible to get user fields");
             return new Status(Status.ERROR);
         }
 

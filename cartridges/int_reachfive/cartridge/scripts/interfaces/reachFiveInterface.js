@@ -280,7 +280,6 @@ function updatePhone(requestObj) {
 		object: serviceResult.object,
 		errorMessage: (!serviceResult.ok) ? serviceResult.error + ' ' + serviceResult.errorMessage : ''
 	};
-    LOGGER.warn("reslt updateProfile"+result)
 	return result;
 }
 

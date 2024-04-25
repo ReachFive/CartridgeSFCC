@@ -77,7 +77,6 @@ module.exports.process = function (reachFiveUserUpdateCO) {
         var currentCustomerProfile = CustomerMgr.getExternallyAuthenticatedCustomerProfile(reachFiveProviderId, reachFiveUser.id);
 
         if (!empty(currentCustomerProfile)) {
-            LOGGER.warn("currentCustomerProfile"+currentCustomerProfile.email)
             libReachFiveSynchronization.updateSFCCProfile(profileFieldsObj, currentCustomerProfile, reachFiveUser, 'user');
 
             Transaction.wrap(function () {
