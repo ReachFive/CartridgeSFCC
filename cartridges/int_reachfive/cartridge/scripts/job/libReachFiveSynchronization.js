@@ -4,8 +4,6 @@
  * API
  */
 var Transaction = require('dw/system/Transaction');
-var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
-
 /**
  * Script Modules
  */

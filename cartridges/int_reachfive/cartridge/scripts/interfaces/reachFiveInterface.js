@@ -13,7 +13,6 @@
  * */
 var LocalServiceRegistry = require('dw/svc/LocalServiceRegistry');
 var URLUtils = require('dw/web/URLUtils');
-var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 
 /**
  * Script Modules
@@ -201,7 +200,7 @@ function sendVerificationEmail(managementToken, reachFiveExternalID) {
 
 /**
  * @function
- * @description Call Service to trigger the verification email sending
+ * @description Call Service to trigger the verification phone sending
  * @param {string} managementToken Management API token
  * @param {string} reachFiveExternalID ReachFive external profile ID
  * @return {Object} Result Obj which contains response result with errorMessage if error
@@ -491,7 +490,7 @@ function deleteUser(customer) {
 
 /**
  * @function
- * @description Delete the user on Reachfive
+ * @description get reachfive user fields
  * @param {string} clientId Client ID
  * @return {Object} request result
  */
@@ -533,3 +532,4 @@ exports.oauthToken = oauthToken;
 exports.passwordLogin = passwordLogin;
 exports.deleteUser = deleteUser;
 exports.getUserFields = getUserFields;
+exports.sendVerificationPhone = sendVerificationPhone ;
