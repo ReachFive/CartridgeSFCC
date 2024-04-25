@@ -60,7 +60,18 @@
         <password encrypted="true" encryption-type="common.export">Q93BFhW07Rp8PkExyoAeEW7dmutxSKCLjGbonRiLbsg=</password>
     </service-credential>
 
+    <service-credential service-credential-id="reachfive.verifyphone.post.credentials">
+        <url>https://{reach5Domain}/api/v2/users/{user_id}/verify-phone-number</url>
+        <user-id/>
+        <password encrypted="true" encryption-type="common.export">Q93BFhW07Rp8PkExyoAeEW7dmutxSKCLjGbonRiLbsg=</password>
+    </service-credential>
+
     <service-credential service-credential-id="reachfive.deleteuser">
+        <url>https://{reach5Domain}/api/v2/users/{user_id}</url>
+        <user-id/>
+    </service-credential>
+
+    <service-credential service-credential-id="reachfive.getuser">
         <url>https://{reach5Domain}/api/v2/users/{user_id}</url>
         <user-id/>
     </service-credential>

@@ -77,13 +77,14 @@ module.exports.process = function (reachFiveUserUpdateCO) {
         var currentCustomerProfile = CustomerMgr.getExternallyAuthenticatedCustomerProfile(reachFiveProviderId, reachFiveUser.id);
 
         if (!empty(currentCustomerProfile)) {
+            LOGGER.warn("currentCustomerProfile"+currentCustomerProfile.email)
             libReachFiveSynchronization.updateSFCCProfile(profileFieldsObj, currentCustomerProfile, reachFiveUser, 'user');
 
             Transaction.wrap(function () {
                 CustomObjectMgr.remove(reachFiveUserUpdateCO);
             });
         } else {
-            LOGGER.error('Customer profile does not exist: ' + reachFiveUser);
+            LOGGER.error('Customer profile does not exist: ' + reachFiveUser.email);
         }
 
         return new Status(Status.OK);

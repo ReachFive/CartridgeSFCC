@@ -6,6 +6,7 @@
 var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 var Status = require('dw/system/Status');
 var CustomerMgr = require('dw/customer/CustomerMgr');
+var Calendar = require('dw/util/Calendar');
 
 /**
  * Script Modules
@@ -35,10 +36,23 @@ module.exports.beforeStep = function () {
         }
         profileFieldsObj = JSON.parse(profileFields);
 
-        profilesIterator = CustomerMgr.searchProfiles(
-            'custom.reachfiveSendVerificationEmail = TRUE OR custom.reachfiveUpdateEmailAddress = TRUE OR custom.reachfiveUpdateProfile = TRUE',
-            'creationDate ASC');
-
+            var yesterdayCalendar = new Calendar();
+            yesterdayCalendar.add(Calendar.DATE, -1); 
+            var yesterdayDate = yesterdayCalendar.time; 
+            
+            var dateString = [
+                yesterdayDate.getFullYear(),
+                ('0' + (yesterdayDate.getMonth() + 1)).slice(-2),
+                ('0' + yesterdayDate.getDate()).slice(-2)
+            ].join('-');
+            
+            var query = "lastModified >= {0}";
+            var sortString = "lastModified asc"; 
+            var queryParams = [dateString];
+            
+            profilesIterator = CustomerMgr.queryProfiles(query, sortString, queryParams);
+            LOGGER.warn("liste customers " + profilesIterator.getCount());
+            
         if (profilesIterator.hasNext()) {
             managementTokenObj = reachFiveServiceInterface.generateTokenForManagementAPI();
             if (!managementTokenObj.ok) {
@@ -88,7 +102,12 @@ module.exports.read = function () {
  */
 module.exports.process = function (profile) {
     try {
+        LOGGER.warn("je suis dans process");
         var reachFiveExternalID = reachFiveHelper.getReachFiveExternalID(profile);
+        if (!reachFiveExternalID) {
+            LOGGER.warn("External ID non trouvé pour le profil.");
+            return new Status(Status.ERROR);
+        }
         var managementToken = managementTokenObj.token;
 
         libReachFiveSynchronization.cleanUpProfileErrorAttr(profile);
@@ -96,14 +115,22 @@ module.exports.process = function (profile) {
         if (profile.custom.reachfiveSendVerificationEmail) {
             libReachFiveSynchronization.sendVerificationEmail(profile, managementToken, reachFiveExternalID);
         }
-
-        if (profile.custom.reachfiveUpdateEmailAddress) {
-            libReachFiveSynchronization.updateEmailAddress(profile, managementToken, reachFiveExternalID);
+        if (profile.custom.reachfiveSendVerificationPhone) {
+            libReachFiveSynchronization.sendVerificationPhone(profile, managementToken, reachFiveExternalID);
+        }
+        var userDataResult = reachFiveServiceInterface.getUserFields(reachFiveExternalID);
+        if (!userDataResult.ok || !userDataResult.object) {
+            LOGGER.error("Impossible de récupérer les informations de l'utilisateur depuis ReachFive.");
+            return new Status(Status.ERROR);
         }
 
-        if (profile.custom.reachfiveUpdateProfile) {
+        var emailFromAPI = userDataResult.object.email;
+        var phoneNumberFromAPI = userDataResult.object.phone_number;
+        if((phoneNumberFromAPI != profile.getPhoneMobile()) || (emailFromAPI != profile.getEmail())){
+            libReachFiveSynchronization.updatePhoneAndEmail(profile, managementToken, reachFiveExternalID);
+        } 
             libReachFiveSynchronization.updateProfile(profileFieldsObj, profile, managementToken, reachFiveExternalID);
-        }
+        
 
         return new Status(Status.OK);
     } catch (e) {
