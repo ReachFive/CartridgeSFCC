@@ -11,6 +11,7 @@ var CustomerMgr = require('dw/customer/CustomerMgr');
  * Script Modules
  */
 var reachFiveHelper = require('int_reachfive/cartridge/scripts/helpers/reachFiveHelper');
+var reachFivApiHelper = require('int_reachfive/cartridge/scripts/helpers/reachFiveApiHelper');
 var libReachFiveSynchronization = require('int_reachfive/cartridge/scripts/job/libReachFiveSynchronization');
 var reachFiveServiceInterface = require('int_reachfive/cartridge/scripts/interfaces/reachFiveInterface');
 
@@ -88,7 +89,7 @@ module.exports.read = function () {
  */
 module.exports.process = function (profile) {
     try {
-        var reachFiveExternalID = reachFiveHelper.getReachFiveExternalID(profile);
+        var reachFiveExternalID = reachFivApiHelper.getReachFiveExternalID(profile);
         var managementToken = managementTokenObj.token;
 
         libReachFiveSynchronization.cleanUpProfileErrorAttr(profile);
