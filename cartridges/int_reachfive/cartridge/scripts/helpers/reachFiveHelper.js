@@ -7,6 +7,20 @@
 // TODO: 3. Functions helper (real helpers for code and frequently used functions)
 'use strict';
 
+var Encoding = require('dw/crypto/Encoding');
+var Calendar = require('dw/util/Calendar');
+var Site = require('dw/system/Site');
+var Locale = require('dw/util/Locale');
+var Cookie = require('dw/web/Cookie');
+var Resource = require('dw/web/Resource');
+var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
+var StringUtils = require('dw/util/StringUtils');
+
+var reachFiveService = require('*/cartridge/scripts/interfaces/reachFiveInterface');
+var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
+
+
+
 /**
  * @function
  * @description Return reach five cookie name
@@ -149,7 +163,7 @@ function isFieldExist(externalProfile, key) {
  * @return {string} encoded key value
  */
 function encodeBase64UrlSafe(key) {
-    var Encoding = require('dw/crypto/Encoding');
+    
     if (!key) {
         return null;
     }
@@ -166,7 +180,6 @@ function encodeBase64UrlSafe(key) {
  * @return {string} decoded token value
  */
 function reachFiveTokenDecode(idToken) {
-    var Encoding = require('dw/crypto/Encoding');
     var partsofidtoken = idToken.split('.')[1];
     if (!partsofidtoken) {
         return null;
@@ -191,7 +204,6 @@ function isReachFiveLoginAllowed() {
  * @return {boolean} True or False
  */
 function compareTimestamp(signinTimestamp) {
-    var Calendar = require('dw/util/Calendar');
     var now = new Calendar();
     // eslint-disable-next-line no-new-wrappers
     var dateSigninTimestamp = new Date(new Number(signinTimestamp) * 1000);
@@ -208,7 +220,6 @@ function compareTimestamp(signinTimestamp) {
  * @return {mixed} value from the key
  * */
 function getReachFivePreferences(key) {
-    var Site = require('dw/system/Site');
     return Site.getCurrent().getCustomPreferenceValue(key);
 }
 
@@ -264,7 +275,6 @@ function getReachFiveProfileFieldsJSON() {
  * @return {string} The language lowercase ISO 639-1 code
  */
 function getReachFiveLanguageCode() {
-    var Locale = require('dw/util/Locale');
     var currentLanguageCode = Locale.getLocale(request.getLocale()).getLanguage();
 
     var supportedReachFiveLanguageCodes = getReachFivePreferences('reach5SupportedLanguageCodes');
@@ -283,9 +293,7 @@ function getReachFiveLanguageCode() {
  * @return {string} The country lowercase ISO 639-1 code
  */
 function getReachFiveLocaleCode() {
-    var Locale = require('dw/util/Locale');
     var localeCode = Locale.getLocale(request.getLocale()).getCountry();
-
     return localeCode;
 }
 
@@ -318,7 +326,6 @@ function getReachFiveLocaleCode() {
  * @return {void}
  * */
  function setReachFiveConversionCookie() {
-    var Cookie = require('dw/web/Cookie');
     if (isReachFiveTransitionActive()) {
         var cookie = new Cookie(getReachFiveCookieName(), '1');
         var CONVERSION_COOKIE_AGE = getReachFivePreferences('reachFiveTransitionCookieDuration') * 24 * 60 * 60;
@@ -335,7 +342,6 @@ function getReachFiveLocaleCode() {
  * @return {void}
  * */
  function setReachFiveLoginCookie() {
-    var Cookie = require('dw/web/Cookie');
     var cookie = new Cookie(getReachFiveLoginCookieName(), '1');
     var CONVERSION_COOKIE_AGE = getReachFivePreferences('reachFiveLoginCookieDuration') * 24 * 60 * 60;
     cookie.setPath('/');
@@ -351,9 +357,6 @@ function getReachFiveLocaleCode() {
  * @return {Object} request object
  * */
 function getProfileRequestObjFromForm(customerForm) {
-    var Calendar = require('dw/util/Calendar');
-    var StringUtils = require('dw/util/StringUtils');
-
     var birthdate = customerForm.get('birthday').value();
     var requestObj = {
         name: customerForm.get('firstname').value() + ' ' + customerForm.get('lastname').value(),
@@ -378,7 +381,6 @@ function getProfileRequestObjFromForm(customerForm) {
  * @return {string} result
  * */
 function getStateObjBase64(redirectURL, action, handleCustomerRoute, data) {
-    var dwStringUtils = require('dw/util/StringUtils');
     var stateObj = {
         redirectURL: redirectURL,
         action: action
@@ -405,9 +407,6 @@ function getStateObjBase64(redirectURL, action, handleCustomerRoute, data) {
  * @return {string|null} result
  * */
 function createLoginRedirectUrl(tkn, stateTarget) {
-    var URLUtils = require('dw/web/URLUtils');
-    var Site = require('dw/system/Site');
-
     var querystring = '';
     var PROTOCOL = 'https';
     var domain = getReachFiveDomain();
@@ -451,10 +450,7 @@ function createLoginRedirectUrl(tkn, stateTarget) {
  * @return {Object} result
  * */
 function verifySessionAccessTkn(updateFlag) {
-    var Resource = require('dw/web/Resource');
-    var reachFiveService = require('*/cartridge/scripts/interfaces/reachFiveInterface');
-    var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
-    var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
+
     var status = {
         success: false,
         msg: Resource.msg('reachfive.access_tkn.expired', 'reachfive', null)
