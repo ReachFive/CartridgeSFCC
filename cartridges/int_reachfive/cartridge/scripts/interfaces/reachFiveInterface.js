@@ -25,8 +25,6 @@ var ServiceRegistry = require('dw/svc/LocalServiceRegistry');
 var Site = require('dw/system/Site');
 var Encoding = require('dw/crypto/Encoding');
 var Bytes = require('dw/util/Bytes');
-
-var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 var bearer;
 
 /**
@@ -202,6 +200,26 @@ function sendVerificationEmail(managementToken, reachFiveExternalID) {
 
 /**
  * @function
+ * @description Call Service to trigger the verification phone sending
+ * @param {string} managementToken Management API token
+ * @param {string} reachFiveExternalID ReachFive external profile ID
+ * @return {Object} Result Obj which contains response result with errorMessage if error
+ * */
+function sendVerificationPhone(managementToken, reachFiveExternalID) {
+	var service = configureService('reachfive.verifyphone.post', { user_id: reachFiveExternalID });
+	service.addHeader('Authorization', 'Bearer ' + managementToken);
+
+	var serviceResult = service.call();
+	var result = {
+		ok: serviceResult.ok,
+		errorMessage: (!serviceResult.ok) ? serviceResult.error + ' ' + serviceResult.errorMessage : ''
+	};
+
+	return result;
+}
+
+/**
+ * @function
  * @description Call Service to update ReachFive profile
  * @param {Object} requestObj Request Object with new login
  * @return {Object} Result Obj which contains response result with errorMessage if error
@@ -261,7 +279,6 @@ function updatePhone(requestObj) {
 		object: serviceResult.object,
 		errorMessage: (!serviceResult.ok) ? serviceResult.error + ' ' + serviceResult.errorMessage : ''
 	};
-
 	return result;
 }
 
@@ -471,6 +488,33 @@ function deleteUser(customer) {
     return null;
 }
 
+/**
+ * @function
+ * @description get reachfive user fields
+ * @param {string} clientId Client ID
+ * @return {Object} request result
+ */
+function getUserFields(clientId) {
+    var managementTokenObj = generateTokenForManagementAPI();
+    if (!clientId || !managementTokenObj.ok) {
+        return { ok: false, errorMessage: 'Missing userId or failed to obtain management token' };
+    }
+
+    var managementToken = managementTokenObj.token;
+    var service = configureService('reachfive.getuser', { user_id: clientId });
+    service.setRequestMethod('GET');
+    service.addHeader('Authorization', 'Bearer ' + managementToken);
+    service.addHeader('Content-type', 'application/json');
+
+    var serviceResult = service.call();
+    var result = {
+        ok: serviceResult.ok,
+        object: serviceResult.object,
+        errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : ''
+    };
+
+    return result;
+}
 /* Expose Methods */
 exports.generateTokenForManagementAPI = generateTokenForManagementAPI;
 exports.exchangeAuthorizationCodeForIDToken = exchangeAuthorizationCodeForIDToken;
@@ -487,3 +531,5 @@ exports.updatePassword = updatePassword;
 exports.oauthToken = oauthToken;
 exports.passwordLogin = passwordLogin;
 exports.deleteUser = deleteUser;
+exports.getUserFields = getUserFields;
+exports.sendVerificationPhone = sendVerificationPhone ;
