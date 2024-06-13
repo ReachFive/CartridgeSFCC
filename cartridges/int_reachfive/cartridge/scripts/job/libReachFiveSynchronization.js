@@ -325,6 +325,7 @@ function updateSFCCProfile(profileFieldsObj, profile, reachFiveUser, reach5ObjTy
 module.exports = {
     sendVerificationEmail: sendVerificationEmail,
     updateEmailAddress: updateEmailAddress,
+    updatePhoneAndEmail: updatePhoneAndEmail,
     updateProfile: updateProfile,
     cleanUpProfileErrorAttr: cleanUpProfileErrorAttr,
     updateSFCCProfile: updateSFCCProfile

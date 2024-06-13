@@ -10,14 +10,6 @@
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
-            <attribute-definition attribute-id="reachfiveHasTechnicalPassword">
-                <display-name xml:lang="x-default">Has a technical password</display-name>
-                <description xml:lang="x-default">"true" if the customer has a technical password</description>
-                <type>boolean</type>
-                <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
-                <default-value>false</default-value>
-            </attribute-definition>
             <attribute-definition attribute-id="data">
                 <display-name xml:lang="x-default">Data</display-name>
                 <description xml:lang="x-default"></description>
@@ -33,18 +25,6 @@
             </attribute-definition>
             <attribute-definition attribute-id="reachfiveSendVerificationEmail">
                 <display-name xml:lang="x-default">ReachFive send verification email</display-name>
-                <type>boolean</type>
-                <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
-            </attribute-definition>
-            <attribute-definition attribute-id="reachfiveUpdateEmailAddress">
-                <display-name xml:lang="x-default">ReachFive update email address</display-name>
-                <type>boolean</type>
-                <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
-            </attribute-definition>
-            <attribute-definition attribute-id="reachfiveUpdateProfile">
-                <display-name xml:lang="x-default">ReachFive update profile</display-name>
                 <type>boolean</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
