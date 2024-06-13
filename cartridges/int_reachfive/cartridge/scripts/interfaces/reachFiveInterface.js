@@ -34,7 +34,7 @@ var bearer;
  * @returns {dw.svc.HTTPService} Service Object
  */
 function configureService(serviceName, substObj) {
-	return LocalServiceRegistry.createService(serviceName, {
+    return LocalServiceRegistry.createService(serviceName, {
         createRequest: function (svc, params) {
             svc.setAuthentication('NONE');
             svc.addHeader('Content-type', 'application/json');
@@ -58,15 +58,15 @@ function configureService(serviceName, substObj) {
                 svc.setURL(svcUrl);
             }
 
-			var jsonArgs = JSON.stringify(params);
-			return jsonArgs;
+            var jsonArgs = JSON.stringify(params);
+            return jsonArgs;
         },
         parseResponse: function (svc, client) {
-			var jsonResponse = client.text;
-			var objResponse = JSON.parse(jsonResponse);
-			return objResponse;
-		}
-	});
+            var jsonResponse = client.text;
+            var objResponse = JSON.parse(jsonResponse);
+            return objResponse;
+        }
+    });
 }
 
 /**
@@ -86,97 +86,136 @@ function mergeObjects(obj1, obj2) {
     return result;
 }
 
-// TODO: Need to be refactored in order to use: oauthToken function
+
 /**
  * @function
  * @description Call Service Registry ReachFive. This method is not exposed
  * @return {string} response.auth.accessToken
  * */
-function generateToken() {
-	var requestParams = {
-		grant_type: 'client_credentials',
-		client_id: reachFiveHelper.getReachFiveApiKey(),
+/* function generateToken() {
+    var requestParams = {
+        grant_type: 'client_credentials',
+        client_id: reachFiveHelper.getReachFiveApiKey(),
         client_secret: reachFiveHelper.getReachFiveClientSecret()
-	};
-	// Service Call
-	var service = configureService('reachfive.rest.auth');
-	var result = service.call(requestParams);
-	return result.object.access_token;
+    };
+    // Service Call
+    var service = configureService('reachfive.rest.auth');
+    var result = service.call(requestParams);
+    return result.object.access_token;
+} */
+
+function generateToken() {
+    var requestObj = {
+        grant_type: 'client_credentials',
+        client_id: reachFiveHelper.getReachFiveApiKey(),
+        client_secret: reachFiveHelper.getReachFiveClientSecret()
+    };
+    return oauthToken(requestObj).then(result => result.object.access_token);
 }
 
-// TODO: Need to be refactored in order to use: oauthToken function
+
 /**
  * @function
  * @description Call Service to have access_token for management API
  * @return {Object} result Obj which contains response.auth.accessToken or errorMessage
  * */
+/* function generateTokenForManagementAPI() {
+    var requestParams = {
+        grant_type: 'client_credentials',
+        client_id: reachFiveHelper.getReachFiveManagementApiKey(),
+        client_secret: reachFiveHelper.getReachFiveManagementClientSecret(),
+        scope: reachFiveHelper.getReachFiveManagementScope()
+    };
+    // Service Call
+    var service = configureService('reachfive.rest.auth');
+    var serviceResult = service.call(requestParams);
+
+    var result = {
+        ok: serviceResult.ok,
+        token: serviceResult.object && serviceResult.object.access_token,
+        errorMessage: (!serviceResult.ok) ? serviceResult.error + ' ' + serviceResult.errorMessage : ''
+    };
+
+    return result;
+} */
 function generateTokenForManagementAPI() {
-	var requestParams = {
-		grant_type: 'client_credentials',
-		client_id: reachFiveHelper.getReachFiveManagementApiKey(),
-		client_secret: reachFiveHelper.getReachFiveManagementClientSecret(),
-		scope: reachFiveHelper.getReachFiveManagementScope()
-	};
-	// Service Call
-	var service = configureService('reachfive.rest.auth');
-	var serviceResult = service.call(requestParams);
-
-	var result = {
-		ok: serviceResult.ok,
-		token: serviceResult.object && serviceResult.object.access_token,
-		errorMessage: (!serviceResult.ok) ? serviceResult.error + ' ' + serviceResult.errorMessage : ''
-	};
-
-	return result;
+    var requestObj = {
+        grant_type: 'client_credentials',
+        client_id: reachFiveHelper.getReachFiveManagementApiKey(),
+        client_secret: reachFiveHelper.getReachFiveManagementClientSecret(),
+        scope: reachFiveHelper.getReachFiveManagementScope()
+    };
+    return oauthToken(requestObj);
 }
 
-// TODO: Need to be refactored in order to use: oauthToken function
+
 /**
  * @function
  * @description Call Service Registry ReachFive. This method is not exposed
  * @param {Object} customFields Custom Fields
  * @return {string} response.auth.accessToken
  * */
-function exchangeAuthorizationCodeForIDToken(customFields) {
-	var requestParams = {
-		code: customFields.code,
-		client_id: reachFiveHelper.getReachFiveApiKey(),
-		client_secret: reachFiveHelper.getReachFiveClientSecret(),
+/* function exchangeAuthorizationCodeForIDToken(customFields) {
+    var requestParams = {
+        code: customFields.code,
+        client_id: reachFiveHelper.getReachFiveApiKey(),
+        client_secret: reachFiveHelper.getReachFiveClientSecret(),
     grant_type: 'authorization_code',
     return_provider_token: reachfiveSettings.isReachFiveReturnProviderToken,
-		redirect_uri: customFields.redirectUrl || URLUtils.https('ReachFiveController-CallbackReachFiveRequest').toString()
-	};
-	// Service Call
-	var service = configureService('reachfive.rest.auth');
-	var result = service.call(requestParams);
-	return result.object;
+        redirect_uri: customFields.redirectUrl || URLUtils.https('ReachFiveController-CallbackReachFiveRequest').toString()
+    };
+    // Service Call
+    var service = configureService('reachfive.rest.auth');
+    var result = service.call(requestParams);
+    return result.object;
+} */
+function exchangeAuthorizationCodeForIDToken(customFields) {
+    var requestObj = {
+        code: customFields.code,
+        client_id: reachFiveHelper.getReachFiveApiKey(),
+        client_secret: reachFiveHelper.getReachFiveClientSecret(),
+        grant_type: 'authorization_code',
+        return_provider_token: reachfiveSettings.isReachFiveReturnProviderToken,
+        redirect_uri: customFields.redirectUrl || URLUtils.https('ReachFiveController-CallbackReachFiveRequest').toString()
+    };
+    return oauthToken(requestObj);
 }
 
-// TODO: Need to be refactored in order to use: oauthToken function
+
 /**
  * @function
  * @description Retrieve new access_token with refresh_token
  * @param {Object} refreshToken Refresh token
  * @return {Object} response.auth.accessToken
  * */
-function retrieveAccessTokenWithRefresh(refreshToken) {
-	var requestParams = {
-		client_id: reachFiveHelper.getReachFiveApiKey(),
-		client_secret: reachFiveHelper.getReachFiveClientSecret(),
-		grant_type: 'refresh_token',
+/* function retrieveAccessTokenWithRefresh(refreshToken) {
+    var requestParams = {
+        client_id: reachFiveHelper.getReachFiveApiKey(),
+        client_secret: reachFiveHelper.getReachFiveClientSecret(),
+        grant_type: 'refresh_token',
     refresh_token: refreshToken
-	};
-	// Service Call
-	var service = configureService('reachfive.rest.auth');
-	var serviceResult = service.call(requestParams);
+    };
+    // Service Call
+    var service = configureService('reachfive.rest.auth');
+    var serviceResult = service.call(requestParams);
     var result = {
-		ok: serviceResult.ok,
-		object: serviceResult.object,
-		errorMessage: (!serviceResult.ok) ? serviceResult.error + ' ' + serviceResult.errorMessage : ''
-	};
+        ok: serviceResult.ok,
+        object: serviceResult.object,
+        errorMessage: (!serviceResult.ok) ? serviceResult.error + ' ' + serviceResult.errorMessage : ''
+    };
 
-	return result;
+    return result;
+} */
+function retrieveAccessTokenWithRefresh(refreshToken) {
+    var requestObj = {
+        client_id: reachFiveHelper.getReachFiveApiKey(),
+        client_secret: reachFiveHelper.getReachFiveClientSecret(),
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken
+    };
+    return oauthToken(requestObj);
 }
+
 
 /**
  * @function
@@ -186,16 +225,16 @@ function retrieveAccessTokenWithRefresh(refreshToken) {
  * @return {Object} Result Obj which contains response result with errorMessage if error
  * */
 function sendVerificationEmail(managementToken, reachFiveExternalID) {
-	var service = configureService('reachfive.verifyemail.post', { user_id: reachFiveExternalID });
-	service.addHeader('Authorization', 'Bearer ' + managementToken);
+    var service = configureService('reachfive.verifyemail.post', { user_id: reachFiveExternalID });
+    service.addHeader('Authorization', 'Bearer ' + managementToken);
 
-	var serviceResult = service.call();
-	var result = {
-		ok: serviceResult.ok,
-		errorMessage: (!serviceResult.ok) ? serviceResult.error + ' ' + serviceResult.errorMessage : ''
-	};
+    var serviceResult = service.call();
+    var result = {
+        ok: serviceResult.ok,
+        errorMessage: (!serviceResult.ok) ? serviceResult.error + ' ' + serviceResult.errorMessage : ''
+    };
 
-	return result;
+    return result;
 }
 
 /**
@@ -225,18 +264,18 @@ function sendVerificationPhone(managementToken, reachFiveExternalID) {
  * @return {Object} Result Obj which contains response result with errorMessage if error
  * */
 function updateEmail(requestObj) {
-	var service = configureService('reachfive.updateemail.post');
-	service.setRequestMethod('POST');
-	service.addHeader('Authorization', 'Bearer ' + session.privacy.access_token);
+    var service = configureService('reachfive.updateemail.post');
+    service.setRequestMethod('POST');
+    service.addHeader('Authorization', 'Bearer ' + session.privacy.access_token);
 
-	var serviceResult = service.call(requestObj);
-	var result = {
-		ok: serviceResult.ok,
-		object: serviceResult.object,
-		errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : ''
-	};
+    var serviceResult = service.call(requestObj);
+    var result = {
+        ok: serviceResult.ok,
+        object: serviceResult.object,
+        errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : ''
+    };
 
-	return result;
+    return result;
 }
 
 /**
@@ -248,16 +287,16 @@ function updateEmail(requestObj) {
 function updatePhone(requestObj) {
     var service = configureService('reachfive.updatephone.post');
     service.setRequestMethod('POST');
-	service.addHeader('Authorization', 'Bearer ' + session.privacy.access_token);
+    service.addHeader('Authorization', 'Bearer ' + session.privacy.access_token);
 
     var serviceResult = service.call(requestObj);
-	var result = {
-		ok: serviceResult.ok,
-		object: serviceResult.object,
-		errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : ''
-	};
+    var result = {
+        ok: serviceResult.ok,
+        object: serviceResult.object,
+        errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : ''
+    };
 
-	return result;
+    return result;
 }
 
 /**
@@ -269,17 +308,18 @@ function updatePhone(requestObj) {
  * @return {Object} Result Obj which contains response result with errorMessage if error
  * */
  function updateProfile(requestObj, managementToken, reachFiveExternalID) {
-	var service = configureService('reachfive.updateprofile.put', { user_id: reachFiveExternalID });
-	service.setRequestMethod('PUT');
-	service.addHeader('Authorization', 'Bearer ' + managementToken);
+    var service = configureService('reachfive.updateprofile.put', { user_id: reachFiveExternalID });
+    service.setRequestMethod('PUT');
+    service.addHeader('Authorization', 'Bearer ' + managementToken);
 
-	var serviceResult = service.call(requestObj);
-	var result = {
-		ok: serviceResult.ok,
-		object: serviceResult.object,
-		errorMessage: (!serviceResult.ok) ? serviceResult.error + ' ' + serviceResult.errorMessage : ''
-	};
-	return result;
+    var serviceResult = service.call(requestObj);
+    var result = {
+        ok: serviceResult.ok,
+        object: serviceResult.object,
+        errorMessage: (!serviceResult.ok) ? serviceResult.error + ' ' + serviceResult.errorMessage : ''
+    };
+
+    return result;
 }
 
 /**
@@ -289,9 +329,9 @@ function updatePhone(requestObj) {
  * @return {Object} Result Obj which contains response result with errorMessage if error
  * */
  function updateProfileIdentityAPI(requestObj) {
-	var service = configureService('reachfive.update.profile.post');
-	service.setRequestMethod('POST');
-	service.addHeader('Authorization', 'Bearer ' + session.privacy.access_token);
+    var service = configureService('reachfive.update.profile.post');
+    service.setRequestMethod('POST');
+    service.addHeader('Authorization', 'Bearer ' + session.privacy.access_token);
 
     var serviceResult = service.call(requestObj);
     var servResObject;
@@ -318,18 +358,18 @@ function updatePhone(requestObj) {
  * @return {Object} Result Obj which contains response result or errorMessage if error
  * */
 function getUserProfile(profileFields) {
-	var service = configureService('reachfive.userinfo.get', { profile_fields: profileFields });
-	service.setRequestMethod('GET');
-	service.addHeader('Authorization', 'Bearer ' + session.privacy.access_token);
+    var service = configureService('reachfive.userinfo.get', { profile_fields: profileFields });
+    service.setRequestMethod('GET');
+    service.addHeader('Authorization', 'Bearer ' + session.privacy.access_token);
 
-	var serviceResult = service.call();
-	var result = {
-		ok: serviceResult.ok,
-		object: serviceResult.object,
-		errorMessage: (!serviceResult.ok) ? serviceResult.error + ' ' + serviceResult.errorMessage : ''
-	};
+    var serviceResult = service.call();
+    var result = {
+        ok: serviceResult.ok,
+        object: serviceResult.object,
+        errorMessage: (!serviceResult.ok) ? serviceResult.error + ' ' + serviceResult.errorMessage : ''
+    };
 
-	return result;
+    return result;
 }
 
 /**
@@ -341,7 +381,7 @@ function getUserProfile(profileFields) {
  * @return {Object} Result Obj which contains response result or errorMessage if error
  * */
 function signUp(login, password, profile) {
-	var requestParams = {
+    var requestParams = {
         client_id: reachfiveSettings.reach5ApiKey,
         scope: 'openid profile email phone',
         data: {
@@ -358,8 +398,8 @@ function signUp(login, password, profile) {
         }
     };
 
-	// Service Call
-	var service = configureService('reachfive.signup.post');
+    // Service Call
+    var service = configureService('reachfive.signup.post');
     service.setRequestMethod('POST');
 
     var serviceResult = service.call(requestParams);
