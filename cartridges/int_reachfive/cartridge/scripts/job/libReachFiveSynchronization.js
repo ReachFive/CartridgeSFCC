@@ -4,11 +4,11 @@
  * API
  */
 var Transaction = require('dw/system/Transaction');
-
 /**
  * Script Modules
  */
 var reachFiveServiceInterface = require('int_reachfive/cartridge/scripts/interfaces/reachFiveInterface');
+
 
 /**
  * @function
@@ -66,6 +66,7 @@ function sendVerificationEmail(profile, managementToken, reachFiveExternalID) {
     });
 }
 
+
 /**
  * @function
  * @description Calls Service to update ReachFive Email. It updates ReachFive profile addtibutes
@@ -73,13 +74,39 @@ function sendVerificationEmail(profile, managementToken, reachFiveExternalID) {
  * @param {string} managementToken management API token
  * @param {string} reachFiveExternalID ReachFive external profile ID
  * */
-function updateEmailAddress(profile, managementToken, reachFiveExternalID) {
+function updatePhoneAndEmail(profile, managementToken, reachFiveExternalID) {
+    if (!profile || !managementToken || !reachFiveExternalID) {
+        return;
+    }
+    var requestObj = {
+        phone_number: profile.getPhoneMobile() ,
+        email: profile.getEmail()
+    };
+
+    var result = reachFiveServiceInterface.updateProfile(requestObj, managementToken, reachFiveExternalID);
+
+    if (!result.ok) {
+        addReachFiveProfileError(result.errorMessage, profile);
+    }
+    return result;
+}
+
+/**
+ * @function
+ * @description Calls Service to update ReachFive profile. It updates ReachFive profile attributes
+ * @param {dw.customer.Profile} profile - The current profile
+ * @param {string} managementToken management API token
+ * @param {string} reachFiveExternalID ReachFive external profile ID
+ * */
+function updateProfileField(profile, managementToken, reachFiveExternalID) {
     if (!profile || !managementToken || !reachFiveExternalID) {
         return;
     }
 
     var requestObj = {
-        email: profile.email
+        email: profile.email,
+        phone_number: profile.phoneHome,
+        phone_mobile: profile.phoneMobile
     };
     var result = reachFiveServiceInterface.updateProfile(requestObj, managementToken, reachFiveExternalID);
 
@@ -91,7 +118,6 @@ function updateEmailAddress(profile, managementToken, reachFiveExternalID) {
         profile.custom.reachfiveUpdateEmailAddress = false;
     });
 }
-
 /**
  * @function
  * @description Sets reach5 Object which includes item for request Object. Use 'reach5ProfileFieldsJSON' Site Preference.
@@ -324,9 +350,9 @@ function updateSFCCProfile(profileFieldsObj, profile, reachFiveUser, reach5ObjTy
  */
 module.exports = {
     sendVerificationEmail: sendVerificationEmail,
-    updateEmailAddress: updateEmailAddress,
     updatePhoneAndEmail: updatePhoneAndEmail,
     updateProfile: updateProfile,
     cleanUpProfileErrorAttr: cleanUpProfileErrorAttr,
-    updateSFCCProfile: updateSFCCProfile
+    updateSFCCProfile: updateSFCCProfile,
+    updateProfileField: updateProfileField
 };
