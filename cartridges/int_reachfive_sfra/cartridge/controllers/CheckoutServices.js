@@ -30,7 +30,6 @@ server.prepend(
                 if (!viewData.customerLoginResult.error && authenticatedCustomer) {
                     var apiHelper = require('*/cartridge/scripts/helpers/reachfiveApiHelper');
                     var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
-                    var reachFiveHelper = require('*/cartridge/scripts/helpers/reachFiveHelper');
 
                     var email = viewData.reachFiveCache.loginEmail;
                     var password = viewData.reachFiveCache.loginPassword;
@@ -40,7 +39,7 @@ server.prepend(
                         + email
                         + '] was not created because of:';
 
-                    var customerReachFiveProfile = reachFiveHelper.getCustomerReachFiveExtProfile(authenticatedCustomer);
+                    var customerReachFiveProfile = apiHelper.getCustomerReachFiveExtProfile(authenticatedCustomer);
 
                     if (customerReachFiveProfile) {
                         errorMessagePrefix = '[CheckoutService-LoginCustomer] ReachFive profile ['
