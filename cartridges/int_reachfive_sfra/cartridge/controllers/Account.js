@@ -10,6 +10,7 @@ var consentTracking = require('*/cartridge/scripts/middleware/consentTracking');
 // var Site = require('dw/system/Site');
 var Transaction = require('dw/system/Transaction');
 var reachFiveHelper = require('*/cartridge/scripts/helpers/reachFiveHelper');
+var reachFiveApiHelper = require('*/cartridge/scripts/helpers/reachFiveApiHelper');
 var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
 var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 
@@ -31,7 +32,7 @@ server.append('Login', function (req, res, next) {
                     + '] was not created because of:';
 
             // Check does the customer profile already contain reachfive account
-            var customerReachFiveProfile = reachFiveHelper.getCustomerReachFiveExtProfile(authenticatedCustomer);
+            var customerReachFiveProfile = reachFiveApiHelper.getCustomerReachFiveExtProfile(authenticatedCustomer);
 
             if (customerReachFiveProfile) {
                 errorMessagePrefix = '[Account-Login] ReachFive profile['
@@ -218,7 +219,7 @@ server.replace(
                 );
 
                 if (reachfiveSettings.isReachFiveEnabled && reachfiveSettings.isReachFiveLoginAllowed) {
-                    response = reachFiveHelper.updatePassword(
+                    response = reachFiveApiHelper.updatePassword(
                         customer.profile.credentials.login,
                         formInfo.newPassword,
                         formInfo.currentPassword
@@ -366,7 +367,7 @@ server.append('SaveNewPassword', function (req, res, next) {
 
             if (data.passwordForm.valid && !empty(tokenCustomer))
             {
-                reachFiveHelper.passwordUpdateManagementAPI(tokenCustomer.profile, data.newPassword);
+                reachFiveApiHelper.passwordUpdateManagementAPI(tokenCustomer.profile, data.newPassword);
 
                 //If the password is not set by the customer
                 if( tokenCustomer.profile.custom.reachfiveHasTechnicalPassword )
@@ -591,7 +592,7 @@ server.post(
                         verifiedTknObj.verified = true;
 
                         if (verifiedTknObj.status) {
-                            reachfiveUpdateLogin = reachFiveHelper.updateReachfiveLoginWithTkn(formInfo.email);
+                            reachfiveUpdateLogin = reachFiveApiHelper.updateReachfiveLoginWithTkn(formInfo.email);
                         }
                     }
 
@@ -614,7 +615,7 @@ server.post(
                     profile.setEmail(formInfo.email);
                     profile.setPhoneHome(formInfo.phone);
 
-                    if (reachFiveHelper.isNewPhone(oldPhone, formInfo.phone)) {
+                    if (reachFiveApiHelper.isNewPhone(oldPhone, formInfo.phone)) {
                         if (!verifiedTknObj.verified) {
                             tknStatus = reachFiveHelper.verifySessionAccessTkn();
                             verifiedTknObj.status = tknStatus.success;
@@ -622,7 +623,7 @@ server.post(
                         }
 
                         if (verifiedTknObj.status) {
-                            reachfiveUpdatePhone = reachFiveHelper.updateReachfivePhoneWithTnk(formInfo.phone);
+                            reachfiveUpdatePhone = reachFiveApiHelper.updateReachfivePhoneWithTnk(formInfo.phone);
                         }
                     }
 
@@ -633,9 +634,8 @@ server.post(
                         accountHelpers.sendAccountEditedEmail(customer.profile);
 
                         var reachfiveProfile = new ReachfiveProfile(customer);
-                        // var fields = reachFiveHelper.getReachfiveProfileFields();
                         var profileRequestObj = reachfiveProfile.getUserProfileObj('email,given_name,family_name'/* fields */);
-                        reachFiveHelper.updateReachFiveProfile(profileRequestObj);
+                        reachFiveApiHelper.updateReachFiveProfile(profileRequestObj);
 
                         delete formInfo.profileForm;
                         delete formInfo.email;
@@ -747,7 +747,7 @@ server.post(
                     updateToken = false;
 
                     // Check customer password and update access token in session
-                    var authResult = reachFiveHelper.getTokenWithPassword(req.currentCustomer.profile.email, result.password);
+                    var authResult = reachFiveApiHelper.getTokenWithPassword(req.currentCustomer.profile.email, result.password);
 
                     if (!authResult.ok) {
                         errorDetected = true;
@@ -807,7 +807,7 @@ server.post(
                     equalList.email = formModel.equal(customerModel, 'email');
                 }
                 if (formInfo.phone) {
-                    equalList.phone = !reachFiveHelper.isNewPhone(customerModel.profile.phone_number, formModel.profile.phone_number);
+                    equalList.phone = !reachFiveApiHelper.isNewPhone(customerModel.profile.phone_number, formModel.profile.phone_number);
                 }
 
                 equalList.trigger = !(equalList.profile && equalList.email && equalList.phone);
@@ -818,7 +818,7 @@ server.post(
                     if (tknStatus.success) {
                         // Update phone_number
                         if (!equalList.phone) {
-                            reachfiveUpdatePhone = reachFiveHelper.updateReachfivePhoneWithTnk(formInfo.phone);
+                            reachfiveUpdatePhone = reachFiveApiHelper.updateReachfivePhoneWithTnk(formInfo.phone);
 
                             if (reachfiveUpdatePhone.ok) {
                                 formModel.updateCustomerProfile('phone_number');
@@ -830,7 +830,7 @@ server.post(
                         }
                         // Update email
                         if (!equalList.email) {
-                            reachfiveUpdateLogin = reachFiveHelper.updateReachfiveLoginWithTkn(formInfo.email);
+                            reachfiveUpdateLogin = reachFiveApiHelper.updateReachfiveLoginWithTkn(formInfo.email);
 
                             if (reachfiveUpdateLogin.ok) {
                                 formModel.updateCustomerProfile('email');
@@ -843,7 +843,7 @@ server.post(
                         // Update other profile fields
                         if (!equalList.profile) {
                             var profileRequestObj = formModel.getUserProfileObj(profileFields);
-                            reachfiveUpdateProfile = reachFiveHelper.updateReachFiveProfile(profileRequestObj);
+                            reachfiveUpdateProfile = reachFiveApiHelper.updateReachFiveProfile(profileRequestObj);
 
                             if (reachfiveUpdateProfile.ok) {
                                 formModel.updateCustomerProfile(profileFields);

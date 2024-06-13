@@ -83,7 +83,7 @@ module.exports.process = function (reachFiveUserUpdateCO) {
                 CustomObjectMgr.remove(reachFiveUserUpdateCO);
             });
         } else {
-            LOGGER.error('Customer profile does not exist: ' + reachFiveUser);
+            LOGGER.error('Customer profile does not exist: ' + reachFiveUser.email);
         }
 
         return new Status(Status.OK);
