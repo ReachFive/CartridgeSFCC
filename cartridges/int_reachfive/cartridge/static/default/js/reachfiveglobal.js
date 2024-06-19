@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     state: reach5Const.stateUrl
                 });
             }
-        })
+        });
     }
 
     function displayError(el, errorMsg, errorClass) {
@@ -37,8 +37,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (el) {
                 errorCont = el.closest('.form-row').querySelector('.form-caption');
                 if (errorCont) {
-                errorCont.classList.add('error-message');
-                errorCont.textContent = error.error;
+                    errorCont.classList.add('error-message');
+                    errorCont.textContent = error.error;
                 }
             }
         }
@@ -51,6 +51,24 @@ document.addEventListener('DOMContentLoaded', function() {
             errorfield.textContent = '';
         });
     }
+
+    function displayQueryParamError() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const errormsg = urlParams.get('errormsg');
+        if (errormsg != null) {
+            let errorElement = document.getElementById('error');
+            if (!errorElement) {
+                errorElement = document.createElement('div');
+                errorElement.id = 'error';
+                document.body.insertBefore(errorElement, document.body.firstChild);
+            }
+            errorElement.textContent = errormsg;
+            errorElement.style.display = 'block';
+        }
+    }
+
+    // Call the function to display query param error
+    displayQueryParamError();
 
     // Conversion functions
     document.addEventListener('submit', function(event) {
