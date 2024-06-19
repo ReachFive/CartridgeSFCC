@@ -887,4 +887,30 @@ server.post(
     }
 );
 
+server.post('DeleteProfile', function (req, res, next) {
+    var currentCustomer = req.currentCustomer.raw;
+
+    if (currentCustomer && currentCustomer.isAuthenticated()) {
+        Transaction.wrap(function () {
+            CustomerMgr.removeCustomer(currentCustomer);
+        });
+        
+        // Destroy session and clear cookies
+        req.session.privacy = {};
+        res.clearCookie('dwsid');
+        
+        res.json({
+            success: true,
+            redirectUrl: URLUtils.url('Login-Show').toString()
+        });
+    } else {
+        res.json({
+            success: false,
+            errorMessage: 'No authenticated customer found.'
+        });
+    }
+
+    return next();
+});
+
 module.exports = server.exports();

@@ -31,9 +31,9 @@ window.addEventListener('DOMContentLoaded', function() {
 
             if (active.indexOf('active') > -1) {
                 if (nbProvider === 1 && !isReachFiveLoginAllowed) {
-                    makeCallToDeleteSocialAccount(parent);
+                    makeCallUnlinkSocialAccount(parent, social, true);
                 } else {
-                    makeCallUnlinkSocialAccount(parent, social);
+                    makeCallUnlinkSocialAccount(parent, social, false);
                 }
             } else {
                 sdkCoreClient.loginWithSocialProvider(social, {
@@ -71,19 +71,19 @@ window.addEventListener('DOMContentLoaded', function() {
                 });
 
                 sdkCoreClient.on('authentication_failed', function (authResult) {
-
+                    console.error('Authentication failed:', authResult);
                 });
 
                 sdkCoreClient.on('login_failed', function (authResult) {
-
+                    console.error('Login failed:', authResult);
                 });
 
                 sdkCoreClient.on('signup_failed', function (authResult) {
-
+                    console.error('Signup failed:', authResult);
                 });
 
                 sdkCoreClient.on('profile_updated', function (authResult) {
-
+                    console.log('Profile updated:', authResult);
                 });
             }
         });
@@ -116,31 +116,7 @@ window.addEventListener('DOMContentLoaded', function() {
         xhr.send();
     }
 
-    function makeCallToDeleteSocialAccount(parent) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('DELETE', urlCall(demandWareId));
-        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                var xhr2 = new XMLHttpRequest();
-                xhr2.open('GET', urlLink + '?externalid=0');
-                xhr2.onload = function() {
-                    if (xhr2.status === 200) {
-                    var responseLink = JSON.parse(xhr2.responseText);
-                        if (responseLink.isSaved) {
-                            parent.classList.remove('active');
-                            nbProvider = 0;
-                            demandWareId = 0;
-                        }
-                    }
-                };
-                xhr2.send();
-            }
-        };
-        xhr.send();
-    }
-
-    function makeCallUnlinkSocialAccount(parent, social) {
+    function makeCallUnlinkSocialAccount(parent, social, deleteProfile) {
         var url = 'https://' + domain + '/api/v2/users/' + demandWareId + '/providers/' + social;
 
         var xhr = new XMLHttpRequest();
@@ -151,9 +127,36 @@ window.addEventListener('DOMContentLoaded', function() {
             if (xhr.status === 200) {
                 parent.classList.remove('active');
                 nbProvider--;
+
+                if (deleteProfile) {
+                    makeCallToDeleteProfile();
+                }
+            } else {
+                console.error('Failed to unlink social account:', xhr.status);
             }
         };
 
+        xhr.send();
+    }
+
+    function makeCallToDeleteProfile() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('DELETE', urlCall(demandWareId));
+        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                var xhr2 = new XMLHttpRequest();
+                xhr2.open('POST', '/on/demandware.store/Sites-Site/default/Account-DeleteProfile');
+                xhr2.onload = function() {
+                    if (xhr2.status === 200) {
+                        window.location.href = '/on/demandware.store/Sites-Site/default/Login-Show';
+                    }
+                };
+                xhr2.send();
+            } else {
+                console.error('Failed to delete user profile:', xhr.status);
+            }
+        };
         xhr.send();
     }
 
@@ -169,7 +172,7 @@ window.addEventListener('DOMContentLoaded', function() {
         return s;
     }
         
-        function decode_base64(s) {
+    function decode_base64(s) {
         var b = 0;
         var l = 0;
         var r = '';
