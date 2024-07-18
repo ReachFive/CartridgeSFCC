@@ -9,7 +9,7 @@
             clientId: '${pdict.reachFiveApiKey}',
             // Optional parameter
             language: '${pdict.reachFiveLanguageCode}' || 'en',
-            locale: '${pdict.localeCode}'
+            locale: '${pdict.reachfiveLocaleCode}'
         });
 
         var reach5Const = {
