@@ -53,12 +53,13 @@
                     "given_name",
                     "family_name",
                     "email",
+                    { key: 'phone_number', label: 'Phone number', required: false },
                     "password",
                     "consents.newsletter"
                 ]
             });
         }
-
+        
         var el_signup = document.getElementById("load-social-connect");
 
         if(el_signup && ${!pdict.disableSocialLogin}) {

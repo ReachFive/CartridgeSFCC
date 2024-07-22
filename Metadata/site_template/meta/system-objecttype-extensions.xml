@@ -276,6 +276,27 @@
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
+                <default-value>sdkUiClient.showAuth({
+                    container: 'load-social-connect-signup',
+                    initialScreen: 'signup',
+                    allowLogin: false,
+                    allowForgotPassword: allowForgotPassword,
+                    auth: {
+                        responseType: 'code',
+                        redirectUri: redirectUri,
+                        origin : origin,
+                        state: state
+                    },
+                    signupFields: [
+                        "given_name",
+                        "family_name",
+                        "email",
+                        { key: 'phone_number', label: 'Phone number', required: false },
+                        "password",
+                        "password_confirmation",
+                        "consents.newsletter"
+                    ]
+                })</default-value>
             </attribute-definition>
             <attribute-definition attribute-id="load-social-connect2">
                 <display-name xml:lang="x-default">Load social connect2</display-name>
