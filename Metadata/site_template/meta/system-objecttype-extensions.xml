@@ -64,6 +64,10 @@
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
+                <default-value>sdkUiClient.showSocialAccounts({
+                            accessToken: accessToken,
+                            container: 'social-accounts-container'
+                        })</default-value>
             </attribute-definition>
             <attribute-definition attribute-id="cartridgeControllersName">
                 <display-name xml:lang="x-default">Cartridge name with controllers</display-name>
@@ -199,6 +203,7 @@
                 <type>text</type>
                 <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
+                <default-value>{"profile":{"firstName":"given_name","lastName":"family_name","birthday":"birthdate","gender":"gender","companyName":"company","phoneHome":"phone_number"},"address":{"ID":"title","fullName":"recipient","address1":"street_address","city":"locality","postalCode":"postal_code","stateCode":"region","countryCode":"country","phone":"phone_number"},"consents":{"custom.isNewsletter":"newsletter"},"custom_fields":{"custom.cardNo":"loyalty_card_number"}}</default-value>
             </attribute-definition>
             <attribute-definition attribute-id="reach5SupportedLanguageCodes">
                 <display-name xml:lang="x-default">Supported ReachFive LanguageCodes</display-name>
@@ -255,6 +260,10 @@
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
+                <default-value>sdkUiClient.showEmailEditor({
+                        container: 'email-editor',
+                        accessToken: accessToken
+                    })</default-value>
             </attribute-definition>
             <attribute-definition attribute-id="load-social-connect">
                 <display-name xml:lang="x-default">Load social connect</display-name>
@@ -262,6 +271,15 @@
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
+                <default-value>sdkUiClient.showSocialLogin({
+                    container: 'load-social-connect',
+                    auth: {
+                        responseType: 'code',
+                        redirectUri: redirectUri,
+                        origin : origin,
+                        state: state
+                    }
+                })</default-value>
             </attribute-definition>
             <attribute-definition attribute-id="load-social-connect-login">
                 <display-name xml:lang="x-default">Load social connect login</display-name>
@@ -269,6 +287,17 @@
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
+                <default-value>sdkUiClient.showAuth({
+                    container: 'load-social-connect-login',
+                    allowSignup: false,
+                    allowForgotPassword: allowForgotPassword,
+                    auth: {
+                        responseType: 'code',
+                        redirectUri: redirectUri,
+                        origin : origin,
+                        state: state
+                    }
+                })</default-value>
             </attribute-definition>
             <attribute-definition attribute-id="load-social-connect-signup">
                 <display-name xml:lang="x-default">Load social connect signup</display-name>
@@ -276,6 +305,26 @@
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
+                <default-value>sdkUiClient.showAuth({
+                    container: 'load-social-connect-signup',
+                    initialScreen: 'signup',
+                    allowLogin: false,
+                    allowForgotPassword: allowForgotPassword,
+                    auth: {
+                        responseType: 'code',
+                        redirectUri: redirectUri,
+                        origin : origin,
+                        state: state
+                    },
+                    signupFields: [
+                        "given_name",
+                        "family_name",
+                        "email",
+                        "password",
+                        "password_confirmation",
+                        "consents.newsletter"
+                    ]
+                })</default-value>
             </attribute-definition>
             <attribute-definition attribute-id="load-social-connect2">
                 <display-name xml:lang="x-default">Load social connect2</display-name>
@@ -283,6 +332,14 @@
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
+                <default-value>sdkUiClient.showSocialLogin({
+                    container: 'load-social-connect2',
+                    auth: {
+                        responseType: 'code',
+                        redirectUri: redirectUri,
+                        origin : origin
+                    }
+                })</default-value>
             </attribute-definition>
             <attribute-definition attribute-id="password-editor">
                 <display-name xml:lang="x-default">Password editor</display-name>
@@ -290,6 +347,14 @@
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
+                <default-value>sdkUiClient.showPasswordEditor({
+                        container: 'password-editor',
+                        accessToken: accessToken,
+                        promptOldPassword: 'true',
+                        onSuccess: function () {
+                            window.location.href = stateUrl
+                        }
+                    })</default-value>
             </attribute-definition>
             <attribute-definition attribute-id="phone-editor">
                 <display-name xml:lang="x-default">Phone editor</display-name>
@@ -297,6 +362,10 @@
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
+                <default-value>sdkUiClient.showPhoneNumberEditor({
+                        container: 'phone-editor',
+                        accessToken: accessToken
+                })</default-value>
             </attribute-definition>
             <attribute-definition attribute-id="re-auth-container">
                 <display-name xml:lang="x-default">Re auth container</display-name>
@@ -304,6 +373,15 @@
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
+                <default-value>sdkUiClient.showAuth({
+                        container: 're-auth-container',
+                        allowSignup: false,
+                        allowForgotPassword: false,
+                        auth: {
+                            prompt: 'login',
+                            idTokenHint: idToken
+                        }
+                    })</default-value>
             </attribute-definition>
             <attribute-definition attribute-id="reset-password">
                 <display-name xml:lang="x-default">Reset password</display-name>
@@ -311,6 +389,11 @@
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
+                <default-value>sdkUiClient.showPasswordReset({
+                    container: 'reset-password',
+                    loginLink: loginLink,
+                    canShowPassword: true
+                })</default-value>
             </attribute-definition>
             <attribute-definition attribute-id="social-accounts-container">
                 <display-name xml:lang="x-default">Social accounts container</display-name>
@@ -318,6 +401,13 @@
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
+                 <default-value>sdkUiClient.showSocialAccounts({
+                        accessToken: accessToken,
+                        container: 'social-accounts-container',
+                        auth: {
+                            redirectUri: redirectUri
+                        },
+                    })</default-value>
             </attribute-definition>
             <attribute-definition attribute-id="ocapiTokenClientId">
                 <display-name xml:lang="x-default">Ocapi Token Client Id</display-name>
