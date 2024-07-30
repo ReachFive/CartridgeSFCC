@@ -9,7 +9,7 @@ var consentTracking = require('*/cartridge/scripts/middleware/consentTracking');
  * Reach Five Modules
  * */
 var reachFiveHelper = require('*/cartridge/scripts/helpers/reachFiveHelper');
-var reachFiveApiHelper = require('*/cartridge/scripts/helpers/reachFiveApiHelper');
+var reachFiveApiHelper = require('*/cartridge/scripts/helpers/reachfiveApiHelper');
 var ReachFiveModel = require('*/cartridge/models/ReachFiveModel');
 
 /**
@@ -348,7 +348,7 @@ function loginFailedNoCode(error, res) {
  * @param {Object} res Response Object
  * */
 function loginRedirect(targetUrl, res) {
-    if (!targetUrl || targetUrl === '') {
+    if (!targetUrl || targetUrl === '' || targetUrl.indexOf(request.httpHost) === -1) {
         targetUrl = URLUtils.https('Account-Show');
     }
     res.redirect(targetUrl);

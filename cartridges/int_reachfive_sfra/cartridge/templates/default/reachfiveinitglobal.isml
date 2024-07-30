@@ -78,7 +78,7 @@
             let accessToken = '${pdict.reachFiveAccess_token}';
             let providerAccessToken = '${pdict.reachFiveProviderAccessToken}';
             let stateUrl = decodeURIComponent('${dw.crypto.Encoding.toURI(pdict.stateUrl)}')
-
+            
             if(document.getElementById("load-social-connect-login")) {
                 console.log('load-social-connect-login');
                 <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('load-social-connect-login')}" encoding="off">

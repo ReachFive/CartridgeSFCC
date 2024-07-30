@@ -432,7 +432,7 @@ function loginFailed(errorCode) {
  * @param {string} targetUrl Target URL
  * */
 function loginRedirect(targetUrl) {
-    if (!targetUrl || targetUrl === '') {
+    if (!targetUrl || targetUrl === '' || targetUrl.indexOf(request.httpHost) === -1) {
         // eslint-disable-next-line no-param-reassign
         targetUrl = URLUtils.https('Account-Show').toString();
     }
