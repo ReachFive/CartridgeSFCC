@@ -12,7 +12,7 @@ var Calendar = require('dw/util/Calendar');
  * Script Modules
  */
 var reachFiveHelper = require('int_reachfive/cartridge/scripts/helpers/reachFiveHelper');
-var reachFivApiHelper = require('int_reachfive/cartridge/scripts/helpers/reachFiveApiHelper');
+var reachFiveApiHelper = require('int_reachfive/cartridge/scripts/helpers/reachfiveApiHelper');
 var libReachFiveSynchronization = require('int_reachfive/cartridge/scripts/job/libReachFiveSynchronization');
 var reachFiveServiceInterface = require('int_reachfive/cartridge/scripts/interfaces/reachFiveInterface');
 
@@ -102,7 +102,7 @@ module.exports.read = function () {
  */
 module.exports.process = function (profile) {
     try {
-        var reachFiveExternalID = reachFivApiHelper.getReachFiveExternalID(profile);
+        var reachFiveExternalID = reachFiveApiHelper.getReachFiveExternalID(profile);
         if (!reachFiveExternalID) {
             LOGGER.warn("External ID not find for this profil.");
             return new Status(Status.ERROR);
