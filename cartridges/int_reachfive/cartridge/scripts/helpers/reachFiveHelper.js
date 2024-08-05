@@ -578,10 +578,7 @@ function createLoginRedirectUrl(tkn, stateTarget) {
  * @return {Object} result
  * */
 function verifySessionAccessTkn(updateFlag) {
-    var Resource = require('dw/web/Resource');
-    var reachFiveService = require('*/cartridge/scripts/interfaces/reachFiveInterface');
-    var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
-    var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
+
     var status = {
         success: false,
         msg: Resource.msg('reachfive.access_tkn.expired', 'reachfive', null)
@@ -594,9 +591,7 @@ function verifySessionAccessTkn(updateFlag) {
 
     var reachfiveSession = new ReachfiveSessionModel();
 
-    if (reachfiveSession.isAccessToken5MinLimit()) {
-        status.success = true;
-    } else if (updateToken) {
+    if (reachfiveSession.isAccessToken5MinLimit() || reachfiveSession.isAccessTokenExpired()) {
         if (reachfiveSession.refresh_token) {
             var tokenObj = reachFiveService.retrieveAccessTokenWithRefresh(reachfiveSession.refresh_token);
 
@@ -610,6 +605,8 @@ function verifySessionAccessTkn(updateFlag) {
         } else {
             LOGGER.error('Error. access_token has expired and can not be updated. Check reachfive client preferences scope for "offline_access".');
         }
+    } else {
+         status.success = true;
     }
 
     return status;
