@@ -578,7 +578,10 @@ function createLoginRedirectUrl(tkn, stateTarget) {
  * @return {Object} result
  * */
 function verifySessionAccessTkn(updateFlag) {
-
+    var Resource = require('dw/web/Resource');
+    var reachFiveService = require('*/cartridge/scripts/interfaces/reachFiveInterface');
+    var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
+    var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
     var status = {
         success: false,
         msg: Resource.msg('reachfive.access_tkn.expired', 'reachfive', null)
