@@ -9,7 +9,7 @@ var consentTracking = require('*/cartridge/scripts/middleware/consentTracking');
  * Reach Five Modules
  * */
 var reachFiveHelper = require('*/cartridge/scripts/helpers/reachFiveHelper');
-var reachFiveApiHelper = require('*/cartridge/scripts/helpers/reachFiveApiHelper');
+var reachFiveApiHelper = require('*/cartridge/scripts/helpers/reachfiveApiHelper');
 var ReachFiveModel = require('*/cartridge/models/ReachFiveModel');
 
 /**

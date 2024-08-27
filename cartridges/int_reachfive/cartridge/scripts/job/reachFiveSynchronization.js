@@ -12,7 +12,7 @@ var Calendar = require('dw/util/Calendar');
  * Script Modules
  */
 var reachFiveHelper = require('int_reachfive/cartridge/scripts/helpers/reachFiveHelper');
-var reachFivApiHelper = require('int_reachfive/cartridge/scripts/helpers/reachFiveApiHelper');
+var reachFiveApiHelper = require('int_reachfive/cartridge/scripts/helpers/reachfiveApiHelper');
 var libReachFiveSynchronization = require('int_reachfive/cartridge/scripts/job/libReachFiveSynchronization');
 var reachFiveServiceInterface = require('int_reachfive/cartridge/scripts/interfaces/reachFiveInterface');
 
@@ -37,7 +37,7 @@ module.exports.beforeStep = function () {
         }
         profileFieldsObj = JSON.parse(profileFields);
 
-            var yesterdayCalendar = new Calendar();
+        var yesterdayCalendar = new Calendar();
             yesterdayCalendar.add(Calendar.DATE, -1); 
             var yesterdayDate = yesterdayCalendar.time; 
             
@@ -53,12 +53,13 @@ module.exports.beforeStep = function () {
             
             profilesIterator = CustomerMgr.queryProfiles(query, sortString, queryParams);
             
-        if (profilesIterator.hasNext()) {
+       if (profilesIterator.hasNext()) {
             managementTokenObj = reachFiveServiceInterface.generateTokenForManagementAPI();
             if (!managementTokenObj.ok) {
                 LOGGER.error('Error during ReachFive Management token call: {0}', managementTokenObj.errorMessage);
                 return new Status(Status.ERROR);
             }
+        
         }
 
         return new Status(Status.OK);
@@ -102,7 +103,7 @@ module.exports.read = function () {
  */
 module.exports.process = function (profile) {
     try {
-        var reachFiveExternalID = reachFivApiHelper.getReachFiveExternalID(profile);
+        var reachFiveExternalID = reachFiveApiHelper.getReachFiveExternalID(profile);
         if (!reachFiveExternalID) {
             LOGGER.warn("External ID not find for this profil.");
             return new Status(Status.ERROR);

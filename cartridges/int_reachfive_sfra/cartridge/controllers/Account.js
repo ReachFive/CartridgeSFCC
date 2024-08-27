@@ -10,7 +10,7 @@ var consentTracking = require('*/cartridge/scripts/middleware/consentTracking');
 // var Site = require('dw/system/Site');
 var Transaction = require('dw/system/Transaction');
 var reachFiveHelper = require('*/cartridge/scripts/helpers/reachFiveHelper');
-var reachFiveApiHelper = require('*/cartridge/scripts/helpers/reachFiveApiHelper');
+var reachFiveApiHelper = require('*/cartridge/scripts/helpers/reachfiveApiHelper');
 var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
 var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 

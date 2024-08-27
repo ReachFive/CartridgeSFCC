@@ -178,7 +178,7 @@ function exchangeAuthorizationCodeForIDToken(customFields) {
         return_provider_token: reachfiveSettings.isReachFiveReturnProviderToken,
         redirect_uri: customFields.redirectUrl || URLUtils.https('ReachFiveController-CallbackReachFiveRequest').toString()
     };
-    return oauthToken(requestObj);
+    return oauthToken(requestObj).object;
 }
 
 
