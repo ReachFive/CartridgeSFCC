@@ -389,6 +389,7 @@ function signUp(login, password, profile) {
             family_name: profile.lastName,
             email: login,
             password: password,
+            phone_number: profile.phoneHome,
             consents: {
                 newsletter: {
                     granted: false,
