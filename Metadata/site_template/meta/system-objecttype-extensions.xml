@@ -74,7 +74,7 @@
                 <default-value>app_storefront_controllers</default-value>
             </attribute-definition>
             <attribute-definition attribute-id="isReach5ThemeActive">
-                <display-name xml:lang="x-default">Use default ReachFive theme</display-name>
+                 <display-name xml:lang="x-default">Use default ReachFive theme</display-name>
                 <description xml:lang="x-default">If set to "No" falls back on "light" theme from SalesForce</description>
                 <type>boolean</type>
                 <mandatory-flag>false</mandatory-flag>
@@ -158,10 +158,8 @@
                 <default-value>https://cdn.jsdelivr.net/npm/@reachfive/identity-core@latest/umd/identity-core.min.js</default-value>
             </attribute-definition>
             <attribute-definition attribute-id="reach5DefaulLanguageCode">
-                <display-name xml:lang="x-default">Default ReachFive LanguageCode</display-name>
-                <description xml:lang="x-default">Defaul ReachFive LanguageCodes. It sets the language
-
- of ReachFive Form. The language lowercase ISO 639-1 code. e.g: en, es, fr, it, nl ... It is used when current site language is not supported.</description>
+                 <display-name xml:lang="x-default">Default ReachFive LanguageCode</display-name>
+                <description xml:lang="x-default">Defaul ReachFive LanguageCodes. It sets the language of ReachFive Form. The language lowercase ISO 639-1 code. e.g: en, es, fr, it, nl ... It is used when current site language is not supported.</description>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -258,28 +256,28 @@
             </attribute-definition>
             <attribute-definition attribute-id="email-editor">
                 <display-name xml:lang="x-default">ReachFive showEmailEditor widget configuration</display-name>
-                <description xml:lang="x-default">Define widget options (described here: showEmailEditor | UI JS SDK | ReachFive Documentation )</description>
+                <description xml:lang="x-default">Define widget options (described here: https://developer.reachfive.com/sdk-ui/showEmailEditor.html )</description>
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
             <attribute-definition attribute-id="load-social-connect">
-                <display-name xml:lang="x-default">ReachFive showSocialLogin widget configuration</display-name>
-                <description xml:lang="x-default">Define widget options (described here: showSocialLogin | UI JS SDK | ReachFive Documentation )</description>
+               <display-name xml:lang="x-default">ReachFive showSocialLogin widget configuration</display-name>
+                <description xml:lang="x-default">Define widget options (described here: https://developer.reachfive.com/sdk-ui/showSocialLogin.html)</description>
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
             <attribute-definition attribute-id="load-social-connect-login">
-                <display-name xml:lang="x-default">ReachFive showAuth widget configuration</display-name>
-                <description xml:lang="x-default">Define widget options (described here: showAuth | UI JS SDK | ReachFive Documentation ) ; This widget is used for the flow in the Home page</description>
+               <display-name xml:lang="x-default">ReachFive showAuth widget configuration</display-name>
+                <description xml:lang="x-default">Define widget options (described here: https://developer.reachfive.com/sdk-ui/showAuth.html ) ; This widget is used for the flow in the Home page</description>
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
             <attribute-definition attribute-id="load-social-connect-signup">
-                <display-name xml:lang="x-default">ReachFive showAuth widget configuration</display-name>
-                <description xml:lang="x-default">Define widget options (described here: showAuth | UI JS SDK | ReachFive Documentation ) ; This widget is used for the flow in the Home page</description>
+                 <display-name xml:lang="x-default">ReachFive showAuth widget configuration</display-name>
+                <description xml:lang="x-default">Define widget options (described here: https://developer.reachfive.com/sdk-ui/showAuth.html ) ; This widget is used for the flow in the Home page</description>
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -292,15 +290,15 @@
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
             <attribute-definition attribute-id="password-editor">
-                <display-name xml:lang="x-default">ReachFive showPasswordEditor widget configuration</display-name>
-                <description xml:lang="x-default">Define widget options (described here: showPasswordEditor | UI JS SDK | ReachFive Documentation ) ; This widget is used in My Account dashboard</description>
+               <display-name xml:lang="x-default">ReachFive showPasswordEditor widget configuration</display-name>
+                <description xml:lang="x-default">Define widget options (described here: https://developer.reachfive.com/sdk-ui/showPasswordEditor.html ) ; This widget is used in My Account dashboard</description>
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
             <attribute-definition attribute-id="phone-editor">
-                <display-name xml:lang="x-default">ReachFive showPhoneNumberEditor widget configuration</display-name>
-                <description xml:lang="x-default">Define widget options (described here: showPhoneNumberEditor | UI JS SDK | ReachFive Documentation )</description>
+                 <display-name xml:lang="x-default">ReachFive showPhoneNumberEditor widget configuration</display-name>
+                <description xml:lang="x-default">Define widget options (described here: https://developer.reachfive.com/sdk-ui/showPhoneNumberEditor.html )</description>
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -308,28 +306,26 @@
             <attribute-definition attribute-id="re-auth-container">
                 <display-name xml:lang="x-default">Re auth container</display-name>
                 <description xml:lang="x-default">Auth token under the login form</description>
-
-
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
             <attribute-definition attribute-id="reset-password">
                 <display-name xml:lang="x-default">ReachFive showPasswordReset widget configuration</display-name>
-                <description xml:lang="x-default">Define widget options (described here: showPasswordReset | UI JS SDK | ReachFive Documentation )</description>
+                <description xml:lang="x-default">Define widget options (described here: https://developer.reachfive.com/sdk-ui/showPasswordReset.html )</description>
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
             <attribute-definition attribute-id="social-accounts-container">
                 <display-name xml:lang="x-default">ReachFive showSocialAccounts widget configuration</display-name>
-                <description xml:lang="x-default">Define widget options (described here: showSocialAccounts | UI JS SDK | ReachFive Documentation ) ; This widget can be found in My Account dashboard</description>
+                <description xml:lang="x-default">Define widget options (described here: https://developer.reachfive.com/sdk-ui/showSocialAccounts.html ) ; This widget can be found in My Account dashboard</description>
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
             <attribute-definition attribute-id="ocapiTokenClientId">
-                <display-name xml:lang="x-default">SalesForce Open Commerce API client ID</display-name>
+               <display-name xml:lang="x-default">SalesForce Open Commerce API client ID</display-name>
                 <description xml:lang="x-default">The client id/username to get the access token for OCAPI</description>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
