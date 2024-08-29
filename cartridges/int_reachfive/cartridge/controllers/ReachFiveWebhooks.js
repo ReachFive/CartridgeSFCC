@@ -28,18 +28,14 @@ server.post('UpdateUser', function (req, res, next) {
         }
     }; 
 
-    LOGGER.warn("J'arrive au if " + reachFiveUser);
     if (!reachFiveUser || !reach5ObjType) {
         res.setStatusCode(400);
-        LOGGER.warn("Il manque des data et je suis en erreur reachfive user :" + reachFiveUser);
         res.json({ error: 'Missing data' });
         return next();
     }
 
     var profile = CustomerMgr.getExternallyAuthenticatedCustomerProfile("ReachFive", reachFiveUser.id);
-    
-    LOGGER.warn("CustomerID " + reachFiveUser.id);
-    LOGGER.warn("Profile " + profile);
+
     if (!profile) {
         res.setStatusCode(404);
         res.json({ error: 'Customer not found' });
@@ -47,7 +43,6 @@ server.post('UpdateUser', function (req, res, next) {
         return next();
     }
 
-    LOGGER.warn("profileFieldsObj: " + profileFieldsObj + " profile: " + profile + " reachFiveUser: " + reachFiveUser + " reach5ObjType: " + reach5ObjType);
     libReachFiveSynchronization.updateSFCCProfile(profileFieldsObj, profile, reachFiveUser, reach5ObjType);
 
     res.setStatusCode(200);
