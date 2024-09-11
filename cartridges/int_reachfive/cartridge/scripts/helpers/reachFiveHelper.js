@@ -395,7 +395,7 @@ function getStateObjBase64(redirectURL, action, handleCustomerRoute, data) {
         stateObj.data = data;
     }
 
-    return dwStringUtils.encodeBase64(JSON.stringify(stateObj));
+    return StringUtils.encodeBase64(JSON.stringify(stateObj));
 }
 
 

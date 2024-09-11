@@ -2,8 +2,54 @@
 
 var server = require('server');
 var LOGGER = require('dw/system/Logger').getLogger('reachfive');
-
+var CustomerMgr = require('dw/customer/CustomerMgr');
+var Transaction = require('dw/system/Transaction');
+var libReachFiveSynchronization = require('~/cartridge/scripts/job/libReachFiveSynchronization');
 var salesforceInterface = require('~/cartridge/scripts/interfaces/salesforceInterface');
+
+server.post('UpdateUser', function (req, res, next) {
+    var webhookData;
+    try {
+        webhookData = JSON.parse(req.body);
+    } catch (e) {
+        res.setStatusCode(400);
+        res.json({ error: 'Invalid JSON' });
+        return next();
+    }
+
+    var reachFiveUser = webhookData.user;
+    var reach5ObjType = "user"; 
+    var profileFieldsObj = {
+        user: {
+            email: 'email',               
+            phone_number: 'phoneHome',  
+            given_name: 'firstName',      
+            family_name: 'lastName'
+        }
+    }; 
+
+    if (!reachFiveUser || !reach5ObjType) {
+        res.setStatusCode(400);
+        res.json({ error: 'Missing data' });
+        return next();
+    }
+
+    var profile = CustomerMgr.getExternallyAuthenticatedCustomerProfile("ReachFive", reachFiveUser.id);
+
+    if (!profile) {
+        res.setStatusCode(404);
+        res.json({ error: 'Customer not found' });
+        LOGGER.warn("Customer not found");
+        return next();
+    }
+
+    libReachFiveSynchronization.updateSFCCProfile(profileFieldsObj, profile, reachFiveUser, reach5ObjType);
+
+    res.setStatusCode(200);
+    res.json({ success: true });
+
+    return next();
+});
 
 server.post('DeleteUser', server.middleware.https, function(req, res, next) {
     var payload = req.httpParameterMap.getRequestBodyAsString();
@@ -30,4 +76,34 @@ server.post('DeleteUser', server.middleware.https, function(req, res, next) {
     next();
 });
 
+server.post('DeleteUser', server.middleware.https, function(req, res, next) {
+    var payload = req.httpParameterMap.getRequestBodyAsString();
+    LOGGER.warn("payload" + payload);
+    try {
+        var eventData = JSON.parse(payload);
+        var userId = eventData.user.id; 
+        
+        var customerProfile = salesforceInterface.findCustomerProfileByExternalID("ReachFive", userId);
+        
+        if (customerProfile) {
+            Transaction.wrap(function() {
+                LOGGER.warn("Utilisateur déconnecté (si possible)");
+            });
+            var result = salesforceInterface.deleteCustomerUsingOCAPI(customerProfile.getCustomer());
+            res.setStatusCode(200);
+        } else {
+            LOGGER.warn("No profile found");
+            res.setStatusCode(404);
+            res.json({ error: 'No profile found' });
+        }
+    } catch (e) {
+        LOGGER.error("Error when webhook is processing : " + e.toString());
+        res.setStatusCode(500);
+        res.json({ error: e.toString() });
+    }
+
+    next();
+});
+
 module.exports = server.exports();
+
