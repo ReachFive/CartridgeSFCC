@@ -325,6 +325,7 @@
                         "given_name",
                         "family_name",
                         "email",
+                        { key: 'phone_number', label: 'Phone number', required: false },
                         "password",
                         "password_confirmation",
                         "consents.newsletter"
