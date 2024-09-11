@@ -348,7 +348,7 @@ function loginFailedNoCode(error, res) {
  * @param {Object} res Response Object
  * */
 function loginRedirect(targetUrl, res) {
-    if (!targetUrl || targetUrl === '') {
+    if (!targetUrl || targetUrl === '' || targetUrl.indexOf(request.httpHost) === -1) {
         targetUrl = URLUtils.https('Account-Show');
     }
     res.redirect(targetUrl);
@@ -519,7 +519,6 @@ server.post(
                             }
 
                             var target = afterAuth.getLoginRedirectURL(req.querystring.rurl, req.session.privacyCache, true);
-
                             target = handleCustomerRoute(loggedCustomer, target, afterAuth.isHandlerActionRequire(req.querystring.rurl));
 
                             res.json({
