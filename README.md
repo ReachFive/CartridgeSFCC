@@ -17,3 +17,12 @@ The latest compatible version of SiteGenesis is 18.3
 
 # Getting Started
 For detailed instructions on integration and configuration, please refer to our documentation available at [https://developer.reachfive.com/docs/integration/salesforce.html](https://developer.reachfive.com/docs/integration/salesforce.html). This documentation provides all the necessary information for integrating and configuring the ReachFive Cartridge for Salesforce B2C Commerce, tailored to your site version, whether it's SFRA or SiteGenesis.
+
+# Git Branching Strategy
+This GitFlow strategy is composed of the following branches:
+
+- Main branch: Serves as the official release history.
+- Development branch: Used as the integration branch for features.
+- Feature branches: Used to develop new features derived from the development branch.
+- Release branches: Help in preparing a new production release. Typically branched off from the development branch and must be merged back into both development and main branches upon completion.
+- Hotfix branches: Facilitate quick fixes for production issues found in the main branch, allowing developers to address bugs without halting ongoing work in the development branch.
