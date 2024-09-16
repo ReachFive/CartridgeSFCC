@@ -15,6 +15,7 @@ var Cookie = require('dw/web/Cookie');
 var Resource = require('dw/web/Resource');
 var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 var StringUtils = require('dw/util/StringUtils');
+var URLUtils = require('dw/web/URLUtils');
 
 var reachFiveService = require('*/cartridge/scripts/interfaces/reachFiveInterface');
 var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
