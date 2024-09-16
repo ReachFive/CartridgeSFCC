@@ -389,7 +389,6 @@ function signUp(login, password, profile) {
             family_name: profile.lastName,
             email: login,
             password: password,
-            phone_number: profile.phoneHome,
             consents: {
                 newsletter: {
                     granted: false,
@@ -398,6 +397,10 @@ function signUp(login, password, profile) {
             }
         }
     };
+
+    if (profile && profile.phoneHome) {
+        requestParams.data.phone_number = profile.phoneHome;
+    }
 
     // Service Call
     var service = configureService('reachfive.signup.post');
