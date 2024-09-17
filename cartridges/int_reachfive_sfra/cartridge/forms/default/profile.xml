@@ -22,7 +22,7 @@
 		<field
 			formid="email" 
 			label="label.input.email.profile" 
-			mandatory="false" 
+			mandatory="true" 
 			max-length="50" 
 			missing-error="error.message.required"
 			parse-error="error.message.parse.email.profile.form"
@@ -35,7 +35,7 @@
 		<field 
 			formid="emailconfirm"
 			label="label.input.emailconfirm.profile"
-			mandatory="false"
+			mandatory="true"
 			max-length="50"
 			missing-error="error.message.required"
 			parse-error="error.message.parse.email.profile.form"
