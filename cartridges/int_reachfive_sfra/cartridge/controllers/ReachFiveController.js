@@ -348,7 +348,7 @@ function loginFailedNoCode(error, res) {
  * @param {Object} res Response Object
  * */
 function loginRedirect(targetUrl, res) {
-    if (!targetUrl || targetUrl === '' || targetUrl.indexOf(request.httpHost) === -1) {
+    if (!targetUrl || targetUrl === '' ) {
         targetUrl = URLUtils.https('Account-Show');
     }
     res.redirect(targetUrl);

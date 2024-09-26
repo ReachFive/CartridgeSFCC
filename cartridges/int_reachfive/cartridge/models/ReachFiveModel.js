@@ -77,8 +77,8 @@ var ReachFiveModel = ({
 			if( !has_password ) {
 				profile.custom.reachfiveHasTechnicalPassword = true;
 			}
-
 			// Complete customer's profile with firstname, lastname, email and birthday if exists
+
 			if (reachFiveHelper.isFieldExist(externalProfile, 'given_name')) {
 				profile.setFirstName(externalProfile.given_name);
 			}
@@ -87,7 +87,7 @@ var ReachFiveModel = ({
 				profile.setLastName(externalProfile.family_name);
 			}
 
-      if (reachFiveHelper.isFieldExist(externalProfile, 'phone_number')) {
+      		if (reachFiveHelper.isFieldExist(externalProfile, 'phone_number')) {
 				profile.setPhoneHome(externalProfile.phone_number);
 			}
 
@@ -107,6 +107,19 @@ var ReachFiveModel = ({
 					profile.setGender(2);
 				} else if (gender.equals('male')) {
 					profile.setGender(1);
+				}
+			}
+
+			if (reachFiveHelper.isFieldExist(externalProfile, 'auth_type') && externalProfile.auth_type === 'kakaotalk') {
+				if (reachFiveHelper.isFieldExist(externalProfile, 'name')) {
+					var fullName = externalProfile.name;
+
+					// Split the name into the first letter and the rest
+					var lastName = fullName.substring(0, 1); // First letter
+					var firstName = fullName.substring(1);   // Rest of the name
+
+					profile.setLastName(lastName);
+					profile.setFirstName(firstName);
 				}
 			}
 
