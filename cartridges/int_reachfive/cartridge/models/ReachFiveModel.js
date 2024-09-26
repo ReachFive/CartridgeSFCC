@@ -109,19 +109,21 @@ var ReachFiveModel = ({
 					profile.setGender(1);
 				}
 			}
+			if (reachFiveHelper.isReachFiveEnableKakaoTalkNameSplit()) {
 
-			if (reachFiveHelper.isFieldExist(externalProfile, 'auth_type') && externalProfile.auth_type === 'kakaotalk') {
-				if (reachFiveHelper.isFieldExist(externalProfile, 'name')) {
-					var fullName = externalProfile.name;
+				if (reachFiveHelper.isFieldExist(externalProfile, 'auth_type') && externalProfile.auth_type === 'kakaotalk') {
+					if (reachFiveHelper.isFieldExist(externalProfile, 'name')) {
+						var fullName = externalProfile.name;
 
-					// Split the name into the first letter and the rest
-					var lastName = fullName.substring(0, 1); // First letter
-					var firstName = fullName.substring(1);   // Rest of the name
+						// Split the name into the first letter and the rest
+						var lastName = fullName.substring(0, 1); // First letter
+						var firstName = fullName.substring(1);   // Rest of the name
 
-					profile.setLastName(lastName);
-					profile.setFirstName(firstName);
+						profile.setLastName(lastName);
+						profile.setFirstName(firstName);
+						}
+					}
 				}
-			}
 
       // TODO: Check this attribute "isNewsletter" looks like it is not used
       //       Also check it in system attributes

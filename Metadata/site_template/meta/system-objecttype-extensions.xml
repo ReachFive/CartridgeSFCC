@@ -242,6 +242,14 @@
                 <externally-managed-flag>false</externally-managed-flag>
                 <default-value>365</default-value>
             </attribute-definition>
+            <attribute-definition attribute-id="enableKakaoTalkNameSplit">
+                <display-name xml:lang="x-default">Split Kakao Name between Lastname and Firstname</display-name>
+                <description xml:lang="x-default">Enables the split function concerning the kakao name - first character in lastname , the rest in firstname</description>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>false</default-value>
+            </attribute-definition>
             <attribute-definition attribute-id="reachFiveCheckCredentials">
                 <display-name xml:lang="x-default">User profile updates verification method</display-name>
                 <description xml:lang="x-default">Authentication method used to validate profile updates</description>
@@ -443,6 +451,7 @@
                 <attribute attribute-id="cartridgeControllersName"/>
                 <attribute attribute-id="isReachFiveEnabled"/>
                 <attribute attribute-id="isReachFiveTransitionActive"/>
+                <attribute attribute-id="enableKakaoTalkNameSplit"/> 
                 <attribute attribute-id="reachFiveTransitionCookieDuration"/>
                 <attribute attribute-id="isReachFiveSessionForcedAuth"/>
                 <attribute attribute-id="isReach5ThemeActive"/>
