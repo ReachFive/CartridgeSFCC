@@ -60,6 +60,15 @@ function getReachFiveUserCustomObjectType() {
 
 /**
  * @function
+ * @description enable name Split function
+ * @return {boolean} True or False
+ * */
+function isReachFiveEnableKakaoTalkNameSplit() {
+    return getReachFivePreferences('enableKakaoTalkNameSplit');
+}
+
+/**
+ * @function
  * @description is Reach Five enabled
  * @return {boolean} True or False
  * */
@@ -528,3 +537,4 @@ module.exports.getReachFiveUserCustomObjectType = getReachFiveUserCustomObjectTy
 module.exports.getStateObjBase64 = getStateObjBase64;
 module.exports.createLoginRedirectUrl = createLoginRedirectUrl;
 module.exports.verifySessionAccessTkn = verifySessionAccessTkn;
+module.exports.isReachFiveEnableKakaoTalkNameSplit = isReachFiveEnableKakaoTalkNameSplit;
