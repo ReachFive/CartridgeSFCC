@@ -128,18 +128,12 @@
             if(reAuthContainer && socialAccountsContainer) {
                 var idToken = null;
 
-                try{
-                    idToken = '${pdict.CurrentSession.privacy.id_token}';
-                } catch(err) {
-                }
-
                 sdkUiClient.showAuth({
                     container: 're-auth-container',
                     allowSignup: false,
                     allowForgotPassword: false,
                     auth: {
                         prompt: 'login',
-                        idTokenHint: idToken
                     }
                 });
             }

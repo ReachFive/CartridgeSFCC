@@ -132,7 +132,6 @@ ReachfiveSession.prototype = {
             externalProfile = decodeIdToken(authRespObj.id_token);
 
             if (externalProfile) {
-                session.privacy.id_token = authRespObj.id_token;
                 session.privacy.access_token = authRespObj.access_token;
                 session.privacy.access_token_exp = externalProfile.exp;
                 session.privacy.access_token_iat = externalProfile.iat;
