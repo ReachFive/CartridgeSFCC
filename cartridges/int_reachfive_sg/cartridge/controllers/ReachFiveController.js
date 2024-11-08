@@ -60,7 +60,7 @@ function initReachFive() {
 
     // Get request parameters to disable social login to prevent autologin with sso
     var disableSocialLogin = request.httpParameterMap.isParameterSubmitted('disableSocialLogin')
-                            && request.httpParameterMap.disableSocialLogin.value === 'true';
+        && request.httpParameterMap.disableSocialLogin.value === 'true';
 
     // Render view
     app.getView({
@@ -86,7 +86,7 @@ function initReachFive() {
  * @function
  * @description Display javascript tags for ReachFive
  * */
- function initReachFiveGlobal() {
+function initReachFiveGlobal() {
     var targetPage = request.httpParameterMap.isParameterSubmitted('state') ? request.httpParameterMap.state.value : request.httpReferer;
     var ignoreSessionAuth = !reachFiveHelper.isReachFiveSessionForcedAuth() || customer.authenticated;
 
@@ -192,7 +192,7 @@ function callbackReachFiveRequest() {
                 'email',
                 email
             ).toString());
-        // eslint-disable-next-line no-else-return
+            // eslint-disable-next-line no-else-return
         } else {
             // Get profile with email and if email is not null
             if (!!email) {
@@ -231,16 +231,16 @@ function callbackReachFiveRequest() {
                 return loginRedirect(target);
             }
         }
-     } else {
+    } else {
         // Case : Login a customer with reachfive provider
         // Login externally customer
         loggedCustomer = ReachFiveModel.loginReachFiveCustomer(externalID, profile);
         reachFiveHelper.setReachFiveLoginCookie();
 
         return loginRedirect(target);
-     }
-     // If any condition above was validated, the externally login failed
-     return loginFailed('genericerror');
+    }
+    // If any condition above was validated, the externally login failed
+    return loginFailed('genericerror');
 }
 
 /**
@@ -249,7 +249,7 @@ function callbackReachFiveRequest() {
  * @return {void}
  *
  * */
- function callbackCheckSessionRequest() {
+function callbackCheckSessionRequest() {
     //  Step 2: Handle the Authorization Response
     var code = request.httpParameterMap.code.value;
     var stateUrl = request.httpParameterMap.isParameterSubmitted('state')
@@ -317,7 +317,6 @@ function callbackReachFiveRequest() {
  */
 function setReachFiveAuthorizationInSession(authorizationResponse) {
     session.privacy.access_token = authorizationResponse.access_token;
-    session.privacy.id_token = authorizationResponse.id_token;
 }
 
 /**
@@ -381,7 +380,7 @@ function handleLinkForm() {
                     ContinueURL: URLUtils.https('ReachFiveController-HandleLinkForm')
                 }).render('account/login/reachfivelinkform');
                 return;
-            // eslint-disable-next-line no-else-return
+                // eslint-disable-next-line no-else-return
             } else {
                 loginForm.clear();
             }
@@ -558,7 +557,7 @@ function showSocialAccounts() {
  * @return {dw.web.Url} The URL to redirect to in case of success
  * or {@link module:controllers/Account~Show|Account controller Show function} in case of failure.
  */
- function getTargetUrl() {
+function getTargetUrl() {
     if (session.custom.TargetLocation) {
         var target = session.custom.TargetLocation;
         delete session.custom.TargetLocation;
@@ -599,8 +598,8 @@ function ajaxLogin() {
     }
 
     if (authenticatedCustomer) {
-    // Check does it customer has external reach five profile if yes - logout, return success response
-    // If matched external reach five profile does not exist try to create profile with this login and pass
+        // Check does it customer has external reach five profile if yes - logout, return success response
+        // If matched external reach five profile does not exist try to create profile with this login and pass
         // If profile was created proper - logout, return success response
         // If profile was not created because of password policy - return error or force customer to create external profile with new password ????????
         // If profile already exist - !!!!!!!!!!! not described behavior, potential risk.
@@ -701,7 +700,7 @@ function ajaxSignUp() {
 
         if (orderNo) {
             var orders = OrderMgr.searchOrders('orderNo={0} AND status!={1}', 'creationDate desc', orderNo,
-                    dw.order.Order.ORDER_STATUS_REPLACED);
+                dw.order.Order.ORDER_STATUS_REPLACED);
             if (orders) {
                 var foundOrder = orders.next();
                 Transaction.wrap(function () {
