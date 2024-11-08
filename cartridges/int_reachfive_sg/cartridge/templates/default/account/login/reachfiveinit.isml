@@ -126,8 +126,6 @@
             var socialAccountsContainer = document.getElementById("social-accounts-container");
 
             if(reAuthContainer && socialAccountsContainer) {
-                var idToken = null;
-
                 sdkUiClient.showAuth({
                     container: 're-auth-container',
                     allowSignup: false,
