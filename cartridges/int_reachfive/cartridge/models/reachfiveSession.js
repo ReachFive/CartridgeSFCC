@@ -29,12 +29,6 @@ function ReachfiveSession(authRespObj) {
         }
     });
 
-    Object.defineProperty(this, 'id_token', {
-        get: function () {
-            return session.privacy.id_token;
-        }
-    });
-
     Object.defineProperty(this, 'provider_access_token', {
         get: function () {
             return session.privacy.provider_access_token;
@@ -144,8 +138,6 @@ ReachfiveSession.prototype = {
                     session.privacy.provider_access_token = authRespObj.provider_access_token;
                 }
             }
-        } else if (session.privacy.id_token) {
-            externalProfile = decodeIdToken(session.privacy.id_token);
         }
 
         if (externalProfile) {
