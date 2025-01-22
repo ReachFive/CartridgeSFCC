@@ -1,5 +1,20 @@
 'use strict';
 
+var Site = require('dw/system/Site');
+
+const removeLongStrings = (obj) => {
+    for (let key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            if (typeof obj[key] === 'object' && obj[key] !== null) {
+                removeLongStrings(obj[key]); // recursive call to handle nested objects
+            } else if (typeof obj[key] === 'string' && obj[key].length > 1999) {
+                delete obj[key];
+            }
+        }
+    }
+    return obj;
+}
+
 /**
  * @constructor
  * @classdesc Reachfive session data
@@ -141,7 +156,26 @@ ReachfiveSession.prototype = {
         }
 
         if (externalProfile) {
-            this.profile = externalProfile;
+            // we need to keep the external profile in session for later use
+            // simply remove image
+            var cleanedProfile = removeLongStrings(externalProfile);
+            session.privacy.profile = cleanedProfile;
+            this.profile = cleanedProfile;
+        }
+
+        if (Site.getCurrent().getCustomPreferenceValue('enableKakaoTalkNameSplit')) {
+            if (!empty(externalProfile.auth_type) && externalProfile.auth_type === 'kakaotalk') {
+                if (!empty(externalProfile.name)) {
+                    var fullName = externalProfile.name;
+
+                    // Split the name into the first letter and the rest
+                    var lastName = fullName.substring(0, 1); // First letter
+                    var firstName = fullName.substring(1);   // Rest of the name
+
+                    session.privacy.profile.lastName = lastName;
+                    session.privacy.profile.firstName = firstName;
+                }
+            }
         }
     },
     isAccessToken5MinLimit: function () {
