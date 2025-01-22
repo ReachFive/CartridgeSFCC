@@ -105,7 +105,7 @@ describe('ReachfiveSession', function () {
         expect(session.privacy.profile.lastName).to.equal('최');
     });
 
-    it('should don\'t split name if kakao provider and sitePref undifined or false', function () {
+    it('shouldn\'t split name if kakao provider and sitePref undifined or false', function () {
         const authRespObj = {
             access_token: 'access_token',
             refresh_token: 'refresh_token',
