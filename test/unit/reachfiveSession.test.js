@@ -6,6 +6,7 @@ var Site = require('dw-api-mock/dw/system/Site');
 var ReachfiveSession = proxyquire('../../cartridges/int_reachfive/cartridge/models/reachfiveSession', {
     'dw/crypto/Encoding': Encoding,
     'dw/system/Site': Site,
+    'dw/system/Logger': require('dw-api-mock/dw/system/Logger')
 });
 
 // Thi is a mock of the Demandware global object
@@ -65,10 +66,10 @@ describe('ReachfiveSession', function () {
 
         const reachfiveSession = new ReachfiveSession(authRespObj);
 
-        expect(session.privacy.profile.picture).to.be.undefined;
-        expect(session.privacy.access_token).to.equal(authRespObj.access_token);
-        expect(session.privacy.refresh_token).to.equal(authRespObj.refresh_token);
-        expect(session.privacy.provider_access_token).to.equal(authRespObj.provider_access_token);
+        expect(session.profile_picture).to.be.undefined;
+        expect(reachfiveSession.access_token).to.equal(authRespObj.access_token);
+        expect(reachfiveSession.refresh_token).to.equal(authRespObj.refresh_token);
+        expect(reachfiveSession.provider_access_token).to.equal(authRespObj.provider_access_token);
     });
 
     it('should split name if kakao provider and sitePref is True', function () {
@@ -101,8 +102,8 @@ describe('ReachfiveSession', function () {
 
         Site.getCurrent.restore();
 
-        expect(session.privacy.profile.firstName).to.equal('혜선');
-        expect(session.privacy.profile.lastName).to.equal('최');
+        expect(reachfiveSession.profile.given_name).to.equal('혜선');
+        expect(reachfiveSession.profile.family_name).to.equal('최');
     });
 
     it('shouldn\'t split name if kakao provider and sitePref undifined or false', function () {
@@ -120,8 +121,8 @@ describe('ReachfiveSession', function () {
         
         const reachfiveSession = new ReachfiveSession(authRespObj);
 
-        expect(session.privacy.profile.firstName).to.be.undefined;
-        expect(session.privacy.profile.lastName).to.be.undefined;
+        expect(reachfiveSession.profile.firstName).to.be.undefined;
+        expect(reachfiveSession.profile.lastName).to.be.undefined;
     });
 
 });
