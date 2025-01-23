@@ -210,7 +210,8 @@ server.get(
                     } else {
             var afterAuth = require('*/cartridge/models/afterAuthUrl');
 
-            reachfiveSession.prefill_register = true;
+            session.privacy.prefill_register = true;
+            prefillRegisterForm(reachfiveSession.profile);
 
             var rurl = afterAuth.getRurlValue(stateObj.action);
 
@@ -397,17 +398,13 @@ server.get(
         var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
         var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
 
-        var reachfiveSession = new ReachfiveSessionModel();
-
-        if (reachfiveSettings.isReachFiveEnabled && reachfiveSession.isPrefillRegister()) {
+        if (reachfiveSettings.isReachFiveEnabled && session.privacy.prefill_register) {
             var breadcrumbs = [
                 {
                     htmlValue: Resource.msg('global.home', 'common', null),
                     url: URLUtils.home().toString()
                 }
             ];
-
-            prefillRegisterForm(reachfiveSession.profile);
 
             var rurl = req.querystring.rurl || '1';
 
@@ -420,7 +417,9 @@ server.get(
                 actionUrl: URLUtils.url('ReachFiveController-SubmitProfileSocialLogin', 'rurl', rurl).toString()
             });
         } else {
-            res.redirect(URLUtils.url('Login-Show'));
+            res.render('/error', {
+                message: Resource.msg('error.prefillRegisterForm', 'login', null)
+            });
         }
 
         next();
@@ -437,7 +436,7 @@ server.post(
         var profileForm = server.forms.getForm('profile');
         var reachfiveSession = new ReachfiveSessionModel();
 
-        if (reachfiveSession.isPrefillRegister()) {
+        if (session.privacy.prefill_register) {
             // form validation
             if (!!profileForm.customer.email.value && profileForm.customer.email.value.toLowerCase() !== profileForm.customer.emailconfirm.value.toLowerCase()) {
                 profileForm.valid = false;
@@ -483,7 +482,7 @@ server.post(
                             var CustomerReachfiveProfileModel = require('*/cartridge/models/profile/customerOrigin');
                             var ReachfiveProfileModel = require('*/cartridge/models/profile/reachfiveOrigin');
 
-                            reachfiveSession.prefill_register = false;
+                            session.privacy.prefill_register = false;
 
                             // Update Reachfive profile after Salesforce, because of potential changes
                             var equalList = {
@@ -498,7 +497,7 @@ server.post(
                             // Data freshness check
                             equalList.profile = sessionModel.equal(customerModel, profileFields);
                             if (formInfo.phone) {
-                                equalList.phone = !reachFiveHelper.isNewPhone(customerModel.profile.phone_number, sessionModel.profile.phone_number);
+                                equalList.phone = !reachFiveApiHelper.isNewPhone(customerModel.profile.phone_number, sessionModel.profile.phone_number);
                             }
 
                             equalList.trigger = !(equalList.profile && equalList.phone);
