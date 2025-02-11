@@ -63,6 +63,14 @@ var ReachFiveModel = ({
 				credentials.setAuthenticationProviderID(this.reachFiveProviderId);
 				credentials.setExternalID(externalID);
 
+				try {
+					// we add email for this new external customer profile
+					var externalCustomerProfile = newCustomer.getExternalProfile(this.reachFiveProviderId, externalID);
+					externalCustomerProfile.setEmail(externalProfile.email);
+				} catch (e) {
+					LOGGER.debug('Error on added email to external profile {0}', e);	
+				}
+				
 				LOGGER.info('Customer created with credentials and an external profile {0} with the external ID {1}', this.reachFiveProviderId, externalID);
 			}
 			else
