@@ -1,9 +1,11 @@
 {
     "compilerOptions": {
-        "lib": ["es6", "dom"],
-        "target": "es6",
+        "noLib": true,
+        "target": "es5",
         "baseUrl": "./",
-        "typeRoots" : ["./@types/", "./node_modules/sfcc-dts/**/*.*"],
+        "typeRoots" : ["./@types/", "./node_modules/sfcc-dts/**/*.*", "./types/**/*.*"],
+        "types": ["node", "jest"],
+        "module": "commonjs",
         "paths": {
             "*": [
                 "./*",
@@ -16,10 +18,17 @@
     "typeAcquisition": {
         "enable": true,
         "include": [
-            "node_modules/sfcc-dts/**/*"
+            "node_modules/sfcc-dts/**/*",
+            "@types/*.d.ts",
+            "types/*.d.ts",
+            "@types/**/*.d.ts",
+            "types/**/*.d.ts",
+            "cartridges/**/*.ts"
         ]
     },
     "include": [
+        "./types/*.d.ts",
+        "./@types/*.d.ts",
         "./cartridges/**/*.js",
         "./node_modules/sfcc-dts/*",
         "test/unit/int_reachfive/models/afterAuthUrl.test.js",

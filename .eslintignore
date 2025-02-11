@@ -10,3 +10,7 @@ cartridges/int_reachfive/cartridge/static/
 cartridges/app_storefront_controllers/
 cartridges/app_storefront_core/
 cartridges/app_storefront_pipelines/
+
+# generated @types
+@types/dw/attrs.d.ts
+@types/dw/index.d.ts

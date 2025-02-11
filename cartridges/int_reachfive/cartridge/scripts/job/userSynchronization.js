@@ -12,8 +12,8 @@ var Transaction = require('dw/system/Transaction');
 /**
  * Script Modules
  */
-var reachFiveHelper = require('int_reachfive/cartridge/scripts/helpers/reachFiveHelper');
-var libReachFiveSynchronization = require('int_reachfive/cartridge/scripts/job/libReachFiveSynchronization');
+var reachFiveService = require('int_reachfive/cartridge/scripts/interfaces/reachFiveInterface');
+var { getReachFiveUserCustomObjectType, getReachFiveProfileFieldsJSON, getReachFiveProviderId } = require('int_reachfive/cartridge/models/reachfiveSettings');
 
 /**
  * Globals
@@ -28,15 +28,8 @@ var profileFieldsObj = null;
  */
 module.exports.beforeStep = function () {
     // Search the orders for orders that have to been sent to pickpack
-    reachFiveUserUpdateIterator = CustomObjectMgr.getAllCustomObjects(reachFiveHelper.getReachFiveUserCustomObjectType());
-
-    var profileFields = reachFiveHelper.getReachFiveProfileFieldsJSON();
-    if (!profileFields) {
-        LOGGER.error('Error - "reach5ProfileFieldsJSON" Site Preference is missing');
-        return new Status(Status.ERROR);
-    }
-    profileFieldsObj = JSON.parse(profileFields);
-
+    reachFiveUserUpdateIterator = CustomObjectMgr.getAllCustomObjects(getReachFiveUserCustomObjectType());
+    profileFieldsObj = getReachFiveProfileFieldsJSON();
     return new Status(Status.OK);
 };
 
@@ -73,11 +66,11 @@ module.exports.read = function () {
 module.exports.process = function (reachFiveUserUpdateCO) {
     try {
         var reachFiveUser = JSON.parse(reachFiveUserUpdateCO.custom.user);
-        var reachFiveProviderId = reachFiveHelper.getReachFiveProviderId();
+        var reachFiveProviderId = getReachFiveProviderId();
         var currentCustomerProfile = CustomerMgr.getExternallyAuthenticatedCustomerProfile(reachFiveProviderId, reachFiveUser.id);
 
         if (!empty(currentCustomerProfile)) {
-            libReachFiveSynchronization.updateSFCCProfile(profileFieldsObj, currentCustomerProfile, reachFiveUser, 'user');
+            reachFiveService.updateSFCCProfile(profileFieldsObj, currentCustomerProfile, reachFiveUser, 'user');
 
             Transaction.wrap(function () {
                 CustomObjectMgr.remove(reachFiveUserUpdateCO);

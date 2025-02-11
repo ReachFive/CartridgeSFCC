@@ -1,6 +1,28 @@
 {
-    "hooks": [{
-        "name" : "app.template.afterFooter",
-        "script" : "./cartridge/scripts/hooks/initGlobals.js"
-    }]
+    "hooks": [
+        {
+            "name" : "app.template.afterFooter",
+            "script" : "./cartridge/scripts/hooks/initGlobals.js"
+        },
+        {
+            "name": "dw.ocapi.shop.auth.afterPOST",
+            "script" : "./cartridge/scripts/hooks/auth.js"
+        },
+        {
+            "name": "dw.ocapi.shop.auth.beforePOST",
+            "script" : "./cartridge/scripts/hooks/auth.js"
+        },
+        {
+            "name": "dw.ocapi.shop.auth.modifyPOSTResponse",
+            "script" : "./cartridge/scripts/hooks/auth.js"
+        },
+        {
+            "name": "dw.ocapi.shop.customer.afterPATCH",
+            "script" : "./cartridge/scripts/hooks/customer.js"
+        },
+        {
+            "name": "dw.ocapi.shop.customer.afterPOST",
+            "script" : "./cartridge/scripts/hooks/customer.js"
+        }
+    ]
 }

@@ -1,14 +1,39 @@
 {
     "root": true,
-    "extends": "airbnb-base/legacy",
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "extends": [
+        "airbnb-base/legacy",
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
+    "parserOptions": {
+        "ecmaVersion": 2015
+    },
+    "env": {
+        "node": true,
+        "mocha": true
+    },
     "globals": {
         "request": true,
         "session": true,
         "customer": true,
         "response": true,
-        "empty": true
+        "empty": true,
+        "reach5Const": true,
+        "reach5": true,
+        "sdkCoreClient": true,
+        "$": true,
+        "dw": true
     },
     "rules": {
+        "@typescript-eslint/no-unused-vars": "warn",
+        "@typescript-eslint/no-require-imports": "off",
+        "@typescript-eslint/triple-slash-reference": "off",
+        "strict": "off",
         "import/no-unresolved": "off",
         "indent": ["error", 4, { "SwitchCase": 1, "VariableDeclarator": 1 }],
         "func-names": "off",
@@ -16,7 +41,7 @@
         "valid-jsdoc": ["error", { "preferType": { "Boolean": "boolean", "Number": "number", "object": "Object", "String": "string" }, "requireReturn": false}],
         "vars-on-top": "off",
         "global-require": "off",
-        "no-shadow": ["error", { "allow": ["err", "callback"]}],
+        "no-shadow": ["error", { "allow": ["err", "callback", "req", "res"]}],
         "max-len": "off",
         "no-param-reassign": ["error", { "props": false }],
         "linebreak-style": 0

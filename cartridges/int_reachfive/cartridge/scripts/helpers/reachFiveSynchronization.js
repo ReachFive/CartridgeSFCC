@@ -4,29 +4,8 @@
  * API
  */
 var Transaction = require('dw/system/Transaction');
-/**
- * Script Modules
- */
-var reachFiveServiceInterface = require('int_reachfive/cartridge/scripts/interfaces/reachFiveInterface');
-
-
-/**
- * @function
- * @description Adds API calls errors to the 'reachfiveError' attribute if request is fail
- * @param {string} errorMessage Error message
- * @param {dw.customer.Profile} profile - The current profile
- * */
-function addReachFiveProfileError(errorMessage, profile) {
-    var LINE_FEED = '\n'; // new line character;
-
-    if (errorMessage && profile) {
-        Transaction.wrap(function () {
-            profile.custom.reachfiveError = (profile.custom.reachfiveError)
-                ? profile.custom.reachfiveError + errorMessage + LINE_FEED + LINE_FEED
-                : errorMessage + LINE_FEED + LINE_FEED;
-        });
-    }
-}
+var userManagement = require('*/cartridge/scripts/interfaces/reachFiveInterface').userManagement;
+var addReachFiveProfileError = require('*/cartridge/scripts/helpers/utils').addReachFiveProfileError;
 
 /**
  * @function
@@ -45,50 +24,26 @@ function getGenderValue(gender) {
 
 /**
  * @function
- * @description Calls Service to trigger the verification email sending. It updates ReachFive profile addtibutes
- * @param {dw.customer.Profile} profile - The current profile
- * @param {string} managementToken management API token
- * @param {string} reachFiveExternalID ReachFive external profile ID
- * */
-function sendVerificationEmail(profile, managementToken, reachFiveExternalID) {
-    if (!profile || !managementToken || !reachFiveExternalID) {
-        return;
-    }
-
-    var result = reachFiveServiceInterface.sendVerificationEmail(managementToken, reachFiveExternalID);
-
-    if (!result.ok) {
-        addReachFiveProfileError(result.errorMessage, profile);
-    }
-
-    Transaction.wrap(function () {
-        profile.custom.reachfiveSendVerificationEmail = false;
-    });
-}
-
-
-/**
- * @function
  * @description Calls Service to update ReachFive Email. It updates ReachFive profile addtibutes
  * @param {dw.customer.Profile} profile - The current profile
  * @param {string} managementToken management API token
  * @param {string} reachFiveExternalID ReachFive external profile ID
+ * @returns {void}
  * */
 function updatePhoneAndEmail(profile, managementToken, reachFiveExternalID) {
     if (!profile || !managementToken || !reachFiveExternalID) {
         return;
     }
     var requestObj = {
-        phone_number: profile.getPhoneMobile() ,
+        phone_number: profile.getPhoneMobile(),
         email: profile.getEmail()
     };
 
-    var result = reachFiveServiceInterface.updateProfile(requestObj, managementToken, reachFiveExternalID);
+    var result = userManagement.updateProfile(requestObj, managementToken, reachFiveExternalID);
 
     if (!result.ok) {
         addReachFiveProfileError(result.errorMessage, profile);
     }
-    return result;
 }
 
 /**
@@ -108,7 +63,7 @@ function updateProfileField(profile, managementToken, reachFiveExternalID) {
         phone_number: profile.phoneHome,
         phone_mobile: profile.phoneMobile
     };
-    var result = reachFiveServiceInterface.updateProfile(requestObj, managementToken, reachFiveExternalID);
+    var result = userManagement.updateProfile(requestObj, managementToken, reachFiveExternalID);
 
     if (!result.ok) {
         addReachFiveProfileError(result.errorMessage, profile);
@@ -206,14 +161,12 @@ function createProfileRequestObj(profileFieldsObj, profile) {
 
     if (addrFieldsObj && profile.addressBook && profile.addressBook && profile.addressBook.addresses.length) {
         var addresses = profile.addressBook.addresses;
-        var address = null;
         var addressObj = null;
         var defaultAddrId = profile.addressBook.preferredAddress && profile.addressBook.preferredAddress.UUID;
 
         resultObj.addresses = [];
 
-        for (var i = 0, l = addresses.length; i < l; i++) {
-            address = addresses[i];
+        addresses.toArray().forEach(function (address) {
             addressObj = {};
 
             if (defaultAddrId && address.UUID === defaultAddrId) {
@@ -223,7 +176,7 @@ function createProfileRequestObj(profileFieldsObj, profile) {
             addressObj = setReach5Obj(address, profileFieldsObj, 'address');
 
             resultObj.addresses.push(addressObj);
-        }
+        });
     }
 
     if (consentsFieldsObj) {
@@ -251,7 +204,7 @@ function updateProfile(profileFieldsObj, profile, managementToken, reachFiveExte
     }
 
     var requestObj = createProfileRequestObj(profileFieldsObj, profile);
-    var result = reachFiveServiceInterface.updateProfile(requestObj, managementToken, reachFiveExternalID);
+    var result = userManagement.updateProfile(requestObj, managementToken, reachFiveExternalID);
 
     if (!result.ok) {
         addReachFiveProfileError(result.errorMessage, profile);
@@ -342,6 +295,29 @@ function updateSFCCProfile(profileFieldsObj, profile, reachFiveUser, reach5ObjTy
     }
     Transaction.wrap(function () {
         setR5toSFCCProfile(profileFieldsObj, profile, reachFiveUser, reach5ObjType);
+    });
+}
+
+/**
+ * @function
+ * @description Calls Service to trigger the verification email sending. It updates ReachFive profile addtibutes
+ * @param {dw.customer.Profile} profile - The current profile
+ * @param {string} managementToken management API token
+ * @param {string} reachFiveExternalID ReachFive external profile ID
+ * */
+function sendVerificationEmail(profile, managementToken, reachFiveExternalID) {
+    if (!profile || !managementToken || !reachFiveExternalID) {
+        return;
+    }
+
+    var result = userManagement.sendVerificationEmail(managementToken, reachFiveExternalID);
+
+    if (!result.ok) {
+        addReachFiveProfileError(result.errorMessage, profile);
+    }
+
+    Transaction.wrap(function () {
+        profile.custom.reachfiveSendVerificationEmail = false;
     });
 }
 

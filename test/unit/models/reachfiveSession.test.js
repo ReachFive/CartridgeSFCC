@@ -1,13 +1,20 @@
+'use strict';
+
 const chai = require('chai');
-const sinon = require('sinon');
 var proxyquire = require('proxyquire').noCallThru();
 var Encoding = require('dw-api-mock/dw/crypto/Encoding');
 var Site = require('dw-api-mock/dw/system/Site');
-var ReachfiveSession = proxyquire('../../cartridges/int_reachfive/cartridge/models/reachfiveSession', {
-    'dw/crypto/Encoding': Encoding,
-    'dw/system/Site': Site,
-    'dw/system/Logger': require('dw-api-mock/dw/system/Logger')
-});
+var ReachfiveSession = proxyquire(
+    '../../../cartridges/int_reachfive/cartridge/models/reachfiveSession',
+    {
+        'dw/crypto/Encoding': Encoding,
+        'dw/system/Site': Site,
+        'dw/system/Logger': require('dw-api-mock/dw/system/Logger'),
+        '*/cartridge/models/reachfiveSettings': {
+            enableKakaoTalkNameSplit: true
+        }
+    }
+);
 
 // Thi is a mock of the Demandware global object
 require('dw-api-mock/demandware-globals');
@@ -38,21 +45,32 @@ describe('ReachfiveSession', function () {
             expires_in: '3600'
         };
         // we do like this because of mocking the Encoding, see, dw/crypto/Encoding from dw-api-mock
-        authRespObj.id_token = `header.${JSON.stringify(authRespObj)}.signature`;
+        authRespObj.id_token = `header.${JSON.stringify(
+            authRespObj
+        )}.signature`;
 
         const reachfiveSession = new ReachfiveSession(authRespObj);
 
+        expect(reachfiveSession.access_token).to.equal(authRespObj.access_token);
         expect(session.privacy.access_token).to.equal(authRespObj.access_token);
-        expect(session.privacy.refresh_token).to.equal(authRespObj.refresh_token);
-        expect(session.privacy.provider_access_token).to.equal(authRespObj.provider_access_token);
+        expect(session.privacy.refresh_token).to.equal(
+            authRespObj.refresh_token
+        );
+        expect(session.privacy.provider_access_token).to.equal(
+            authRespObj.provider_access_token
+        );
     });
 
     it('should initialize session with authRespObj evenIf verylong googleId img', function () {
         // Test limit of 2000 for string https://salesforcecommercecloud.github.io/b2c-dev-doc/docs/current/scriptapi/html/index.html?target=class_dw_system_Session.html
         const min = 97; // ASCII Code of 'a'
         const max = 122; // ASCII Code of 'z'
-        const randomChar = () => String.fromCharCode(Math.floor(Math.random() * (max - min + 1)) + min);
-        const someLongString = Array.from({ length: 2000 }, (_, i) => i).map(randomChar).join('');
+        const randomChar = () => String.fromCharCode(
+            Math.floor(Math.random() * (max - min + 1)) + min
+        );
+        const someLongString = Array.from({ length: 2000 }, (_, i) => i)
+            .map(randomChar)
+            .join('');
         const authRespObj = {
             access_token: 'access_token',
             refresh_token: 'refresh_token',
@@ -62,14 +80,22 @@ describe('ReachfiveSession', function () {
             picture: someLongString
         };
         // we do like this because of mocking the Encoding, see, dw/crypto/Encoding from dw-api-mock
-        authRespObj.id_token = `header.${JSON.stringify(authRespObj)}.signature`;
+        authRespObj.id_token = `header.${JSON.stringify(
+            authRespObj
+        )}.signature`;
 
         const reachfiveSession = new ReachfiveSession(authRespObj);
 
-        expect(session.profile_picture).to.be.undefined;
-        expect(reachfiveSession.access_token).to.equal(authRespObj.access_token);
-        expect(reachfiveSession.refresh_token).to.equal(authRespObj.refresh_token);
-        expect(reachfiveSession.provider_access_token).to.equal(authRespObj.provider_access_token);
+        expect(session.profile_picture).to.equal(undefined);
+        expect(reachfiveSession.access_token).to.equal(
+            authRespObj.access_token
+        );
+        expect(reachfiveSession.refresh_token).to.equal(
+            authRespObj.refresh_token
+        );
+        expect(reachfiveSession.provider_access_token).to.equal(
+            authRespObj.provider_access_token
+        );
     });
 
     it('should split name if kakao provider and sitePref is True', function () {
@@ -84,29 +110,14 @@ describe('ReachfiveSession', function () {
         };
         var idToken = `header.${JSON.stringify(authRespObj)}.signature`;
         authRespObj.id_token = idToken;
-        
-        sinon.stub(Site, 'getCurrent').returns({
-            ID: 'bystub',
-            customPreferences: {
-                isReachFiveEnableKakaoTalkNameSplit: true
-            },
-            getCustomPreferenceValue: (key) => {
-                if (key === 'isReachFiveEnableKakaoTalkNameSplit') {
-                    return true;
-                }
-                return 'grr';
-            }
-        });
 
         const reachfiveSession = new ReachfiveSession(authRespObj);
-
-        Site.getCurrent.restore();
 
         expect(reachfiveSession.profile.given_name).to.equal('혜선');
         expect(reachfiveSession.profile.family_name).to.equal('최');
     });
 
-    it('shouldn\'t split name if kakao provider and sitePref undifined or false', function () {
+    it("shouldn't split name if kakao provider and sitePref undifined or false", function () {
         const authRespObj = {
             access_token: 'access_token',
             refresh_token: 'refresh_token',
@@ -118,11 +129,10 @@ describe('ReachfiveSession', function () {
         };
         var idToken = `header.${JSON.stringify(authRespObj)}.signature`;
         authRespObj.id_token = idToken;
-        
+
         const reachfiveSession = new ReachfiveSession(authRespObj);
 
-        expect(reachfiveSession.profile.firstName).to.be.undefined;
-        expect(reachfiveSession.profile.lastName).to.be.undefined;
+        expect(reachfiveSession.profile.firstName).to.equal(undefined);
+        expect(reachfiveSession.profile.lastName).to.equal(undefined);
     });
-
 });

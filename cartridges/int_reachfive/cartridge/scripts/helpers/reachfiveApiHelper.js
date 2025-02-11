@@ -2,44 +2,88 @@
 
 var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 var reachFiveService = require('*/cartridge/scripts/interfaces/reachFiveInterface');
-var reachFiveHelper = require('*/cartridge/scripts/helpers/reachFiveHelper');
+var {
+    getStateObjBase64,
+    getReachFiveExternalID
+} = require('*/cartridge/scripts/helpers/reachFiveHelper');
 
+var URLUtils = require('dw/web/URLUtils');
+var Site = require('dw/system/Site');
+var {
+    getReachFiveApiKey,
+    getReachFiveDomain,
+    getReachFiveProviderId,
+    isReachFiveEnabled
+} = require('*/cartridge/models/reachfiveSettings');
+
+const initPkce = () => {
+    const uuidStr = dw.util.UUIDUtils.createUUID();
+    const codeVerifier = uuidStr.replace(/-/g, '');
+    
+    // Create hash using MessageDigest
+    const md = new dw.crypto.MessageDigest(dw.crypto.MessageDigest.DIGEST_SHA_256);
+    const hashedBytes = md.digestBytes(new dw.util.Bytes(codeVerifier));
+    
+    // Base64 encode and make URL safe
+    const codeChallenge = dw.crypto.Encoding.toBase64(hashedBytes)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+    
+    return {
+        codeVerifier,
+        codeChallenge
+    };
+};
 
 /**
- * @description Login with reachfive password interface
- * @param {string} email - reachfive customer login
- * @param {string} password - reachfive customer password
- * @returns {Object} prepared result object
+ * Create ReachFive login redirect url for Storefront action
+ * @param {string} tkn The one-time use authentication token
+ * @param {string} stateTarget state object url
+ * @return {string|null} result
  */
-function loginWithPassword(email, password) {
-    var requestObj = {
-        email: email,
-        password: password
+function createLoginRedirectUrl(tkn, stateTarget) {
+    const { codeVerifier, codeChallenge } = initPkce();
+    session.privacy.codeChallenge = codeChallenge;
+    session.privacy.codeVerifier = codeVerifier;
+    var querystring = '';
+    var PROTOCOL = 'https';
+    var domain = getReachFiveDomain();
+    var ENDPOINT = 'oauth/authorize';
+    var url = PROTOCOL + '://' + domain + '/' + ENDPOINT;
+
+    var queryObj = {
+        client_id: getReachFiveApiKey(),
+        scope: 'openid profile email phone full_write',
+        response_type: 'code',
+        redirect_uri: URLUtils.https(
+            'ReachFiveController-CallbackReachFiveRequest'
+        ).toString(),
+        code_challenge: codeChallenge,
+        code_challenge_method: 'S256',
+        origin: Site.getCurrent().getID(),
+        display: 'page'
     };
 
-    var result = reachFiveService.passwordLogin(requestObj);
+    var queryObjEncoded = {};
+    Object.keys(queryObj).forEach(function (key) {
+        queryObjEncoded[key] = encodeURIComponent(queryObj[key]);
+    });
 
-    return result;
-}
+    // No need additional encoding
+    queryObjEncoded.state = getStateObjBase64(stateTarget);
+    queryObjEncoded.tkn = tkn;
 
-// TODO: obviously that this function should be refactored after splitting Reachfvie helper
-/**
- * @description Signup with login and password interface
- * @param {Object} credentialsObj - Object with credentials data
- * @param {string} [credentialsObj.email] - Customer email
- * @param {string} [credentialsObj.phone_number] - Customer phone number
- * @param {string} [credentialsObj.custom_identifier] - Customer custom identifier
- * @param {string} credentialsObj.password - Customer password
- * @param {Object} profile - Customer profile data
- * @returns {Object} Signup result
- */
-function signUp(credentialsObj, profile) {
-    var login = credentialsObj.email;
-    var password = credentialsObj.password;
+    Object.keys(queryObjEncoded).forEach(function (key) {
+        querystring += '&' + key + '=' + queryObjEncoded[key];
+    });
 
-    var result = reachFiveService.signUp(login, password, profile);
+    // Remove first '&' symbol
+    querystring = querystring.substring(1);
 
-    return result;
+    url = url + '?' + querystring;
+
+    return url;
 }
 
 /**
@@ -65,7 +109,7 @@ function isNewPhone(oldPhone, newPhone) {
     // Compare 2 phone numbers
     if (oldPhone && newPhone) {
         result = digitsOnly(oldPhone) !== digitsOnly(newPhone);
-    // Phone number does not exist, but we got new one
+        // Phone number does not exist, but we got new one
     } else if (newPhone) {
         result = true;
     }
@@ -82,7 +126,8 @@ function isNewPhone(oldPhone, newPhone) {
 function getReachfiveProfileFields(profileFields) {
     // TODO: This object should be taken from site preferences
     // Temporal static answer
-    var result = profileFields || 'id,email,emails.verified,given_name,family_name,birthdate,phone_number,gender,addresses,consents';
+    var result = profileFields
+        || 'id,email,emails.verified,given_name,family_name,birthdate,phone_number,gender,addresses,consents';
     return result;
 }
 
@@ -104,16 +149,22 @@ function getTokenWithPassword(login, password) {
 
     var result = reachFiveService.oauthToken(requestObj);
 
-    if (result.ok & !empty(result.object)) {
+    if (result.ok && !empty(result.object)) {
         var reachfiveSession = new ReachfiveSessionModel();
         reachfiveSession.initialize(result.object);
     } else {
         try {
             result.errorObj = JSON.parse(result.errorMessage);
         } catch (error) {
-            LOGGER.error('Error during parse getTokenWithPassword error object: {0}', error);
+            LOGGER.error(
+                'Error during parse getTokenWithPassword error object: {0}',
+                error
+            );
         }
-        LOGGER.error('Error during request access token with customer password: {0}', result.errorMessage);
+        LOGGER.error(
+            'Error during request access token with customer password: {0}',
+            result.errorMessage
+        );
     }
 
     return result;
@@ -127,16 +178,27 @@ function getTokenWithPassword(login, password) {
  * @return {Object} Result of call
  */
 function updatePassword(email, newPassword, oldPassword) {
-    var clientId = reachFiveHelper.getReachFiveApiKey();
-    var result = reachFiveService.updatePassword(email, newPassword, oldPassword, clientId);
+    var clientId = getReachFiveApiKey();
+    var result = reachFiveService.updatePassword(
+        email,
+        newPassword,
+        oldPassword,
+        clientId
+    );
 
     if (!result.ok) {
         try {
             result.errorObj = JSON.parse(result.errorMessage);
         } catch (error) {
-            LOGGER.error('Error during parse updatePassword error object: {0}', error);
+            LOGGER.error(
+                'Error during parse updatePassword error object: {0}',
+                error
+            );
         }
-        LOGGER.error('Error during get ReachFive update password: {0}', result.errorMessage);
+        LOGGER.error(
+            'Error during get ReachFive update password: {0}',
+            result.errorMessage
+        );
     }
 
     return result;
@@ -154,7 +216,10 @@ function getUserProfile(profileFields) {
     var result = reachFiveService.getUserProfile(fields);
 
     if (!result.ok) {
-        LOGGER.error('Error during get ReachFive user Profile: {0}', result.errorMessage);
+        LOGGER.error(
+            'Error during get ReachFive user Profile: {0}',
+            result.errorMessage
+        );
     }
 
     return result;
@@ -170,23 +235,38 @@ function updateReachfivePhoneWithTnk(phone) {
     var result = reachFiveService.updatePhone({ phone_number: phone });
 
     if (!result.ok) {
-        LOGGER.error('Error during update ReachFive phone number: {0}', result.errorMessage);
+        LOGGER.error(
+            'Error during update ReachFive phone number: {0}',
+            result.errorMessage
+        );
 
         if (result.errorMessage) {
             try {
                 result.errorObj = JSON.parse(result.errorMessage);
 
-                if (result.errorObj && Object.prototype.hasOwnProperty.call(result.errorObj, 'error_details')) {
-                    var errorObj = Array.prototype.find.call(result.errorObj.error_details, function (element) {
-                        return element.field === 'phone_number';
-                    });
+                if (
+                    result.errorObj
+                    && Object.prototype.hasOwnProperty.call(
+                        result.errorObj,
+                        'error_details'
+                    )
+                ) {
+                    var errorObj = Array.prototype.find.call(
+                        result.errorObj.error_details,
+                        function (element) {
+                            return element.field === 'phone_number';
+                        }
+                    );
 
                     if (errorObj) {
                         result.errorObj.error_description = errorObj.message;
                     }
                 }
             } catch (error) {
-                LOGGER.error('Error during parse ReachFive phone number update error: {0}', error);
+                LOGGER.error(
+                    'Error during parse ReachFive phone number update error: {0}',
+                    error
+                );
             }
         }
     }
@@ -204,13 +284,19 @@ function updateReachfiveLoginWithTkn(login) {
     var result = reachFiveService.updateEmail({ email: login });
 
     if (!result.ok) {
-        LOGGER.error('Error during update ReachFive login: {0}', result.errorMessage);
+        LOGGER.error(
+            'Error during update ReachFive login: {0}',
+            result.errorMessage
+        );
 
         if (result.errorMessage) {
             try {
                 result.errorObj = JSON.parse(result.errorMessage);
             } catch (error) {
-                LOGGER.error('Error during parse ReachFive login update error: {0}', error);
+                LOGGER.error(
+                    'Error during parse ReachFive login update error: {0}',
+                    error
+                );
             }
         }
     }
@@ -229,7 +315,10 @@ function updateReachFiveProfile(customerObj) {
     if (customerObj) {
         result = reachFiveService.updateProfileIdentityAPI(customerObj);
         if (!result.ok) {
-            LOGGER.error('Error during update ReachFive profile: {0}', result.errorMessage);
+            LOGGER.error(
+                'Error during update ReachFive profile: {0}',
+                result.errorMessage
+            );
         }
     }
 
@@ -243,15 +332,15 @@ function updateReachFiveProfile(customerObj) {
  * @return {null|dw.customer.ExternalProfile} ReachFive profile or null
  * */
 function getCustomerReachFiveExtProfile(thatCustomer) {
-    var reachFiveProviderId = reachFiveHelper.getReachFiveProviderId();
+    var reachFiveProviderId = getReachFiveProviderId();
     var customerReachFiveProfile = null;
-    if (thatCustomer && thatCustomer.externalProfiles.length) {
-        for (var i = 0, length = thatCustomer.externalProfiles.length; i < length; i++) {
-            if (thatCustomer.externalProfiles[i].authenticationProviderID === reachFiveProviderId) {
-                customerReachFiveProfile = thatCustomer.externalProfiles[i];
-                break;
+    if (thatCustomer && thatCustomer.getExternalProfiles().length) {
+        var externalProfiles = thatCustomer.getExternalProfiles();
+        externalProfiles.toArray().forEach(function (profile) {
+            if (profile.authenticationProviderID === reachFiveProviderId) {
+                customerReachFiveProfile = profile;
             }
-        }
+        });
     }
 
     return customerReachFiveProfile;
@@ -264,9 +353,8 @@ function getCustomerReachFiveExtProfile(thatCustomer) {
  * @param {string} newPassword New customer password
  * @return {void}
  * */
- function passwordUpdateManagementAPI(profile, newPassword) {
-    if (reachFiveHelper.isReachFiveEnabled()) {
-
+function passwordUpdateManagementAPI(profile, newPassword) {
+    if (isReachFiveEnabled) {
         var managementTokenObj = reachFiveService.generateTokenForManagementAPI();
         if (managementTokenObj.ok) {
             var managementToken = managementTokenObj.token;
@@ -277,14 +365,24 @@ function getCustomerReachFiveExtProfile(thatCustomer) {
                 var reqBody = {
                     password: newPassword
                 };
-                resetPassRsp = reachFiveService.updateProfile(reqBody, managementToken, reachFiveCustomerId);
+                resetPassRsp = reachFiveService.updateProfile(
+                    reqBody,
+                    managementToken,
+                    reachFiveCustomerId
+                );
 
                 if (!resetPassRsp.ok) {
-                    LOGGER.error('Error during ReachFive reset password: {0}', resetPassRsp.errorMessage);
+                    LOGGER.error(
+                        'Error during ReachFive reset password: {0}',
+                        resetPassRsp.errorMessage
+                    );
                 }
             }
         } else {
-            LOGGER.error('Error during ReachFive Management token call: {0}', managementTokenObj.errorMessage);
+            LOGGER.error(
+                'Error during ReachFive Management token call: {0}',
+                managementTokenObj.errorMessage
+            );
         }
     }
 }
@@ -299,60 +397,47 @@ function getCustomerReachFiveExtProfile(thatCustomer) {
 function passwordResetManagementAPI(reachFiveUserID, newPassword) {
     var resetPassRsp = null;
 
-    if (reachFiveHelper.isReachFiveEnabled() && reachFiveUserID) {
-
+    if (isReachFiveEnabled && reachFiveUserID) {
         var managementTokenObj = reachFiveService.generateTokenForManagementAPI();
         if (managementTokenObj.ok) {
             var managementToken = managementTokenObj.token;
             var reqBody = {
                 password: newPassword
             };
-            resetPassRsp = reachFiveService.updateProfile(reqBody, managementToken, reachFiveUserID);
+            resetPassRsp = reachFiveService.updateProfile(
+                reqBody,
+                managementToken,
+                reachFiveUserID
+            );
 
             if (!resetPassRsp.ok) {
-                LOGGER.error('Error during ReachFive reset password: {0}', resetPassRsp.errorMessage);
+                LOGGER.error(
+                    'Error during ReachFive reset password: {0}',
+                    resetPassRsp.errorMessage
+                );
             }
         } else {
-            LOGGER.error('Error during ReachFive Management token call: {0}', managementTokenObj.errorMessage);
+            LOGGER.error(
+                'Error during ReachFive Management token call: {0}',
+                managementTokenObj.errorMessage
+            );
         }
     }
 
     return resetPassRsp;
 }
 
-/**
- * @function
- * @description Get Reach Five External Profile ID
- * @param {dw.customer.Profile} profile сurrent Customer Profile
- * @return {string} Reach Five External Profile ID
- * */
-function getReachFiveExternalID(profile) {
-    var externalProfiles = profile.customer.getExternalProfiles();
-    var externalProfile = null;
-    var reachFiveProviderId = reachFiveHelper.getReachFiveProviderId();
-
-    for (var i = 0, l = externalProfiles.length; i < l; i++) {
-        externalProfile = externalProfiles[i];
-        if (externalProfile && externalProfile.externalID
-            && externalProfile.authenticationProviderID === reachFiveProviderId) {
-            break;
-        }
-    }
-
-    return externalProfile && externalProfile.externalID;
-}
-
-module.exports.loginWithPassword = loginWithPassword;
-module.exports.signUp = signUp;
-module.exports.isNewPhone = isNewPhone;
-module.exports.getReachfiveProfileFields = getReachfiveProfileFields;
-module.exports.getTokenWithPassword = getTokenWithPassword;
-module.exports.updatePassword = updatePassword;
-module.exports.getUserProfile = getUserProfile;
-module.exports.updateReachfivePhoneWithTnk = updateReachfivePhoneWithTnk;
-module.exports.updateReachfiveLoginWithTkn = updateReachfiveLoginWithTkn;
-module.exports.updateReachFiveProfile = updateReachFiveProfile;
-module.exports.getCustomerReachFiveExtProfile = getCustomerReachFiveExtProfile;
-module.exports.passwordUpdateManagementAPI = passwordUpdateManagementAPI;
-module.exports.passwordResetManagementAPI = passwordResetManagementAPI;
-module.exports.getReachFiveExternalID = getReachFiveExternalID;
+module.exports = {
+    isNewPhone,
+    getReachfiveProfileFields,
+    getTokenWithPassword,
+    updatePassword,
+    getUserProfile,
+    updateReachfivePhoneWithTnk,
+    updateReachfiveLoginWithTkn,
+    updateReachFiveProfile,
+    getCustomerReachFiveExtProfile,
+    passwordUpdateManagementAPI,
+    passwordResetManagementAPI,
+    createLoginRedirectUrl
+};
