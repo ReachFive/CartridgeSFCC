@@ -15,7 +15,10 @@ var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
 var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 
 server.append('Login', function (req, res, next) {
-    if (reachfiveSettings.isReachFiveEnabled && reachfiveSettings.isReachFiveLoginAllowed) {
+    if (
+        reachfiveSettings.isReachFiveEnabled &&
+        reachfiveSettings.isReachFiveLoginAllowed
+    ) {
         var viewData = res.getViewData();
         var authenticatedCustomer = viewData.authenticatedCustomer;
 
@@ -27,17 +30,22 @@ server.append('Login', function (req, res, next) {
             var password = req.form.loginPassword;
             var profile = authenticatedCustomer.profile;
             var authResult;
-            var errorMessagePrefix = '[Account-Login] ReachFive profile ['
-                    + email
-                    + '] was not created because of:';
+            var errorMessagePrefix =
+                '[Account-Login] ReachFive profile [' +
+                email +
+                '] was not created because of:';
 
             // Check does the customer profile already contain reachfive account
-            var customerReachFiveProfile = reachFiveApiHelper.getCustomerReachFiveExtProfile(authenticatedCustomer);
+            var customerReachFiveProfile =
+                reachFiveApiHelper.getCustomerReachFiveExtProfile(
+                    authenticatedCustomer
+                );
 
             if (customerReachFiveProfile) {
-                errorMessagePrefix = '[Account-Login] ReachFive profile['
-                    + email
-                    + '] was not logged in because of:';
+                errorMessagePrefix =
+                    '[Account-Login] ReachFive profile[' +
+                    email +
+                    '] was not logged in because of:';
 
                 authResult = apiHelper.loginWithPassword(email, password);
             } else {
@@ -49,10 +57,16 @@ server.append('Login', function (req, res, next) {
                 authResult = apiHelper.signUp(credentialsObject, profile);
 
                 if (authResult.ok) {
-                    var reachFiveProviderId = reachfiveSettings.reachFiveProviderId;
+                    var reachFiveProviderId =
+                        reachfiveSettings.reachFiveProviderId;
 
                     Transaction.wrap(function () {
-                        customerReachFiveProfile = authenticatedCustomer.createExternalProfile(reachFiveProviderId, authResult.object.id);
+                        customerReachFiveProfile =
+                            authenticatedCustomer.createExternalProfile(
+                                reachFiveProviderId,
+                                authResult.object.id
+                            );
+                        customerReachFiveProfile.setEmail(email);
                     });
                 }
             }
@@ -82,20 +96,32 @@ server.append('Show', function (req, res, next) {
         var ReachfiveProfileModel = require('*/cartridge/models/profile/customerOrigin');
 
         var reachfiveSession = new ReachfiveSessionModel();
-        var reachfiveProfile = new ReachfiveProfileModel(req.currentCustomer.raw);
+        var reachfiveProfile = new ReachfiveProfileModel(
+            req.currentCustomer.raw
+        );
 
-        if (reachfiveSession.profile) //If ReachFive profile exist
-        {
-          //If Social Login only or email null or mode CIAM without password already setted
-            if ( !reachfiveSettings.isReachFiveLoginAllowed || reachfiveProfile.profile.email == "" || (reachfiveSettings.isReachFiveLoginAllowed && !reachfiveSettings.isReachFiveTransitionActive && !reachfiveSession.has_password) ) {
-              passwordResetCTA = false;
-          }
+        if (reachfiveSession.profile) {
+            //If ReachFive profile exist
+            //If Social Login only or email null or mode CIAM without password already setted
+            if (
+                !reachfiveSettings.isReachFiveLoginAllowed ||
+                reachfiveProfile.profile.email == '' ||
+                (reachfiveSettings.isReachFiveLoginAllowed &&
+                    !reachfiveSettings.isReachFiveTransitionActive &&
+                    !reachfiveSession.has_password)
+            ) {
+                passwordResetCTA = false;
+            }
 
-          //If the profile doesn't has a ReachFive password
-          //AND has a technical password OR doesn't has a SFCC password
-          if ( !reachfiveSession.has_password && (reachfiveProfile.hasTechnicalPassword || !reachfiveProfile.salesforcePasswordSet) ) {
-              passwordUpdateCTA = false;
-          }
+            // If the profile doesn't has a ReachFive password
+            // AND has a technical password OR doesn't has a SFCC password
+            if (
+                !reachfiveSession.has_password &&
+                (reachfiveProfile.hasTechnicalPassword ||
+                    !reachfiveProfile.salesforcePasswordSet)
+            ) {
+                passwordUpdateCTA = false;
+            }
         } else {
             socialNetworksCTA = false;
 
@@ -111,13 +137,11 @@ server.append('Show', function (req, res, next) {
     }
 
     //If Social Unlink / Link displayed
-    if( socialNetworksCTA )
-    {
-      var tknStatus = reachFiveHelper.verifySessionAccessTkn(); //Check and refresh the access token if needed
-      if( !tknStatus.success )
-      {
-        socialNetworksCTA = false;
-      }
+    if (socialNetworksCTA) {
+        var tknStatus = reachFiveHelper.verifySessionAccessTkn(); //Check and refresh the access token if needed
+        if (!tknStatus.success) {
+            socialNetworksCTA = false;
+        }
     }
 
     res.setViewData({
@@ -144,7 +168,10 @@ server.append('EditPassword', function (req, res, next) {
         //var reachfiveProfile = new ReachfiveProfileModel(req.currentCustomer.raw);
 
         //if (!reachfiveProfile.salesforcePasswordSet) {
-        if ( reachfiveSettings.isReachFiveLoginAllowed && !reachfiveSettings.isReachFiveTransitionActive ) {
+        if (
+            reachfiveSettings.isReachFiveLoginAllowed &&
+            !reachfiveSettings.isReachFiveTransitionActive
+        ) {
             context.reachfive.formTemplate = 'ACCOUNT_SOCIAL';
         }
 
@@ -183,12 +210,18 @@ server.replace(
         var profileForm = server.forms.getForm('profile');
         var newPasswords = profileForm.login.newpasswords;
         // form validation
-        if (newPasswords.newpassword.value !== newPasswords.newpasswordconfirm.value) {
+        if (
+            newPasswords.newpassword.value !==
+            newPasswords.newpasswordconfirm.value
+        ) {
             profileForm.valid = false;
             newPasswords.newpassword.valid = false;
             newPasswords.newpasswordconfirm.valid = false;
-            newPasswords.newpasswordconfirm.error =
-                Resource.msg('error.message.mismatch.newpassword', 'forms', null);
+            newPasswords.newpasswordconfirm.error = Resource.msg(
+                'error.message.mismatch.newpassword',
+                'forms',
+                null
+            );
         }
 
         var result = {
@@ -200,7 +233,8 @@ server.replace(
 
         if (profileForm.valid) {
             res.setViewData(result);
-            this.on('route:BeforeComplete', function () { // eslint-disable-line no-shadow
+            this.on('route:BeforeComplete', function () {
+                // eslint-disable-line no-shadow
                 var formInfo = res.getViewData();
                 var customer = CustomerMgr.getCustomerByCustomerNumber(
                     req.currentCustomer.profile.customerNo
@@ -218,7 +252,10 @@ server.replace(
                     true
                 );
 
-                if (reachfiveSettings.isReachFiveEnabled && reachfiveSettings.isReachFiveLoginAllowed) {
+                if (
+                    reachfiveSettings.isReachFiveEnabled &&
+                    reachfiveSettings.isReachFiveLoginAllowed
+                ) {
                     response = reachFiveApiHelper.updatePassword(
                         customer.profile.credentials.login,
                         formInfo.newPassword,
@@ -242,23 +279,43 @@ server.replace(
                     Transaction.rollback();
 
                     if (status.error) {
-                        if (!CustomerMgr.isAcceptablePassword(newPasswords.newpassword.value)) {
+                        if (
+                            !CustomerMgr.isAcceptablePassword(
+                                newPasswords.newpassword.value
+                            )
+                        ) {
                             formInfo.profileForm.login.newpasswords.newpassword.valid = false;
                             formInfo.profileForm.login.newpasswords.newpassword.error =
-                                Resource.msg('error.message.password.constraints.not.matched', 'forms', null);
+                                Resource.msg(
+                                    'error.message.password.constraints.not.matched',
+                                    'forms',
+                                    null
+                                );
                         } else {
                             formInfo.profileForm.login.currentpassword.valid = false;
                             formInfo.profileForm.login.currentpassword.error =
-                                Resource.msg('error.message.currentpasswordnomatch', 'forms', null);
+                                Resource.msg(
+                                    'error.message.currentpasswordnomatch',
+                                    'forms',
+                                    null
+                                );
                         }
                     } else if (!response.ok) {
                         formInfo.profileForm.login.newpasswords.newpassword.valid = false;
 
-                        if (response.errorObj && response.errorObj.error_description) {
-                            formInfo.profileForm.login.newpasswords.newpassword.error = response.errorObj.error_description;
+                        if (
+                            response.errorObj &&
+                            response.errorObj.error_description
+                        ) {
+                            formInfo.profileForm.login.newpasswords.newpassword.error =
+                                response.errorObj.error_description;
                         } else {
                             formInfo.profileForm.login.newpasswords.newpassword.error =
-                            Resource.msg('reachfive.server.error', 'forms', null);
+                                Resource.msg(
+                                    'reachfive.server.error',
+                                    'forms',
+                                    null
+                                );
                         }
                     }
 
@@ -287,41 +344,59 @@ server.append('SubmitRegistration', function (req, res, next) {
     if (reachfiveSettings.isReachFiveEnabled) {
         var registrationForm = res.getViewData();
 
-        if (registrationForm.validForm && reachfiveSettings.isReachFiveTransitionActive) {
+        if (
+            registrationForm.validForm &&
+            reachfiveSettings.isReachFiveTransitionActive
+        ) {
             var reachFiveCache = {
                 password: registrationForm.password
             };
 
             res.setViewData({ reachFiveCache: reachFiveCache });
 
-            this.on('route:Complete', function (req, res) {  // eslint-disable-line no-shadow
+            this.on('route:Complete', function (req, res) {
+                // eslint-disable-line no-shadow
                 var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
                 var data = res.getViewData();
                 var authenticatedCustomer = data.authenticatedCustomer;
 
                 if (authenticatedCustomer && data.validForm) {
                     var reachFiveService = require('*/cartridge/scripts/interfaces/reachFiveInterface');
-                    var reachFiveProviderId = reachfiveSettings.reachFiveProviderId;
+                    var reachFiveProviderId =
+                        reachfiveSettings.reachFiveProviderId;
                     var signUpResult = {
-                        errorMessage: 'Should not happens because of strict logic'
+                        errorMessage:
+                            'Should not happens because of strict logic'
                     };
 
                     var email = data.email;
                     var password = data.reachFiveCache.password;
 
-                    signUpResult = reachFiveService.signUp(email, password, authenticatedCustomer.profile);
+                    signUpResult = reachFiveService.signUp(
+                        email,
+                        password,
+                        authenticatedCustomer.profile
+                    );
 
                     if (signUpResult.ok) {
                         Transaction.wrap(function () {
-                            authenticatedCustomer.createExternalProfile(reachFiveProviderId, signUpResult.object.id);
+                            var externalProfile = authenticatedCustomer.createExternalProfile(
+                                reachFiveProviderId,
+                                signUpResult.object.id
+                            );
+                            externalProfile.setEmail(email);
                         });
 
                         var reachfiveSession = new ReachfiveSessionModel();
-                        reachfiveSession.one_time_token = signUpResult.object.tkn;
+                        reachfiveSession.one_time_token =
+                            signUpResult.object.tkn;
 
                         reachFiveHelper.setReachFiveConversionCookie();
                     } else {
-                        LOGGER.error('[Account-SubmitRegistration] ReachFive profile was not created because of: ' + signUpResult.errorMessage);
+                        LOGGER.error(
+                            '[Account-SubmitRegistration] ReachFive profile was not created because of: ' +
+                                signUpResult.errorMessage
+                        );
                         // TODO: Error during new customer registration need to be processed separately
                         //      Potentially we could return some specific error and block logging
                         //      Or detect signUpResult.errorMessage and based on error display something
@@ -351,8 +426,10 @@ server.append('SubmitRegistration', function (req, res, next) {
  * @param {serverfunction} - post
  */
 server.append('SaveNewPassword', function (req, res, next) {
-    if (reachfiveSettings.isReachFiveEnabled
-        && reachfiveSettings.isReachFiveTransitionActive) {
+    if (
+        reachfiveSettings.isReachFiveEnabled &&
+        reachfiveSettings.isReachFiveTransitionActive
+    ) {
         var CustomerMgr = require('dw/customer/CustomerMgr');
         var viewData = res.getViewData();
 
@@ -361,28 +438,35 @@ server.append('SaveNewPassword', function (req, res, next) {
         };
 
         res.setViewData({ reachFiveCache: reachFiveCache });
-        this.on('route:Complete', function (req, res) { // eslint-disable-line no-shadow
+        this.on('route:Complete', function (req, res) {
+            // eslint-disable-line no-shadow
             var data = res.getViewData();
             var tokenCustomer = data.reachFiveCache.tokenCustomer;
 
-            if (data.passwordForm.valid && !empty(tokenCustomer))
-            {
-                reachFiveApiHelper.passwordUpdateManagementAPI(tokenCustomer.profile, data.newPassword);
+            if (data.passwordForm.valid && !empty(tokenCustomer)) {
+                reachFiveApiHelper.passwordUpdateManagementAPI(
+                    tokenCustomer.profile,
+                    data.newPassword
+                );
 
                 //If the password is not set by the customer
-                if( tokenCustomer.profile.custom.reachfiveHasTechnicalPassword )
-                {
-                  var profile = tokenCustomer.getProfile();
+                if (
+                    tokenCustomer.profile.custom.reachfiveHasTechnicalPassword
+                ) {
+                    var profile = tokenCustomer.getProfile();
 
-                  Transaction.begin();
+                    Transaction.begin();
 
-                  try {
-                    profile.custom.reachfiveHasTechnicalPassword = false; //Update the flag value as the password is now a real one
-                    Transaction.commit();
-                  } catch (error) {
-                      LOGGER.error('Error during modify the reachfiveHasTechnicalPassword value to false : {0}', error);
-                      Transaction.rollback();
-                  }
+                    try {
+                        profile.custom.reachfiveHasTechnicalPassword = false; //Update the flag value as the password is now a real one
+                        Transaction.commit();
+                    } catch (error) {
+                        LOGGER.error(
+                            'Error during modify the reachfiveHasTechnicalPassword value to false : {0}',
+                            error
+                        );
+                        Transaction.rollback();
+                    }
                 }
             }
 
@@ -425,7 +509,10 @@ server.replace(
             showEmailEditor: false,
             showPhoneNumberEditor: false,
             showSocialPassword: false,
-            consentApi: Object.prototype.hasOwnProperty.call(req.session.raw, 'setTrackingAllowed'),
+            consentApi: Object.prototype.hasOwnProperty.call(
+                req.session.raw,
+                'setTrackingAllowed'
+            ),
             caOnline: content ? content.online : false,
             breadcrumbs: [
                 {
@@ -433,7 +520,11 @@ server.replace(
                     url: URLUtils.home().toString()
                 },
                 {
-                    htmlValue: Resource.msg('page.title.myaccount', 'account', null),
+                    htmlValue: Resource.msg(
+                        'page.title.myaccount',
+                        'account',
+                        null
+                    ),
                     url: URLUtils.url('Account-Show').toString()
                 }
             ]
@@ -446,31 +537,49 @@ server.replace(
             var ReachfiveProfile = require('*/cartridge/models/profile/customerOrigin');
             var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
 
-            var reachfiveProfile = new ReachfiveProfile(req.currentCustomer.raw);
+            var reachfiveProfile = new ReachfiveProfile(
+                req.currentCustomer.raw
+            );
             var reachfiveSession = new ReachfiveSessionModel();
 
             //If the user didn't use ReachFive to login
-            if ( reachfiveSession.access_token == null ) {
+            if (reachfiveSession.access_token == null) {
                 context.formTemplate = 'ACCOUNT_SALESFORCE_PASSWORD';
 
-                profileForm.customer.firstname.value = reachfiveProfile.profile.given_name;
-                profileForm.customer.lastname.value = reachfiveProfile.profile.family_name;
-                profileForm.customer.phone.value = reachfiveProfile.profile.phone_number;
-                profileForm.customer.email.value = reachfiveProfile.profile.email;
+                profileForm.customer.firstname.value =
+                    reachfiveProfile.profile.given_name;
+                profileForm.customer.lastname.value =
+                    reachfiveProfile.profile.family_name;
+                profileForm.customer.phone.value =
+                    reachfiveProfile.profile.phone_number;
+                profileForm.customer.email.value =
+                    reachfiveProfile.profile.email;
             } else {
                 context.formTemplate = 'ACCOUNT_SOCIAL';
 
                 context.showEmailEditor = true;
                 context.showPhoneNumberEditor = true;
 
-                profileForm.customer.firstname.value = reachfiveProfile.profile.given_name;
-                profileForm.customer.lastname.value = reachfiveProfile.profile.family_name;
-                profileForm.customer.phoneNotStrict.value = reachfiveProfile.profile.phone_number;
-                profileForm.customer.email.value = reachfiveProfile.profile.email;
+                profileForm.customer.firstname.value =
+                    reachfiveProfile.profile.given_name;
+                profileForm.customer.lastname.value =
+                    reachfiveProfile.profile.family_name;
+                profileForm.customer.phoneNotStrict.value =
+                    reachfiveProfile.profile.phone_number;
+                profileForm.customer.email.value =
+                    reachfiveProfile.profile.email;
 
                 //If the profile has a ReachFive password AND don't have a technical password on SFCC
-                if (reachfiveSession.has_password && !reachfiveProfile.hasTechnicalPassword) {
-                    if (String.prototype.indexOf.call(reachfiveSettings.reachFiveCheckCredentials, 'password') !== -1) {
+                if (
+                    reachfiveSession.has_password &&
+                    !reachfiveProfile.hasTechnicalPassword
+                ) {
+                    if (
+                        String.prototype.indexOf.call(
+                            reachfiveSettings.reachFiveCheckCredentials,
+                            'password'
+                        ) !== -1
+                    ) {
                         context.showSocialPassword = true;
                     }
                 }
@@ -480,7 +589,8 @@ server.replace(
 
             var accountModel = accountHelpers.getAccountModel(req);
 
-            profileForm.customer.firstname.value = accountModel.profile.firstName;
+            profileForm.customer.firstname.value =
+                accountModel.profile.firstName;
             profileForm.customer.lastname.value = accountModel.profile.lastName;
             profileForm.customer.phone.value = accountModel.profile.phone;
             profileForm.customer.email.value = accountModel.profile.email;
@@ -526,13 +636,18 @@ server.post(
         var profileForm = server.forms.getForm('profile');
 
         // form validation
-        if (profileForm.customer.email.value.toLowerCase()
-            !== profileForm.customer.emailconfirm.value.toLowerCase()) {
+        if (
+            profileForm.customer.email.value.toLowerCase() !==
+            profileForm.customer.emailconfirm.value.toLowerCase()
+        ) {
             profileForm.valid = false;
             profileForm.customer.email.valid = false;
             profileForm.customer.emailconfirm.valid = false;
-            profileForm.customer.emailconfirm.error =
-                Resource.msg('error.message.mismatch.email', 'forms', null);
+            profileForm.customer.emailconfirm.error = Resource.msg(
+                'error.message.mismatch.email',
+                'forms',
+                null
+            );
         }
 
         var result = {
@@ -546,7 +661,8 @@ server.post(
         };
         if (profileForm.valid) {
             res.setViewData(result);
-            this.on('route:BeforeComplete', function (req, res) { // eslint-disable-line no-shadow
+            this.on('route:BeforeComplete', function (req, res) {
+                // eslint-disable-line no-shadow
                 var formInfo = res.getViewData();
                 var customer = CustomerMgr.getCustomerByCustomerNumber(
                     req.currentCustomer.profile.customerNo
@@ -577,8 +693,11 @@ server.post(
                 });
                 if (status.error) {
                     formInfo.profileForm.login.password.valid = false;
-                    formInfo.profileForm.login.password.error =
-                        Resource.msg('error.message.currentpasswordnomatch', 'forms', null);
+                    formInfo.profileForm.login.password.error = Resource.msg(
+                        'error.message.currentpasswordnomatch',
+                        'forms',
+                        null
+                    );
                 } else {
                     Transaction.begin();
                     customerLogin = profile.credentials.setLogin(
@@ -592,7 +711,10 @@ server.post(
                         verifiedTknObj.verified = true;
 
                         if (verifiedTknObj.status) {
-                            reachfiveUpdateLogin = reachFiveApiHelper.updateReachfiveLoginWithTkn(formInfo.email);
+                            reachfiveUpdateLogin =
+                                reachFiveApiHelper.updateReachfiveLoginWithTkn(
+                                    formInfo.email
+                                );
                         }
                     }
 
@@ -615,15 +737,21 @@ server.post(
                     profile.setEmail(formInfo.email);
                     profile.setPhoneHome(formInfo.phone);
 
-                    if (reachFiveApiHelper.isNewPhone(oldPhone, formInfo.phone)) {
+                    if (
+                        reachFiveApiHelper.isNewPhone(oldPhone, formInfo.phone)
+                    ) {
                         if (!verifiedTknObj.verified) {
-                            tknStatus = reachFiveHelper.verifySessionAccessTkn();
+                            tknStatus =
+                                reachFiveHelper.verifySessionAccessTkn();
                             verifiedTknObj.status = tknStatus.success;
                             verifiedTknObj.verified = true;
                         }
 
                         if (verifiedTknObj.status) {
-                            reachfiveUpdatePhone = reachFiveApiHelper.updateReachfivePhoneWithTnk(formInfo.phone);
+                            reachfiveUpdatePhone =
+                                reachFiveApiHelper.updateReachfivePhoneWithTnk(
+                                    formInfo.phone
+                                );
                         }
                     }
 
@@ -634,8 +762,13 @@ server.post(
                         accountHelpers.sendAccountEditedEmail(customer.profile);
 
                         var reachfiveProfile = new ReachfiveProfile(customer);
-                        var profileRequestObj = reachfiveProfile.getUserProfileObj('email,given_name,family_name'/* fields */);
-                        reachFiveApiHelper.updateReachFiveProfile(profileRequestObj);
+                        var profileRequestObj =
+                            reachfiveProfile.getUserProfileObj(
+                                'email,given_name,family_name' /* fields */
+                            );
+                        reachFiveApiHelper.updateReachFiveProfile(
+                            profileRequestObj
+                        );
 
                         delete formInfo.profileForm;
                         delete formInfo.email;
@@ -649,11 +782,19 @@ server.post(
 
                         if (!status.error) {
                             formInfo.profileForm.customer.phone.valid = false;
-                            if (reachfiveUpdatePhone.errorObj && reachfiveUpdatePhone.errorObj.error_description) {
-                                formInfo.profileForm.customer.phone.error = reachfiveUpdatePhone.errorObj.error_description;
+                            if (
+                                reachfiveUpdatePhone.errorObj &&
+                                reachfiveUpdatePhone.errorObj.error_description
+                            ) {
+                                formInfo.profileForm.customer.phone.error =
+                                    reachfiveUpdatePhone.errorObj.error_description;
                             } else {
                                 formInfo.profileForm.customer.phone.error =
-                                Resource.msg('error.message.parse.phone', 'forms', null);
+                                    Resource.msg(
+                                        'error.message.parse.phone',
+                                        'forms',
+                                        null
+                                    );
                             }
                         }
 
@@ -669,13 +810,20 @@ server.post(
                     if (!status.error) {
                         formInfo.profileForm.customer.email.valid = false;
 
-                        if (!reachfiveUpdateLogin.ok
-                            && reachfiveUpdateLogin.errorObj
-                            && reachfiveUpdateLogin.errorObj.error_description) {
-                            formInfo.profileForm.customer.email.error = reachfiveUpdateLogin.errorObj.error_description;
+                        if (
+                            !reachfiveUpdateLogin.ok &&
+                            reachfiveUpdateLogin.errorObj &&
+                            reachfiveUpdateLogin.errorObj.error_description
+                        ) {
+                            formInfo.profileForm.customer.email.error =
+                                reachfiveUpdateLogin.errorObj.error_description;
                         } else {
                             formInfo.profileForm.customer.email.error =
-                            Resource.msg('error.message.username.invalid', 'forms', null);
+                                Resource.msg(
+                                    'error.message.username.invalid',
+                                    'forms',
+                                    null
+                                );
                         }
                     }
 
@@ -715,14 +863,19 @@ server.post(
 
         var profileForm = server.forms.getForm('profile');
 
-        if (!empty(profileForm.customer.emailconfirm.value)
-        && (profileForm.customer.email.value.toLowerCase()
-        !== profileForm.customer.emailconfirm.value.toLowerCase())) {
+        if (
+            !empty(profileForm.customer.emailconfirm.value) &&
+            profileForm.customer.email.value.toLowerCase() !==
+                profileForm.customer.emailconfirm.value.toLowerCase()
+        ) {
             profileForm.valid = false;
             profileForm.customer.email.valid = false;
             profileForm.customer.emailconfirm.valid = false;
-            profileForm.customer.emailconfirm.error =
-            Resource.msg('error.message.mismatch.email', 'forms', null);
+            profileForm.customer.emailconfirm.error = Resource.msg(
+                'error.message.mismatch.email',
+                'forms',
+                null
+            );
         }
 
         var result = {
@@ -740,23 +893,39 @@ server.post(
             // Check "reachFiveCheckCredentials" preference
             var checkCredentials = reachfiveSettings.reachFiveCheckCredentials;
 
-            if (String.prototype.indexOf.call(checkCredentials, 'password') !== -1) {
+            if (
+                String.prototype.indexOf.call(checkCredentials, 'password') !==
+                -1
+            ) {
                 // If customer with login and password (not SLO profile)
                 if (!empty(result.password)) {
                     // Disable refresh "access_token" with "refresh_token"
                     updateToken = false;
 
                     // Check customer password and update access token in session
-                    var authResult = reachFiveApiHelper.getTokenWithPassword(req.currentCustomer.profile.email, result.password);
+                    var authResult = reachFiveApiHelper.getTokenWithPassword(
+                        req.currentCustomer.profile.email,
+                        result.password
+                    );
 
                     if (!authResult.ok) {
                         errorDetected = true;
                         profileForm.login.password.valid = false;
-                        if (!empty(authResult.errorObj)
-                            && Object.prototype.hasOwnProperty.call(authResult.errorObj, 'error_description')) {
-                            profileForm.login.password.error = authResult.errorObj.error_description;
+                        if (
+                            !empty(authResult.errorObj) &&
+                            Object.prototype.hasOwnProperty.call(
+                                authResult.errorObj,
+                                'error_description'
+                            )
+                        ) {
+                            profileForm.login.password.error =
+                                authResult.errorObj.error_description;
                         } else {
-                            profileForm.login.password.error = Resource.msg('error.message.error.unknown', 'login', null);
+                            profileForm.login.password.error = Resource.msg(
+                                'error.message.error.unknown',
+                                'login',
+                                null
+                            );
                         }
                     }
                 }
@@ -767,7 +936,8 @@ server.post(
 
         if (!errorDetected) {
             res.setViewData(result);
-            this.on('route:BeforeComplete', function (req, res) { // eslint-disable-line no-shadow
+            this.on('route:BeforeComplete', function (req, res) {
+                // eslint-disable-line no-shadow
                 var CustomerReachfiveProfileModel = require('*/cartridge/models/profile/customerOrigin');
                 var FormReachfiveProfileModel = require('*/cartridge/models/profile/reachfiveOrigin');
 
@@ -792,7 +962,9 @@ server.post(
                     phone: true
                 };
 
-                var customerModel = new CustomerReachfiveProfileModel(req.currentCustomer.raw);
+                var customerModel = new CustomerReachfiveProfileModel(
+                    req.currentCustomer.raw
+                );
                 var formModel = new FormReachfiveProfileModel({
                     id: customerModel.profile.id,
                     given_name: formInfo.firstName,
@@ -802,58 +974,86 @@ server.post(
                 });
 
                 // Data freshness check
-                equalList.profile = formModel.equal(customerModel, profileFields);
+                equalList.profile = formModel.equal(
+                    customerModel,
+                    profileFields
+                );
                 if (formInfo.email) {
                     equalList.email = formModel.equal(customerModel, 'email');
                 }
                 if (formInfo.phone) {
-                    equalList.phone = !reachFiveApiHelper.isNewPhone(customerModel.profile.phone_number, formModel.profile.phone_number);
+                    equalList.phone = !reachFiveApiHelper.isNewPhone(
+                        customerModel.profile.phone_number,
+                        formModel.profile.phone_number
+                    );
                 }
 
-                equalList.trigger = !(equalList.profile && equalList.email && equalList.phone);
+                equalList.trigger = !(
+                    equalList.profile &&
+                    equalList.email &&
+                    equalList.phone
+                );
 
                 if (equalList.trigger) {
-                    tknStatus = reachFiveHelper.verifySessionAccessTkn(updateToken);
+                    tknStatus =
+                        reachFiveHelper.verifySessionAccessTkn(updateToken);
 
                     if (tknStatus.success) {
                         // Update phone_number
                         if (!equalList.phone) {
-                            reachfiveUpdatePhone = reachFiveApiHelper.updateReachfivePhoneWithTnk(formInfo.phone);
+                            reachfiveUpdatePhone =
+                                reachFiveApiHelper.updateReachfivePhoneWithTnk(
+                                    formInfo.phone
+                                );
 
                             if (reachfiveUpdatePhone.ok) {
                                 formModel.updateCustomerProfile('phone_number');
                             } else {
                                 validList.phone = false;
                                 formInfo.profileForm.customer.phoneNotStrict.valid = false;
-                                formInfo.profileForm.customer.phoneNotStrict.error = reachfiveUpdatePhone.errorObj.error_description;
+                                formInfo.profileForm.customer.phoneNotStrict.error =
+                                    reachfiveUpdatePhone.errorObj.error_description;
                             }
                         }
                         // Update email
                         if (!equalList.email) {
-                            reachfiveUpdateLogin = reachFiveApiHelper.updateReachfiveLoginWithTkn(formInfo.email);
+                            reachfiveUpdateLogin =
+                                reachFiveApiHelper.updateReachfiveLoginWithTkn(
+                                    formInfo.email
+                                );
 
                             if (reachfiveUpdateLogin.ok) {
                                 formModel.updateCustomerProfile('email');
                             } else {
                                 validList.email = false;
                                 formInfo.profileForm.customer.email.valid = false;
-                                formInfo.profileForm.customer.email.error = reachfiveUpdateLogin.errorObj.error_description;
+                                formInfo.profileForm.customer.email.error =
+                                    reachfiveUpdateLogin.errorObj.error_description;
                             }
                         }
                         // Update other profile fields
                         if (!equalList.profile) {
-                            var profileRequestObj = formModel.getUserProfileObj(profileFields);
-                            reachfiveUpdateProfile = reachFiveApiHelper.updateReachFiveProfile(profileRequestObj);
+                            var profileRequestObj =
+                                formModel.getUserProfileObj(profileFields);
+                            reachfiveUpdateProfile =
+                                reachFiveApiHelper.updateReachFiveProfile(
+                                    profileRequestObj
+                                );
 
                             if (reachfiveUpdateProfile.ok) {
                                 formModel.updateCustomerProfile(profileFields);
                             } else {
                                 formInfo.profileForm.customer.firstname.valid = false;
-                                formInfo.profileForm.customer.firstname.error = reachfiveUpdateProfile.errorMessage;
+                                formInfo.profileForm.customer.firstname.error =
+                                    reachfiveUpdateProfile.errorMessage;
                             }
                         }
 
-                        validList.trigger = !(validList.email && validList.phone && validList.profile);
+                        validList.trigger = !(
+                            validList.email &&
+                            validList.phone &&
+                            validList.profile
+                        );
 
                         // Collect errors if exist
                         if (validList.trigger) {
@@ -864,7 +1064,8 @@ server.post(
                         }
                     } else {
                         formInfo.profileForm.customer.firstname.valid = false;
-                        formInfo.profileForm.customer.firstname.error = tknStatus.msg;
+                        formInfo.profileForm.customer.firstname.error =
+                            tknStatus.msg;
 
                         res.json({
                             success: false,
@@ -894,11 +1095,11 @@ server.post('DeleteProfile', function (req, res, next) {
         Transaction.wrap(function () {
             CustomerMgr.removeCustomer(currentCustomer);
         });
-        
+
         // Destroy session and clear cookies
         req.session.privacy = {};
         res.clearCookie('dwsid');
-        
+
         res.json({
             success: true,
             redirectUrl: URLUtils.url('Login-Show').toString()

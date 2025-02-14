@@ -17,10 +17,7 @@ var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 var StringUtils = require('dw/util/StringUtils');
 var URLUtils = require('dw/web/URLUtils');
 
-var reachFiveService = require('*/cartridge/scripts/interfaces/reachFiveInterface');
 var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
-
-
 
 /**
  * @function
@@ -454,54 +451,6 @@ function createLoginRedirectUrl(tkn, stateTarget) {
 }
 
 /**
- * @function
- * @description Checks/updates the current tokens from the session for a 5 minute horizon
- * @param {boolean} [updateFlag] is update access token required
- * @return {Object} result
- * */
-function verifySessionAccessTkn(updateFlag) {
-
-    var status = {
-        success: false,
-        msg: Resource.msg('reachfive.access_tkn.expired', 'reachfive', null)
-    };
-
-    var updateToken = true;
-    if (typeof updateFlag !== 'undefined') {
-        updateToken = updateFlag;
-    }
-
-    var reachfiveSession = new ReachfiveSessionModel();
-
-    if (reachfiveSession.isAccessToken5MinLimit()) {
-        status.success = true;
-    } else if (updateToken) {
-        if (reachfiveSession.refresh_token) {
-            var tokenObj = reachFiveService.retrieveAccessTokenWithRefresh(reachfiveSession.refresh_token);
-
-            if (tokenObj.ok) {
-                status.success = true;
-                reachfiveSession.initialize(tokenObj.object);
-            } else {
-                LOGGER.error('Error. Unable to update access_token with refresh_token, error: {0}', tokenObj.errorMessage);
-                status.msg = Resource.msg('reachfive.server.error', 'reachfive', null);
-            }
-        } else {
-            LOGGER.error('Error. access_token has expired and can not be updated. Check reachfive client preferences scope for "offline_access".');
-        }
-    }
-
-    return status;
-}
-
-
-
-
-
-
-
-
-/**
  * Export modules
  * */
 module.exports.getReachFiveDomain = getReachFiveDomain;
@@ -536,5 +485,4 @@ module.exports.setReachFiveLoginCookie = setReachFiveLoginCookie;
 module.exports.getReachFiveUserCustomObjectType = getReachFiveUserCustomObjectType;
 module.exports.getStateObjBase64 = getStateObjBase64;
 module.exports.createLoginRedirectUrl = createLoginRedirectUrl;
-module.exports.verifySessionAccessTkn = verifySessionAccessTkn;
 module.exports.isReachFiveEnableKakaoTalkNameSplit = isReachFiveEnableKakaoTalkNameSplit;

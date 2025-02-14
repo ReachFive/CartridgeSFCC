@@ -60,6 +60,7 @@ server.prepend(
 
                             Transaction.wrap(function () {
                                 customerReachFiveProfile = authenticatedCustomer.createExternalProfile(reachFiveProviderId, authResult.object.id);
+                                customerReachFiveProfile.setEmail(email);
                             });
                         }
                     }
