@@ -49,9 +49,8 @@ module.exports.beforeStep = function () {
             
             var query = "lastModified >= {0}";
             var sortString = "lastModified asc"; 
-            var queryParams = [dateString];
             
-            profilesIterator = CustomerMgr.queryProfiles(query, sortString, queryParams);
+            profilesIterator = CustomerMgr.searchProfiles(query, sortString, dateString);
             
        if (profilesIterator.hasNext()) {
             managementTokenObj = reachFiveServiceInterface.generateTokenForManagementAPI();

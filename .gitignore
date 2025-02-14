@@ -1,2 +1,3 @@
 .DS_Store
 coverage/*
+.vscode/system-objecttype-extensions.d.ts

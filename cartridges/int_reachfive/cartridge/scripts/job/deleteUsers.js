@@ -1,14 +1,12 @@
 'use strict';
 
 var CustomerMgr = require('dw/customer/CustomerMgr');
-var Transaction = require('dw/system/Transaction');
-
 var reachFiveServiceInterface = require('int_reachfive/cartridge/scripts/interfaces/reachFiveInterface');
 var salesforceServiceInterface = require('int_reachfive/cartridge/scripts/interfaces/salesforceInterface');
 var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 
 function execute() {
-    var profileIterator = CustomerMgr.queryProfiles('custom.toDelete = true', 'creationDate desc');
+    var profileIterator = CustomerMgr.searchProfiles('custom.toDelete = true', 'creationDate desc');
 
     while (profileIterator.hasNext()) {
         var customerProfile = profileIterator.next();
@@ -28,7 +26,6 @@ function execute() {
                         else{
                             LOGGER.warn("Issue when deleting the profile on SFCC : " + customerProfile.customerNo);
                         }
-
                     }
                 } catch (e) {
                     LOGGER.error("Issue when deleting the profile: " + customerProfile.customerNo + ". Erreur: " + e.toString());
