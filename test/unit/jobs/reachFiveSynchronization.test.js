@@ -121,7 +121,7 @@ describe('reachFiveSynchronization', function() {
         expect(customerMgrStub.searchProfiles.calledWith(
             "lastModified >= {0}",
             "lastModified asc",
-            [sinon.match.string]
+            sinon.match.string
         )).to.be.true;
         expect(profilesIteratorStub.hasNext.calledOnce).to.be.true;
     });
