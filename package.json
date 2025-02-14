@@ -7,7 +7,6 @@
     "node": ">=4.0"
   },
   "scripts": {
-    "fdr": " sfcc-dts-setup",
     "updatedef": "sfcc-dts-updateattrs",
     "test": "sgmf-scripts --test test/unit/**/*.js",
     "cover": "sgmf-scripts --cover 'test/unit'",
