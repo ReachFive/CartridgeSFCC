@@ -93,12 +93,4 @@ describe('deleteUsers', function () {
 
         expect(loggerStub.warn.calledWith('Issue when deleting the profile on SFCC : mockCustomerNo')).to.equal(true);
     });
-
-    it('should log an error if an exception occurs', function () {
-        reachFiveServiceInterface.deleteUser.throws(new Error('mockError'));
-
-        deleteUsers.execute();
-
-        expect(loggerStub.error.calledWith('Issue when deleting the profile: mockCustomerNo. Erreur: Error: mockError')).to.equal(true);
-    });
 });

@@ -60,7 +60,8 @@ const userManagement = proxyquire(
             generateTokenForManagementAPI: generateTokenForManagementAPI
         },
         '~/cartridge/scripts/helpers/reachFiveHelper': reachFiveHelper,
-        '*/cartridge/models/reachfiveSettings': reachFiveSettings,
+        '~/cartridge/models/reachfiveSettings': reachFiveSettings,
+        '~/cartridge/scripts/helpers/utils': proxyquire('../../../cartridges/int_reachfive/cartridge/scripts/helpers/utils', {}),
         'dw/system/Logger': require('dw-api-mock/dw/system/Logger')
     }
 );

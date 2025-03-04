@@ -1,8 +1,9 @@
 'use strict';
 
 var CustomerMgr = require('dw/customer/CustomerMgr');
-var reachFiveServiceInterface = require('int_reachfive/cartridge/scripts/interfaces/reachFiveInterface');
 var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
+var reachFiveServiceInterface = require('int_reachfive/cartridge/scripts/interfaces/reachFiveInterface');
+var salesforceServiceInterface = require('int_reachfive/cartridge/scripts/interfaces/salesforceInterface');
 
 /**
  * Executes the job to delete user profiles marked for deletion.
@@ -23,16 +24,16 @@ function execute() {
             if (customer && customer.registered) {
                 try {
                     var result = reachFiveServiceInterface.deleteUser(customerProfile);
-                    if (result && result.ok) {
+                    var ocapiResult = salesforceServiceInterface.deleteCustomerUsingOCAPI(customer);
+                    if (result && result.ok && ocapiResult.ok) {
                         LOGGER.info('Customer successfully deleted: ' + customerProfile.customerNo);
                     } else if (!result || !result.ok) {
                         LOGGER.warn('Issue when deleting the profile on Reachfive: ' + customerProfile.customerNo);
                     } else {
                         LOGGER.warn('Issue when deleting the profile on SFCC : ' + customerProfile.customerNo);
                     }
-                    return new dw.system.Status(dw.system.Status.OK, 'OK', 'Profiles processed successfully.');
                 } catch (e) {
-                    LOGGER.error('Issue when deleting the profile: {0}. Erreur: {1}', customerProfile.customerNo, e);
+                    LOGGER.error('Issue when deleting the profile: {0}. Error: {1}', customerProfile.customerNo, e);
                 }
             }
         }

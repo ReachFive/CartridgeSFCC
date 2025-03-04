@@ -4,8 +4,9 @@ var configureService = require('./serviceConfig').configureService;
 var generateTokenForManagementAPI = require('./tokenManagement').generateTokenForManagementAPI;
 
 var reachFiveHelper = require('~/cartridge/scripts/helpers/reachFiveHelper');
+var reachFiveServiceInterface = require('int_reachfive/cartridge/scripts/interfaces/reachFiveInterface');
 var reachfiveSettings = require('~/cartridge/models/reachfiveSettings');
-var mergeObjects = require('~/cartridge/scripts/helpers/util').mergeObjects;
+var { mergeObjects } = require('~/cartridge/scripts/helpers/utils');
 
 /**
  * Sends a verification email.
@@ -14,13 +15,17 @@ var mergeObjects = require('~/cartridge/scripts/helpers/util').mergeObjects;
  * @returns {Object} The result of the service call.
  */
 function sendVerificationEmail(managementToken, reachFiveExternalID) {
-    var service = configureService('reachfive.verifyemail.post', { user_id: reachFiveExternalID });
+    var service = configureService('reachfive.verifyemail.post', {
+        user_id: reachFiveExternalID
+    });
     service.addHeader('Authorization', 'Bearer ' + managementToken);
 
     var serviceResult = service.call();
     return {
         ok: serviceResult.ok,
-        errorMessage: (!serviceResult.ok) ? serviceResult.error + ' ' + serviceResult.errorMessage : ''
+        errorMessage: !serviceResult.ok
+            ? serviceResult.error + ' ' + serviceResult.errorMessage
+            : ''
     };
 }
 
@@ -31,13 +36,17 @@ function sendVerificationEmail(managementToken, reachFiveExternalID) {
  * @returns {Object} The result of the service call.
  */
 function sendVerificationPhone(managementToken, reachFiveExternalID) {
-    var service = configureService('reachfive.verifyphone.post', { user_id: reachFiveExternalID });
+    var service = configureService('reachfive.verifyphone.post', {
+        user_id: reachFiveExternalID
+    });
     service.addHeader('Authorization', 'Bearer ' + managementToken);
 
     var serviceResult = service.call();
     return {
         ok: serviceResult.ok,
-        errorMessage: (!serviceResult.ok) ? serviceResult.error + ' ' + serviceResult.errorMessage : ''
+        errorMessage: !serviceResult.ok
+            ? serviceResult.error + ' ' + serviceResult.errorMessage
+            : ''
     };
 }
 
@@ -77,7 +86,7 @@ function signUp(login, password, profile) {
     return {
         ok: serviceResult.ok,
         object: serviceResult.object,
-        errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : ''
+        errorMessage: !serviceResult.ok ? serviceResult.errorMessage : ''
     };
 }
 
@@ -99,13 +108,16 @@ function updatePassword(email, newPassword, oldPassword, clientId) {
 
     var service = configureService('reachfive.updatepassword.post');
     service.setRequestMethod('POST');
-    service.addHeader('Authorization', 'Bearer ' + session.privacy.access_token);
+    service.addHeader(
+        'Authorization',
+        'Bearer ' + session.privacy.access_token
+    );
 
     var serviceResult = service.call(requestParams);
     return {
         ok: serviceResult.ok,
         object: serviceResult.object,
-        errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : ''
+        errorMessage: !serviceResult.ok ? serviceResult.errorMessage : ''
     };
 }
 
@@ -128,7 +140,7 @@ function passwordLogin(requestFields) {
     return {
         ok: serviceResult.ok,
         object: serviceResult.object,
-        errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : ''
+        errorMessage: !serviceResult.ok ? serviceResult.errorMessage : ''
     };
 }
 
@@ -140,16 +152,20 @@ function passwordLogin(requestFields) {
 function deleteUser(customer) {
     var managementToken = generateTokenForManagementAPI();
 
-    var clientId = reachFiveHelper.getReachFiveExternalID(customer);
+    var clientId = reachFiveServiceInterface.getReachFiveExternalID(
+        customer.profile
+    );
     if (clientId) {
-        var service = configureService('reachfive.deleteuser', { user_id: clientId });
+        var service = configureService('reachfive.deleteuser', {
+            user_id: clientId
+        });
         service.setRequestMethod('DELETE');
         service.addHeader('Authorization', 'Bearer ' + managementToken.token);
 
         var serviceResult = service.call();
         return {
             ok: serviceResult.ok,
-            errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : null
+            errorMessage: !serviceResult.ok ? serviceResult.errorMessage : null
         };
     }
     return null;
@@ -163,7 +179,10 @@ function deleteUser(customer) {
 function getUserFields(clientId) {
     var managementTokenObj = generateTokenForManagementAPI();
     if (!clientId || !managementTokenObj.ok) {
-        return { ok: false, errorMessage: 'Missing userId or failed to obtain management token' };
+        return {
+            ok: false,
+            errorMessage: 'Missing userId or failed to obtain management token'
+        };
     }
 
     var managementToken = managementTokenObj.token;
@@ -176,7 +195,7 @@ function getUserFields(clientId) {
     return {
         ok: serviceResult.ok,
         object: serviceResult.object,
-        errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : ''
+        errorMessage: !serviceResult.ok ? serviceResult.errorMessage : ''
     };
 }
 
