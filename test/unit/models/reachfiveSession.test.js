@@ -3,7 +3,7 @@ const sinon = require('sinon');
 var proxyquire = require('proxyquire').noCallThru();
 var Encoding = require('dw-api-mock/dw/crypto/Encoding');
 var Site = require('dw-api-mock/dw/system/Site');
-var ReachfiveSession = proxyquire('../../cartridges/int_reachfive/cartridge/models/reachfiveSession', {
+var ReachfiveSession = proxyquire('../../../cartridges/int_reachfive/cartridge/models/reachfiveSession', {
     'dw/crypto/Encoding': Encoding,
     'dw/system/Site': Site,
     'dw/system/Logger': require('dw-api-mock/dw/system/Logger')

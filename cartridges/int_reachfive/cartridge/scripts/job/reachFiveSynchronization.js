@@ -30,12 +30,7 @@ var profileFieldsObj = null;
  */
 module.exports.beforeStep = function () {
     try {
-        var profileFields = reachFiveHelper.getReachFiveProfileFieldsJSON();
-        if (!profileFields) {
-            LOGGER.error('Error - "reach5ProfileFieldsJSON" Site Preference is missing');
-            return new Status(Status.ERROR);
-        }
-        profileFieldsObj = JSON.parse(profileFields);
+        profileFieldsObj = reachFiveHelper.getReachFiveProfileFieldsJSON();
 
         var yesterdayCalendar = new Calendar();
             yesterdayCalendar.add(Calendar.DATE, -1); 

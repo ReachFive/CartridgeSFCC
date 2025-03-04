@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    
+    "plugins": [
+      {
+        "name": "sfcc-dts"
+      }
+    ],
+    "module": "commonjs",
+    "paths": {
+      "dw/*": [
+        "./node_modules/sfcc-dts/@types/sfcc/dw/*"
+      ],
+      "~/*": [
+        "cartridges/dev_template_tool/*",
+        "cartridges/int_reachfive/*",
+        "cartridges/int_reachfive_sfra/*",
+        "cartridges/int_reachfive_sg/*"
+      ],
+      "int_reachfive/*": [
+        "cartridges/int_reachfive/*"
+      ],
+      "int_reachfive_sfra/*": [
+        "cartridges/int_reachfive_sfra/*"
+      ],
+      "int_reachfive_sg/*": [
+        "cartridges/int_reachfive_sg/*"
+      ]
+    }
+  }
+}
