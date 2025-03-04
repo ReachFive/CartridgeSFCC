@@ -12,6 +12,7 @@ var Transaction = require('dw/system/Transaction');
 var reachFiveHelper = require('*/cartridge/scripts/helpers/reachFiveHelper');
 var reachFiveApiHelper = require('*/cartridge/scripts/helpers/reachfiveApiHelper');
 var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
+var reachFiveInterface = require('*/cartridge/scripts/interfaces/reachFiveInterface');
 var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 
 server.append('Login', function (req, res, next) {
@@ -138,7 +139,7 @@ server.append('Show', function (req, res, next) {
 
     //If Social Unlink / Link displayed
     if (socialNetworksCTA) {
-        var tknStatus = reachFiveHelper.verifySessionAccessTkn(); //Check and refresh the access token if needed
+        var tknStatus = reachFiveInterface.verifySessionAccessTkn(); //Check and refresh the access token if needed
         if (!tknStatus.success) {
             socialNetworksCTA = false;
         }

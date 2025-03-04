@@ -3,7 +3,10 @@
 // var reachFiveHelper = require('~/cartridge/scripts/helpers/reachFiveHelper');
 var reachFiveHelper = require('../helpers/reachFiveHelper');
 var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
+var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
+var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 var URLUtils = require('dw/web/URLUtils');
+var Resource = require('dw/web/Resource');
 var configureService = require('./serviceConfig').configureService;
 
 function oauthToken(requestObj) {
@@ -111,5 +114,6 @@ module.exports = {
     generateTokenForManagementAPI: generateTokenForManagementAPI,
     generateToken: generateToken,
     exchangeAuthorizationCodeForIDToken: exchangeAuthorizationCodeForIDToken,
-    retrieveAccessTokenWithRefresh: retrieveAccessTokenWithRefresh
+    retrieveAccessTokenWithRefresh: retrieveAccessTokenWithRefresh,
+    verifySessionAccessTkn: verifySessionAccessTkn
 };

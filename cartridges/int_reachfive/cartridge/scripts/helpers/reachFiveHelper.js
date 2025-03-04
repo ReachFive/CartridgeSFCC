@@ -263,7 +263,17 @@ function getReachFiveManagementScope() {
  * @return {string} Reach Five JSON which contains fields to synchronize and mapping between SFCC and ReachFive profile fields
  * */
 function getReachFiveProfileFieldsJSON() {
-    return getReachFivePreferences('reach5ProfileFieldsJSON');
+    try {
+        var profileFields = getReachFivePreferences('reach5ProfileFieldsJSON');
+        if (!profileFields) {
+            LOGGER.error('Error - "reach5ProfileFieldsJSON" Site Preference is missing');
+            return new Status(Status.ERROR);
+        }
+        return JSON.parse(profileFields);
+    } catch (e) {
+        LOGGER.error('Error while parsing site preference "reach5ProfileFieldsJSON": {0}', e);
+    }
+    return null;
 }
 
 /**

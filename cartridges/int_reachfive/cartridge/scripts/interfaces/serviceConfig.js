@@ -12,8 +12,6 @@
  * API Includes
  */
 var LocalServiceRegistry = require('dw/svc/LocalServiceRegistry');
-var URLUtils = require('dw/web/URLUtils');
-
 /**
  * Script Modules
  */
@@ -26,7 +24,7 @@ var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
  * @returns {dw.svc.HTTPService} Service Object
  */
 function configureService(serviceName, substObj) {
-    return LocalServiceRegistry.createService(`http${serviceName}`, {
+    return LocalServiceRegistry.createService(`${serviceName}`, {
         createRequest: function (svc, params) {
             svc.setAuthentication('NONE');
             svc.addHeader('Content-type', 'application/json');

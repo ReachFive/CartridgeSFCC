@@ -74,10 +74,9 @@ describe('reachFiveSynchronization', function() {
     });
 
     it('should return error status if profile fields are missing', function() {
-        reachFiveHelperStub.getReachFiveProfileFieldsJSON.returns(null);
+        reachFiveHelperStub.getReachFiveProfileFieldsJSON.throws('Error - "reach5ProfileFieldsJSON" Site Preference is missing');
         const result = reachFiveSynchronization.beforeStep();
         expect(result).to.deep.equal(new Status(Status.ERROR));
-        expect(loggerStub.error.calledWith('Error - "reach5ProfileFieldsJSON" Site Preference is missing')).to.be.true;
     });
 
     it('should return error status if management token call fails', function() {

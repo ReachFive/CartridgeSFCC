@@ -110,13 +110,12 @@ describe('reachFiveHelper', function() {
     });
 
     it('should return the correct value for getReachFiveProfileFieldsJSON', function() {
-        const jsonStr = '{"field1": "value1"}';
-        siteStub.getCurrent().getCustomPreferenceValue.withArgs('reach5ProfileFieldsJSON').returns(jsonStr);
-        // @TODO check real beahvior
-        expect(reachFiveHelper.getReachFiveProfileFieldsJSON()).to.deep.equal(jsonStr);
+        const json = {field1: "value1"};
+        siteStub.getCurrent().getCustomPreferenceValue.withArgs('reach5ProfileFieldsJSON').returns(JSON.stringify(json));
+        expect(reachFiveHelper.getReachFiveProfileFieldsJSON()).to.deep.equal(json);
     });
 
-    it.skip('should log an error if getReachFiveProfileFieldsJSON is invalid', function() {
+    it('should log an error if getReachFiveProfileFieldsJSON is invalid', function() {
         const invalidJsonStr = '{"field1": "value1"';
         siteStub.getCurrent().getCustomPreferenceValue.withArgs('reach5ProfileFieldsJSON').returns(invalidJsonStr);
         expect(reachFiveHelper.getReachFiveProfileFieldsJSON()).to.be.null;

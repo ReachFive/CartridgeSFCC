@@ -23,7 +23,9 @@ var ReachfiveSession = proxyquire('../../../cartridges/int_reachfive/cartridge/m
 const reachFiveHelper = proxyquire('../../../cartridges/int_reachfive/cartridge/scripts/helpers/reachFiveHelper', {
     '*/cartridge/models/reachfiveSession': ReachfiveSession
 });
-const reachFiveSettings = proxyquire('../../../cartridges/int_reachfive/cartridge/models/reachfiveSettings', {});
+const reachFiveSettings = proxyquire('../../../cartridges/int_reachfive/cartridge/models/reachfiveSettings', {
+    '*/cartridge/models/reachfiveSession': ReachfiveSession
+});
 
 // Mock de `serviceConfig`
 const configureServiceStub = sinon.stub().returns({
@@ -46,6 +48,7 @@ const tokenManagement = proxyquire('../../../cartridges/int_reachfive/cartridge/
     'dw/system/Logger': Logger,
     '~/cartridge/scripts/helpers/reachFiveHelper': reachFiveHelper,
     '*/cartridge/models/reachfiveSettings': reachFiveSettings,
+    '*/cartridge/models/reachfiveSession': ReachfiveSession
 });
 
 describe('tokenManagement', function() {

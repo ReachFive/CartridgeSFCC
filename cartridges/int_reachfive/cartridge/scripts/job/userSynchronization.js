@@ -29,14 +29,7 @@ var profileFieldsObj = null;
 module.exports.beforeStep = function () {
     // Search the orders for orders that have to been sent to pickpack
     reachFiveUserUpdateIterator = CustomObjectMgr.getAllCustomObjects(reachFiveHelper.getReachFiveUserCustomObjectType());
-
-    var profileFields = reachFiveHelper.getReachFiveProfileFieldsJSON();
-    if (!profileFields) {
-        LOGGER.error('Error - "reach5ProfileFieldsJSON" Site Preference is missing');
-        return new Status(Status.ERROR);
-    }
-    profileFieldsObj = JSON.parse(profileFields);
-
+    profileFieldsObj = reachFiveHelper.getReachFiveProfileFieldsJSON();
     return new Status(Status.OK);
 };
 

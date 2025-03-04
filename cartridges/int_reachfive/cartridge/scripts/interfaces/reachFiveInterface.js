@@ -21,5 +21,6 @@ module.exports = {
     passwordLogin: userManagement.passwordLogin,
     deleteUser: userManagement.deleteUser,
     getUserFields: userManagement.getUserFields,
-    sendVerificationPhone: userManagement.sendVerificationPhone
+    sendVerificationPhone: userManagement.sendVerificationPhone,
+    verifySessionAccessTkn: tokenManagement.verifySessionAccessTkn
 };

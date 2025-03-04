@@ -64,7 +64,7 @@ describe('reachfiveSettings', function() {
         expect(reachfiveSettings.reachFiveCheckCredentials).to.equal('mockValue');
     });
 
-    it.skip('should return an empty string if reachFiveCheckCredentials is null', function() {
+    it('should return an empty string if reachFiveCheckCredentials is null', function() {
         // this failed becase of the way customerPreferences work
         currentSite.getCustomPreferenceValue.withArgs('reachFiveCheckCredentials').returns(null);
         expect(reachfiveSettings.reachFiveCheckCredentials).to.equal('');
