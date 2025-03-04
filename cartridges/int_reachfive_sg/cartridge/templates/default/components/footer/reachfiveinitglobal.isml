@@ -27,6 +27,6 @@
         }
     </script>
 
-    <iscomment>	load global client side R5 lib </iscomment>
+    <iscomment> load global client side R5 lib </iscomment>
     <script src="${URLUtils.staticURL('/js/reachfiveglobal.js')}"></script>
 </isif>

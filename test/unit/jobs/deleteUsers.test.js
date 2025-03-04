@@ -10,7 +10,7 @@ const CustomerMgr = require('dw-api-mock/dw/customer/CustomerMgr');
 const Transaction = require('dw-api-mock/dw/system/Transaction');
 const Logger = require('dw-api-mock/dw/system/Logger');
 
-describe('deleteUsers', function() {
+describe('deleteUsers', function () {
     let profileIteratorStub;
     let customerProfileStub;
     let customerStub;
@@ -19,7 +19,7 @@ describe('deleteUsers', function() {
     let reachFiveServiceInterface;
     let salesforceServiceInterface;
 
-    beforeEach(function() {
+    beforeEach(function () {
         customerStub = {
             registered: true
         };
@@ -33,7 +33,8 @@ describe('deleteUsers', function() {
         };
 
         profileIteratorStub = {
-            hasNext: sinon.stub().onFirstCall().returns(true).onSecondCall().returns(false),
+            hasNext: sinon.stub().onFirstCall().returns(true).onSecondCall()
+                .returns(false),
             next: sinon.stub().returns(customerProfileStub)
         };
 
@@ -63,41 +64,41 @@ describe('deleteUsers', function() {
         });
     });
 
-    afterEach(function() {
+    afterEach(function () {
         CustomerMgr.searchProfiles.restore();
         Logger.getLogger.restore();
     });
 
-    it('should delete users marked for deletion', function() {
+    it('should delete users marked for deletion', function () {
         deleteUsers.execute();
 
-        expect(CustomerMgr.searchProfiles.calledOnce).to.be.true;
-        expect(profileIteratorStub.hasNext.calledTwice).to.be.true;
-        expect(profileIteratorStub.next.calledOnce).to.be.true;
-        expect(customerProfileStub.getCustomer.calledOnce).to.be.true;
-        expect(reachFiveServiceInterface.deleteUser.calledOnceWith(customerProfileStub)).to.be.true;
-        expect(salesforceServiceInterface.deleteCustomerUsingOCAPI.calledOnceWith(customerStub)).to.be.true;
+        expect(CustomerMgr.searchProfiles.calledOnce).to.equal(true);
+        expect(profileIteratorStub.hasNext.calledTwice).to.equal(true);
+        expect(profileIteratorStub.next.calledOnce).to.equal(true);
+        expect(customerProfileStub.getCustomer.calledOnce).to.equal(true);
+        expect(reachFiveServiceInterface.deleteUser.calledOnceWith(customerProfileStub)).to.equal(true);
+        expect(salesforceServiceInterface.deleteCustomerUsingOCAPI.calledOnceWith(customerStub)).to.equal(true);
     });
 
-    it('should log a warning if deleting the profile on Reachfive fails', function() {
+    it('should log a warning if deleting the profile on Reachfive fails', function () {
         reachFiveServiceInterface.deleteUser.returns({ ok: false });
         deleteUsers.execute();
-        expect(loggerStub.warn.calledWith('Issue when deleting the profile on Reachfive: mockCustomerNo')).to.be.true;
+        expect(loggerStub.warn.calledWith('Issue when deleting the profile on Reachfive: mockCustomerNo')).to.equal(true);
     });
 
-    it('should log a warning if deleting the profile on SFCC fails', function() {
+    it('should log a warning if deleting the profile on SFCC fails', function () {
         salesforceServiceInterface.deleteCustomerUsingOCAPI.returns({ ok: false });
 
         deleteUsers.execute();
 
-        expect(loggerStub.warn.calledWith('Issue when deleting the profile on SFCC : mockCustomerNo')).to.be.true;
+        expect(loggerStub.warn.calledWith('Issue when deleting the profile on SFCC : mockCustomerNo')).to.equal(true);
     });
 
-    it('should log an error if an exception occurs', function() {
+    it('should log an error if an exception occurs', function () {
         reachFiveServiceInterface.deleteUser.throws(new Error('mockError'));
-        
+
         deleteUsers.execute();
-            
-        expect(loggerStub.error.calledWith('Issue when deleting the profile: mockCustomerNo. Erreur: Error: mockError')).to.be.true;
+
+        expect(loggerStub.error.calledWith('Issue when deleting the profile: mockCustomerNo. Erreur: Error: mockError')).to.equal(true);
     });
 });

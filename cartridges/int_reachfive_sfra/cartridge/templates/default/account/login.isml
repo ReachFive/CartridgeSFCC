@@ -19,9 +19,9 @@
                             <isinclude template="account/components/navTabs" />
                             <div class="tab-content">
                                 <div class="tab-pane ${pdict.navTabValue === 'login' ? 'active' : ''}" id="login" role="tabpanel" aria-labelledby="login-tab">
-                                	<isif condition="${!empty(pdict.errorMsg)}">
-                                		<div class="error-form">${pdict.errorMsg}</div>
-                                	</isif>
+                                    <isif condition="${!empty(pdict.errorMsg)}">
+                                        <div class="error-form">${pdict.errorMsg}</div>
+                                    </isif>
                                     <isif condition="${pdict.isReachFiveEnabled}">
                                         <isif condition="${pdict.isReachFiveLoginAllowed && pdict.isReachFiveConversionMute}">
                                                 <isif condition="${pdict.isReachFivePasswordReset}">
@@ -33,13 +33,13 @@
                                                     </isif>
                                                 </isif>
                                         <iselse/>
-    	                                    <isinclude template="account/components/loginForm" />
-	                                        <isinclude template="account/password/requestPasswordResetModal"/>
+                                            <isinclude template="account/components/loginForm" />
+                                            <isinclude template="account/password/requestPasswordResetModal"/>
                                             <div id="load-social-connect"></div>
                                         </isif>
                                     <iselse/>
-	                                    <isinclude template="account/components/loginForm" />
-	                                    <isinclude template="account/password/requestPasswordResetModal"/>
+                                        <isinclude template="account/components/loginForm" />
+                                        <isinclude template="account/password/requestPasswordResetModal"/>
                                         <isinclude template="account/components/oauth" />
                                     </isif>
                                 </div>

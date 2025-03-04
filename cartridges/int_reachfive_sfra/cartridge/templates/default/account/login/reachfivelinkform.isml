@@ -8,21 +8,21 @@
         <isinclude template="components/breadcrumbs/pageBreadcrumbs"/>
         <div class="row justify-content-center equal-height">
 
-			<div class="col-sm-8 col-md-6">
-				<div class="card">
+            <div class="col-sm-8 col-md-6">
+                <div class="card">
                     <div class="card-body">
                         <div class="login-form-nav">
-							<isif condition="${!empty(pdict.ReachFivesocialName)}">
-								<p><isprint value="${Resource.msgf('reachfive.accountfound','reachfive',null, pdict.ReachFivesocialName)}" encoding="jshtml" /></p>
-							</isif>
-							<isif condition="${!empty(pdict.errorMsg)}">
-								<p><isprint value="${pdict.errorMsg}" encoding="jshtml" /></p>
-							</isif>
-							<isinclude template="account/components/loginForm" />
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+                            <isif condition="${!empty(pdict.ReachFivesocialName)}">
+                                <p><isprint value="${Resource.msgf('reachfive.accountfound','reachfive',null, pdict.ReachFivesocialName)}" encoding="jshtml" /></p>
+                            </isif>
+                            <isif condition="${!empty(pdict.errorMsg)}">
+                                <p><isprint value="${pdict.errorMsg}" encoding="jshtml" /></p>
+                            </isif>
+                            <isinclude template="account/components/loginForm" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </isdecorate>

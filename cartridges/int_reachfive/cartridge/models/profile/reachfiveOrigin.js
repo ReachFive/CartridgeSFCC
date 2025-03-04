@@ -22,7 +22,6 @@ function ReachfiveProfile(profileObj) {
     BaseProfile.call(this, this.profile);
 }
 
-
 ReachfiveProfile.prototype = Object.create(BaseProfile.prototype);
 ReachfiveProfile.prototype.constructor = ReachfiveProfile;
 

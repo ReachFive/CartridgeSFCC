@@ -9,12 +9,12 @@ var Transaction = require('dw/system/Transaction');
  */
 var reachFiveServiceInterface = require('int_reachfive/cartridge/scripts/interfaces/reachFiveInterface');
 
-
 /**
  * @function
  * @description Adds API calls errors to the 'reachfiveError' attribute if request is fail
  * @param {string} errorMessage Error message
  * @param {dw.customer.Profile} profile - The current profile
+ * @returns {void}
  * */
 function addReachFiveProfileError(errorMessage, profile) {
     var LINE_FEED = '\n'; // new line character;
@@ -66,20 +66,20 @@ function sendVerificationEmail(profile, managementToken, reachFiveExternalID) {
     });
 }
 
-
 /**
  * @function
  * @description Calls Service to update ReachFive Email. It updates ReachFive profile addtibutes
  * @param {dw.customer.Profile} profile - The current profile
  * @param {string} managementToken management API token
  * @param {string} reachFiveExternalID ReachFive external profile ID
+ * @returns {void}
  * */
 function updatePhoneAndEmail(profile, managementToken, reachFiveExternalID) {
     if (!profile || !managementToken || !reachFiveExternalID) {
         return;
     }
     var requestObj = {
-        phone_number: profile.getPhoneMobile() ,
+        phone_number: profile.getPhoneMobile(),
         email: profile.getEmail()
     };
 
@@ -88,7 +88,6 @@ function updatePhoneAndEmail(profile, managementToken, reachFiveExternalID) {
     if (!result.ok) {
         addReachFiveProfileError(result.errorMessage, profile);
     }
-    return result;
 }
 
 /**
@@ -206,14 +205,12 @@ function createProfileRequestObj(profileFieldsObj, profile) {
 
     if (addrFieldsObj && profile.addressBook && profile.addressBook && profile.addressBook.addresses.length) {
         var addresses = profile.addressBook.addresses;
-        var address = null;
         var addressObj = null;
         var defaultAddrId = profile.addressBook.preferredAddress && profile.addressBook.preferredAddress.UUID;
 
         resultObj.addresses = [];
 
-        for (var i = 0, l = addresses.length; i < l; i++) {
-            address = addresses[i];
+        addresses.toArray().forEach(function (address) {
             addressObj = {};
 
             if (defaultAddrId && address.UUID === defaultAddrId) {
@@ -223,7 +220,7 @@ function createProfileRequestObj(profileFieldsObj, profile) {
             addressObj = setReach5Obj(address, profileFieldsObj, 'address');
 
             resultObj.addresses.push(addressObj);
-        }
+        });
     }
 
     if (consentsFieldsObj) {

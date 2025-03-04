@@ -14,14 +14,14 @@ $(function () {
     // Check session handler
     if (reach5Const.isSessionAuthRequired) {
         sdkCoreClient.getSessionInfo()
-        .then(function (sessionInfo) {
-            if (sessionInfo && sessionInfo.isAuthenticated) {
-                sdkCoreClient.loginFromSession({
-                    redirectUri: reach5Const.callbackUrl,
-                    state: reach5Const.stateObjBase64
-                });
-            }
-        });
+            .then(function (sessionInfo) {
+                if (sessionInfo && sessionInfo.isAuthenticated) {
+                    sdkCoreClient.loginFromSession({
+                        redirectUri: reach5Const.callbackUrl,
+                        state: reach5Const.stateObjBase64
+                    });
+                }
+            });
     }
 
     // Logout handler
@@ -30,18 +30,18 @@ $(function () {
             event.preventDefault();
 
             sdkCoreClient.getSessionInfo()
-            .then(function (sessionInfo) {
-                if (sessionInfo && sessionInfo.isAuthenticated) {
-                    sdkCoreClient.logout({
-                        redirectTo: reach5Const.reachFiveLogoutUrl
-                    });
-                } else {
+                .then(function (sessionInfo) {
+                    if (sessionInfo && sessionInfo.isAuthenticated) {
+                        sdkCoreClient.logout({
+                            redirectTo: reach5Const.reachFiveLogoutUrl
+                        });
+                    } else {
+                        window.location.href = event.target.href;
+                    }
+                })
+                .catch(function () {
                     window.location.href = event.target.href;
-                }
-            })
-            .catch(function () {
-                window.location.href = event.target.href;
-            });
+                });
         }
     });
 

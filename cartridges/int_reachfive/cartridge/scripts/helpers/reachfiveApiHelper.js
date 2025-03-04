@@ -4,6 +4,22 @@ var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 var reachFiveService = require('*/cartridge/scripts/interfaces/reachFiveInterface');
 var reachFiveHelper = require('*/cartridge/scripts/helpers/reachFiveHelper');
 
+/**
+ * @function
+ * @description Get Reach Five External Profile ID
+ * @param {dw.customer.Profile} profile сurrent Customer Profile
+ * @return {string|null} Reach Five External Profile ID
+ * */
+function getReachFiveExternalID(profile) {
+    var externalProfiles = profile.customer.getExternalProfiles();
+    var reachFiveProviderId = reachFiveHelper.getReachFiveProviderId();
+
+    var externalProfile = externalProfiles.toArray().filter(function (extProfile) {
+        return (extProfile && extProfile.externalID && extProfile.authenticationProviderID === reachFiveProviderId);
+    });
+    // @TODO need to check if we have more than one external profile
+    return externalProfile ? externalProfile[0].externalID : null;
+}
 
 /**
  * @description Login with reachfive password interface
@@ -104,7 +120,7 @@ function getTokenWithPassword(login, password) {
 
     var result = reachFiveService.oauthToken(requestObj);
 
-    if (result.ok & !empty(result.object)) {
+    if (result.ok && !empty(result.object)) {
         var reachfiveSession = new ReachfiveSessionModel();
         reachfiveSession.initialize(result.object);
     } else {
@@ -246,12 +262,12 @@ function getCustomerReachFiveExtProfile(thatCustomer) {
     var reachFiveProviderId = reachFiveHelper.getReachFiveProviderId();
     var customerReachFiveProfile = null;
     if (thatCustomer && thatCustomer.externalProfiles.length) {
-        for (var i = 0, length = thatCustomer.externalProfiles.length; i < length; i++) {
-            if (thatCustomer.externalProfiles[i].authenticationProviderID === reachFiveProviderId) {
-                customerReachFiveProfile = thatCustomer.externalProfiles[i];
-                break;
+        var externalProfiles = thatCustomer.getExternalProfiles();
+        externalProfiles.toArray().forEach(function (profile) {
+            if (profile.authenticationProviderID === reachFiveProviderId) {
+                customerReachFiveProfile = profile;
             }
-        }
+        });
     }
 
     return customerReachFiveProfile;
@@ -264,9 +280,8 @@ function getCustomerReachFiveExtProfile(thatCustomer) {
  * @param {string} newPassword New customer password
  * @return {void}
  * */
- function passwordUpdateManagementAPI(profile, newPassword) {
+function passwordUpdateManagementAPI(profile, newPassword) {
     if (reachFiveHelper.isReachFiveEnabled()) {
-
         var managementTokenObj = reachFiveService.generateTokenForManagementAPI();
         if (managementTokenObj.ok) {
             var managementToken = managementTokenObj.token;
@@ -300,7 +315,6 @@ function passwordResetManagementAPI(reachFiveUserID, newPassword) {
     var resetPassRsp = null;
 
     if (reachFiveHelper.isReachFiveEnabled() && reachFiveUserID) {
-
         var managementTokenObj = reachFiveService.generateTokenForManagementAPI();
         if (managementTokenObj.ok) {
             var managementToken = managementTokenObj.token;
@@ -318,28 +332,6 @@ function passwordResetManagementAPI(reachFiveUserID, newPassword) {
     }
 
     return resetPassRsp;
-}
-
-/**
- * @function
- * @description Get Reach Five External Profile ID
- * @param {dw.customer.Profile} profile сurrent Customer Profile
- * @return {string} Reach Five External Profile ID
- * */
-function getReachFiveExternalID(profile) {
-    var externalProfiles = profile.customer.getExternalProfiles();
-    var externalProfile = null;
-    var reachFiveProviderId = reachFiveHelper.getReachFiveProviderId();
-
-    for (var i = 0, l = externalProfiles.length; i < l; i++) {
-        externalProfile = externalProfiles[i];
-        if (externalProfile && externalProfile.externalID
-            && externalProfile.authenticationProviderID === reachFiveProviderId) {
-            break;
-        }
-    }
-
-    return externalProfile && externalProfile.externalID;
 }
 
 module.exports.loginWithPassword = loginWithPassword;

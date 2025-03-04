@@ -34,7 +34,7 @@
 
         <isinclude url="${URLUtils.url('ReachFiveController-UncachedContext')}" />
 
-        <iscomment>	load global client side R5 lib </iscomment>
+        <iscomment>load global client side R5 lib </iscomment>
         <script defer src="${URLUtils.staticURL('/js/reachfiveglobal.js')}"></script>
     </isif>
 

@@ -33,27 +33,33 @@ module.exports.beforeStep = function () {
         profileFieldsObj = reachFiveHelper.getReachFiveProfileFieldsJSON();
 
         var yesterdayCalendar = new Calendar();
-            yesterdayCalendar.add(Calendar.DATE, -1); 
-            var yesterdayDate = yesterdayCalendar.time; 
-            
-            var dateString = [
-                yesterdayDate.getFullYear(),
-                ('0' + (yesterdayDate.getMonth() + 1)).slice(-2),
-                ('0' + yesterdayDate.getDate()).slice(-2)
-            ].join('-');
-            
-            var query = "lastModified >= {0}";
-            var sortString = "lastModified asc"; 
-            
-            profilesIterator = CustomerMgr.searchProfiles(query, sortString, dateString);
-            
-       if (profilesIterator.hasNext()) {
+        yesterdayCalendar.add(Calendar.DATE, -1);
+        var yesterdayDate = yesterdayCalendar.time;
+
+        var dateString = [
+            yesterdayDate.getFullYear(),
+            ('0' + (yesterdayDate.getMonth() + 1)).slice(-2),
+            ('0' + yesterdayDate.getDate()).slice(-2)
+        ].join('-');
+
+        var query = 'lastModified >= {0}';
+        var sortString = 'lastModified asc';
+
+        profilesIterator = CustomerMgr.searchProfiles(
+            query,
+            sortString,
+            dateString
+        );
+
+        if (profilesIterator.hasNext()) {
             managementTokenObj = reachFiveServiceInterface.generateTokenForManagementAPI();
             if (!managementTokenObj.ok) {
-                LOGGER.error('Error during ReachFive Management token call: {0}', managementTokenObj.errorMessage);
+                LOGGER.error(
+                    'Error during ReachFive Management token call: {0}',
+                    managementTokenObj.errorMessage
+                );
                 return new Status(Status.ERROR);
             }
-        
         }
 
         return new Status(Status.OK);
@@ -99,7 +105,7 @@ module.exports.process = function (profile) {
     try {
         var reachFiveExternalID = reachFiveApiHelper.getReachFiveExternalID(profile);
         if (!reachFiveExternalID) {
-            LOGGER.warn("External ID not find for this profil.");
+            LOGGER.warn('External ID not find for this profil.');
             return new Status(Status.ERROR);
         }
 
@@ -108,24 +114,43 @@ module.exports.process = function (profile) {
         libReachFiveSynchronization.cleanUpProfileErrorAttr(profile);
 
         if (profile.custom.reachfiveSendVerificationEmail) {
-            libReachFiveSynchronization.sendVerificationEmail(profile, managementToken, reachFiveExternalID);
+            libReachFiveSynchronization.sendVerificationEmail(
+                profile,
+                managementToken,
+                reachFiveExternalID
+            );
         }
         if (profile.custom.reachfiveSendVerificationPhone) {
-            libReachFiveSynchronization.sendVerificationPhone(profile, managementToken, reachFiveExternalID);
+            libReachFiveSynchronization.sendVerificationPhone(
+                profile,
+                managementToken,
+                reachFiveExternalID
+            );
         }
         var userDataResult = reachFiveServiceInterface.getUserFields(reachFiveExternalID);
         if (!userDataResult.ok || !userDataResult.object) {
-            LOGGER.error("not possible to get user fields");
+            LOGGER.error('not possible to get user fields');
             return new Status(Status.ERROR);
         }
 
         var emailFromAPI = userDataResult.object.email;
         var phoneNumberFromAPI = userDataResult.object.phone_number;
-        if((phoneNumberFromAPI != profile.getPhoneMobile()) || (emailFromAPI != profile.getEmail())){
-            libReachFiveSynchronization.updatePhoneAndEmail(profile, managementToken, reachFiveExternalID);
-        } 
-            libReachFiveSynchronization.updateProfile(profileFieldsObj, profile, managementToken, reachFiveExternalID);
-        
+        if (
+            phoneNumberFromAPI !== profile.getPhoneMobile()
+            || emailFromAPI !== profile.getEmail()
+        ) {
+            libReachFiveSynchronization.updatePhoneAndEmail(
+                profile,
+                managementToken,
+                reachFiveExternalID
+            );
+        }
+        libReachFiveSynchronization.updateProfile(
+            profileFieldsObj,
+            profile,
+            managementToken,
+            reachFiveExternalID
+        );
 
         return new Status(Status.OK);
     } catch (e) {
@@ -144,9 +169,7 @@ module.exports.process = function (profile) {
 /**
  * Does nothing
  */
-module.exports.write = function () {
-
-};
+module.exports.write = function () {};
 
 /**
  * Closes all system resources associated with this iterator

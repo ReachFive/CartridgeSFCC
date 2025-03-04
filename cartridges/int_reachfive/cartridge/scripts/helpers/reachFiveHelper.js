@@ -5,6 +5,7 @@
 // TODO: 1. Preferences model
 // TODO: 2. API interface helper (all interfaces of the API calls)
 // TODO: 3. Functions helper (real helpers for code and frequently used functions)
+
 'use strict';
 
 var Encoding = require('dw/crypto/Encoding');
@@ -12,12 +13,10 @@ var Calendar = require('dw/util/Calendar');
 var Site = require('dw/system/Site');
 var Locale = require('dw/util/Locale');
 var Cookie = require('dw/web/Cookie');
-var Resource = require('dw/web/Resource');
 var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 var StringUtils = require('dw/util/StringUtils');
 var URLUtils = require('dw/web/URLUtils');
-
-var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
+var Status = require('dw/system/Status');
 
 /**
  * @function
@@ -100,7 +99,6 @@ function getReachFiveApiKey() {
     return getReachFivePreferences('reach5ApiKey');
 }
 
-
 /**
  * @function
  * @description Get Reach Five provider ID
@@ -170,7 +168,6 @@ function isFieldExist(externalProfile, key) {
  * @return {string} encoded key value
  */
 function encodeBase64UrlSafe(key) {
-    
     if (!key) {
         return null;
     }
@@ -285,7 +282,6 @@ function getReachFiveProfileFieldsJSON() {
     return getReachFivePreferences('isReachFiveSessionForcedAuth');
 }
 
-
 /**
  * @function
  * @description Gets Reach Five language code. If current language code is not supported then default code will be returned
@@ -387,14 +383,13 @@ function getProfileRequestObjFromForm(customerForm) {
     return requestObj;
 }
 
-
-
 /**
  * @function
  * @description Prepare BASE64 string object for redirect
  * @param {string} redirectURL redirect url
  * @param {string} action Controller endpoint action
  * @param {boolean} [handleCustomerRoute] handle flag
+ * @param {data} data Data object
  * @return {string} result
  * */
 function getStateObjBase64(redirectURL, action, handleCustomerRoute, data) {
@@ -407,14 +402,13 @@ function getStateObjBase64(redirectURL, action, handleCustomerRoute, data) {
         stateObj.handleCustomerRoute = handleCustomerRoute;
     }
 
-    //Put the data query param as a JSON object in the state
+    // Put the data query param as a JSON object in the state
     if (data) {
         stateObj.data = data;
     }
 
     return StringUtils.encodeBase64(JSON.stringify(stateObj));
 }
-
 
 /**
  * @function
@@ -461,8 +455,55 @@ function createLoginRedirectUrl(tkn, stateTarget) {
 }
 
 /**
+ * Analyze state data in request
+ * @param {Object} req request object
+ * @returns {Object} - parsed state values or defaults
+ */
+function getStateData(req) {
+    var stateData = {
+        target: URLUtils.https('Account-Show').toString(),
+        handleCustomerRoute: false
+    };
+    var stateObj = {
+        redirectURL: null,
+        action: false,
+        handleCustomerRoute: false
+    };
+    if (req.httpParameterMap.isParameterSubmitted('state')) {
+        var stateObjStr = dw.util.StringUtils.decodeBase64(
+            req.httpParameterMap.state.value
+        );
+        try {
+            stateObj = JSON.parse(stateObjStr);
+        } catch (err) {
+            LOGGER.error('Error during state object parsing: {0}', err);
+        }
+
+        if (stateObj.redirectURL) {
+            stateData.target = stateObj.redirectURL;
+        }
+
+        if (typeof stateObj.handleCustomerRoute === 'boolean') {
+            stateData.handleCustomerRoute = stateObj.handleCustomerRoute;
+        }
+
+        if (stateObj.action) {
+            stateData.action = stateObj.action;
+        }
+
+        // Get the data param in the state object
+        if (stateObj.data) {
+            stateData.data = stateObj.data;
+        }
+    }
+
+    return stateData;
+}
+
+/**
  * Export modules
  * */
+module.exports.getStateData = getStateData;
 module.exports.getReachFiveDomain = getReachFiveDomain;
 module.exports.getReachFiveApiKey = getReachFiveApiKey;
 module.exports.getReachFiveClientSecret = getReachFiveClientSecret;

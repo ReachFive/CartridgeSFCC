@@ -20,7 +20,7 @@ var bootstrapPackages = {
 
 module.exports = [
     {
-        mode: "production",
+        mode: 'production',
         name: 'js',
         entry: jsFiles,
         output: {
@@ -47,5 +47,5 @@ module.exports = [
             ]
         },
         plugins: [new webpack.ProvidePlugin(bootstrapPackages)]
-    },
+    }
 ];

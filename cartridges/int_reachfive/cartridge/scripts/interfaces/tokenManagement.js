@@ -9,6 +9,16 @@ var URLUtils = require('dw/web/URLUtils');
 var Resource = require('dw/web/Resource');
 var configureService = require('./serviceConfig').configureService;
 
+/**
+ * Generates an OAuth token using the provided request object.
+ *
+ * @param {Object} requestObj - The request object containing additional parameters for the token request.
+ * @param {string} requestObj.grant_type - The type of grant being requested.
+ * @param {string} [requestObj.username] - The username for password grant type.
+ * @param {string} [requestObj.password] - The password for password grant type.
+ * @param {string} [requestObj.refresh_token] - The refresh token for refresh token grant type.
+ * @returns {Object} The result of the token request.
+ */
 function oauthToken(requestObj) {
     var requestParams = {
         client_id: reachfiveSettings.reach5ApiKey,
@@ -27,6 +37,14 @@ function oauthToken(requestObj) {
     };
 }
 
+/**
+ * Generates an OAuth token for the ReachFive Management API.
+ *
+ * This function constructs a request object with the necessary credentials
+ * and scope to obtain an OAuth token using the client credentials grant type.
+ *
+ * @returns {Object} The OAuth token response object.
+ */
 function generateTokenForManagementAPI() {
     var requestObj = {
         grant_type: 'client_credentials',
@@ -37,6 +55,11 @@ function generateTokenForManagementAPI() {
     return oauthToken(requestObj);
 }
 
+/**
+ * Generates an OAuth token using client credentials.
+ *
+ * @returns {Promise<string>} A promise that resolves to the access token.
+ */
 function generateToken() {
     var requestObj = {
         grant_type: 'client_credentials',
@@ -46,6 +69,14 @@ function generateToken() {
     return oauthToken(requestObj).then(result => result.object.access_token);
 }
 
+/**
+ * Exchanges an authorization code for an ID token.
+ *
+ * @param {Object} customFields - The custom fields required for the token exchange.
+ * @param {string} customFields.code - The authorization code to be exchanged.
+ * @param {string} [customFields.redirectUrl] - The redirect URI to be used. If not provided, a default URL is used.
+ * @returns {Object} The response object containing the ID token.
+ */
 function exchangeAuthorizationCodeForIDToken(customFields) {
     var requestObj = {
         code: customFields.code,
@@ -58,6 +89,12 @@ function exchangeAuthorizationCodeForIDToken(customFields) {
     return oauthToken(requestObj).object;
 }
 
+/**
+ * Retrieves a new access token using a refresh token.
+ *
+ * @param {string} refreshToken - The refresh token used to obtain a new access token.
+ * @returns {Object} The response object containing the new access token.
+ */
 function retrieveAccessTokenWithRefresh(refreshToken) {
     var requestObj = {
         client_id: reachFiveHelper.getReachFiveApiKey(),
@@ -75,7 +112,6 @@ function retrieveAccessTokenWithRefresh(refreshToken) {
  * @return {Object} result
  * */
 function verifySessionAccessTkn(updateFlag) {
-
     var status = {
         success: false,
         msg: Resource.msg('reachfive.access_tkn.expired', 'reachfive', null)

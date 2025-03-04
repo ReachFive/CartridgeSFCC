@@ -59,7 +59,7 @@ initGlobal.afterFooter = function (pdict) {
             signUpTargetPage = URLUtils.url('Account-Show', 'registration', 'submitted').relative();
         }
 
-        var data = request.httpParameterMap.data.value; //Get the query param data in order to store it in the state value
+        var data = request.httpParameterMap.data.value; // Get the query param data in order to store it in the state value
         var stateObjBase64 = reachFiveHelper.getStateObjBase64(targetPage.toString(), pdict.action, handleCustomerRoute, data);
         var signUpStateObjBase64 = reachFiveHelper.getStateObjBase64(signUpTargetPage.toString(), pdict.action, handleCustomerRoute);
 

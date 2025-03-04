@@ -51,10 +51,10 @@ function CustomerProfile(customer) {
 
         var birthday = customer.profile.getBirthday();
         if (birthday) {
-            this.profile.birthdate = '' +
-                birthday.getFullYear() +
-                '-' + (birthday.getMonth() + 1) +
-                '-' + birthday.getDate();
+            this.profile.birthdate = ''
+                + birthday.getFullYear()
+                + '-' + (birthday.getMonth() + 1)
+                + '-' + birthday.getDate();
         }
     }
     BaseProfile.call(this, this.profile);

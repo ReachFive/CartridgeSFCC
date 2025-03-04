@@ -1,12 +1,24 @@
 {
     "root": true,
     "extends": "airbnb-base/legacy",
+    "parserOptions": {
+        "ecmaVersion": 2015
+    },
+    "env": {
+        "node": true,
+        "mocha": true
+    },
     "globals": {
         "request": true,
         "session": true,
         "customer": true,
         "response": true,
-        "empty": true
+        "empty": true,
+        "reach5Const": true,
+        "reach5": true,
+        "sdkCoreClient": true,
+        "$": true,
+        "dw": true
     },
     "rules": {
         "import/no-unresolved": "off",
@@ -16,7 +28,7 @@
         "valid-jsdoc": ["error", { "preferType": { "Boolean": "boolean", "Number": "number", "object": "Object", "String": "string" }, "requireReturn": false}],
         "vars-on-top": "off",
         "global-require": "off",
-        "no-shadow": ["error", { "allow": ["err", "callback"]}],
+        "no-shadow": ["error", { "allow": ["err", "callback", "req", "res"]}],
         "max-len": "off",
         "no-param-reassign": ["error", { "props": false }],
         "linebreak-style": 0

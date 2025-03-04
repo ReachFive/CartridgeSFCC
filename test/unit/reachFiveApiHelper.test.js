@@ -5,13 +5,13 @@ const expect = chai.expect;
 const sinon = require('sinon');
 const proxyquire = require('proxyquire').noCallThru();
 
-describe('reachfiveApiHelper', function() {
+describe('reachfiveApiHelper', function () {
     let loggerStub;
     let reachFiveService;
     let reachFiveHelper;
     let reachfiveApiHelper;
 
-    beforeEach(function() {
+    beforeEach(function () {
         // Mock des modules Demandware
         loggerStub = {
             error: sinon.spy(),
@@ -50,11 +50,11 @@ describe('reachfiveApiHelper', function() {
         });
     });
 
-    afterEach(function() {
+    afterEach(function () {
         require('dw/system/Logger').getLogger.restore();
     });
 
-    it('should login with password', function() {
+    it('should login with password', function () {
         const email = 'test@example.com';
         const password = 'password123';
         const result = { ok: true, object: 'mockResponse' };
@@ -64,10 +64,10 @@ describe('reachfiveApiHelper', function() {
         const response = reachfiveApiHelper.loginWithPassword(email, password);
 
         expect(response).to.deep.equal(result);
-        expect(reachFiveService.passwordLogin.calledOnceWith({ email, password })).to.be.true;
+        expect(reachFiveService.passwordLogin.calledOnceWith({ email, password })).to.equal(true);
     });
 
-    it('should sign up with credentials and profile', function() {
+    it('should sign up with credentials and profile', function () {
         const credentialsObj = { email: 'test@example.com', password: 'password123' };
         const profile = { firstName: 'John', lastName: 'Doe' };
         const result = { ok: true, object: 'mockResponse' };
@@ -77,10 +77,10 @@ describe('reachfiveApiHelper', function() {
         const response = reachfiveApiHelper.signUp(credentialsObj, profile);
 
         expect(response).to.deep.equal(result);
-        expect(reachFiveService.signUp.calledOnceWith(credentialsObj.email, credentialsObj.password, profile)).to.be.true;
+        expect(reachFiveService.signUp.calledOnceWith(credentialsObj.email, credentialsObj.password, profile)).to.equal(true);
     });
 
-    it('should update password', function() {
+    it('should update password', function () {
         const email = 'test@example.com';
         const newPassword = 'newPassword123';
         const oldPassword = 'oldPassword123';
@@ -93,10 +93,10 @@ describe('reachfiveApiHelper', function() {
         const response = reachfiveApiHelper.updatePassword(email, newPassword, oldPassword);
 
         expect(response).to.deep.equal(result);
-        expect(reachFiveService.updatePassword.calledOnceWith(email, newPassword, oldPassword, clientId)).to.be.true;
+        expect(reachFiveService.updatePassword.calledOnceWith(email, newPassword, oldPassword, clientId)).to.equal(true);
     });
 
-    it('should log an error if update password fails', function() {
+    it('should log an error if update password fails', function () {
         const email = 'test@example.com';
         const newPassword = 'newPassword123';
         const oldPassword = 'oldPassword123';
@@ -111,7 +111,7 @@ describe('reachfiveApiHelper', function() {
         expect(response).to.deep.equal(result);
     });
 
-    it('should get user profile', function() {
+    it('should get user profile', function () {
         const profileFields = 'id,email';
         const result = { ok: true, object: 'mockResponse' };
 
@@ -120,10 +120,10 @@ describe('reachfiveApiHelper', function() {
         const response = reachfiveApiHelper.getUserProfile(profileFields);
 
         expect(response).to.deep.equal(result);
-        expect(reachFiveService.getUserProfile.calledOnceWith(profileFields)).to.be.true;
+        expect(reachFiveService.getUserProfile.calledOnceWith(profileFields)).to.equal(true);
     });
 
-    it('should log an error if get user profile fails', function() {
+    it('should log an error if get user profile fails', function () {
         const profileFields = 'id,email';
         const result = { ok: false, errorMessage: 'mockError' };
 
@@ -132,6 +132,6 @@ describe('reachfiveApiHelper', function() {
         const response = reachfiveApiHelper.getUserProfile(profileFields);
 
         expect(response).to.deep.equal(result);
-        expect(loggerStub.error.calledOnce).to.be.true;
+        expect(loggerStub.error.calledOnce).to.equal(true);
     });
 });

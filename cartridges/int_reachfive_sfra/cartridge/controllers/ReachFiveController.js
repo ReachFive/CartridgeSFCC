@@ -20,7 +20,6 @@ var URLUtils = require('dw/web/URLUtils');
 var CustomerMgr = require('dw/customer/CustomerMgr');
 var Resource = require('dw/web/Resource');
 var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
-var dwStringUtils = require('dw/util/StringUtils');
 var CustomObjectMgr = require('dw/object/CustomObjectMgr');
 
 /* eslint-disable no-lonely-if */
@@ -63,52 +62,6 @@ function handleCustomerRoute(loggedCustomer, target, customerRoute) {
     return redirectUrl;
 }
 
-/**
- * Analyze state data in request
- * @param {Object} req request object
- * @returns {Object} - parsed state values or defaults
- */
-function getStateData(req) {
-    var stateData = {
-        target: URLUtils.https('Account-Show').toString(),
-        handleCustomerRoute: false
-    };
-    var stateObj = {
-        redirectURL: null,
-        action: false,
-        handleCustomerRoute: false
-    };
-    if (req.httpParameterMap.isParameterSubmitted('state')) {
-        var stateObjStr = dwStringUtils.decodeBase64(
-            req.httpParameterMap.state.value
-        );
-        try {
-            stateObj = JSON.parse(stateObjStr);
-        } catch (err) {
-            LOGGER.error('Error during state object parsing: {0}', err);
-        }
-
-        if (stateObj.redirectURL) {
-            stateData.target = stateObj.redirectURL;
-        }
-
-        if (typeof stateObj.handleCustomerRoute === 'boolean') {
-            stateData.handleCustomerRoute = stateObj.handleCustomerRoute;
-        }
-
-        if (stateObj.action) {
-            stateData.action = stateObj.action;
-        }
-
-        //Get the data param in the state object
-        if (stateObj.data) {
-            stateData.data = stateObj.data;
-        }
-    }
-
-    return stateData;
-}
-
 server.get('CallbackReachFiveRequest', function (req, res, next) {
     var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
     var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
@@ -129,8 +82,7 @@ server.get('CallbackReachFiveRequest', function (req, res, next) {
     }
 
     //  Step 3: Exchange authorization code for ID token
-    var authorizationResponse =
-        reachFiveService.exchangeAuthorizationCodeForIDToken({ code: code });
+    var authorizationResponse = reachFiveService.exchangeAuthorizationCodeForIDToken({ code: code });
 
     if (!authorizationResponse) {
         LOGGER.warn('authorization error : for code ' + code);
@@ -141,9 +93,8 @@ server.get('CallbackReachFiveRequest', function (req, res, next) {
     var reachfiveSession = new ReachfiveSessionModel(authorizationResponse);
 
     var externalProfileAddons = reachFiveApiHelper.getUserProfile();
-    reachfiveSession.has_password =
-        externalProfileAddons.object &&
-        externalProfileAddons.object.has_password;
+    reachfiveSession.has_password = externalProfileAddons.object
+        && externalProfileAddons.object.has_password;
 
     var email = reachfiveSession.profile.email;
     var externalID = reachfiveSession.profile.sub.trim();
@@ -155,7 +106,7 @@ server.get('CallbackReachFiveRequest', function (req, res, next) {
     var stateObj = getStateData(req);
     var target = stateObj.target;
 
-    //Get the data from the state object
+    // Get the data from the state object
     var data = stateObj.data;
 
     // Logger debug for profile
@@ -176,9 +127,9 @@ server.get('CallbackReachFiveRequest', function (req, res, next) {
             ? CustomerMgr.getCustomerByLogin(email)
             : null;
         if (
-            existingCustomer != null &&
-            existingCustomer.getExternalProfiles() != null &&
-            existingCustomer.getExternalProfiles().length === 0
+            existingCustomer != null
+            && existingCustomer.getExternalProfiles() != null
+            && existingCustomer.getExternalProfiles().length === 0
         ) {
             // Case : We found one customer in Demandware with this login / email. So we have to link customer account with provider reachfive
             // clear fields
@@ -240,12 +191,11 @@ server.get('CallbackReachFiveRequest', function (req, res, next) {
                 // Create customer with external profile
                 // If we want to create a new customer without prefill form
                 if (
-                    reachfiveSettings.isReachFiveFastRegister ||
-                    reachfiveSession.has_password
+                    reachfiveSettings.isReachFiveFastRegister
+                    || reachfiveSession.has_password
                 ) {
                     if (externalProfileAddons.ok) {
-                        reachFiveConsents =
-                            externalProfileAddons.object.consents;
+                        reachFiveConsents = externalProfileAddons.object.consents;
                     }
 
                     profile = ReachFiveModel.createReachFiveCustomer(
@@ -495,8 +445,8 @@ server.get(
         var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
 
         if (
-            reachfiveSettings.isReachFiveEnabled &&
-            session.privacy.prefill_register
+            reachfiveSettings.isReachFiveEnabled
+            && session.privacy.prefill_register
         ) {
             var breadcrumbs = [
                 {
@@ -546,9 +496,9 @@ server.post(
         if (session.privacy.prefill_register) {
             // form validation
             if (
-                !!profileForm.customer.email.value &&
-                profileForm.customer.email.value.toLowerCase() !==
-                    profileForm.customer.emailconfirm.value.toLowerCase()
+                !!profileForm.customer.email.value
+                && profileForm.customer.email.value.toLowerCase()
+                    !== profileForm.customer.emailconfirm.value.toLowerCase()
             ) {
                 profileForm.valid = false;
                 profileForm.customer.email.valid = false;
@@ -611,8 +561,7 @@ server.post(
                                 phone: true
                             };
 
-                            var customerModel =
-                                new CustomerReachfiveProfileModel(
+                            var customerModel = new CustomerReachfiveProfileModel(
                                     loggedCustomer
                                 );
                             var sessionModel = new ReachfiveProfileModel(
@@ -625,8 +574,7 @@ server.post(
                                 profileFields
                             );
                             if (formInfo.phone) {
-                                equalList.phone =
-                                    !reachFiveApiHelper.isNewPhone(
+                                equalList.phone = !reachFiveApiHelper.isNewPhone(
                                         customerModel.profile.phone_number,
                                         sessionModel.profile.phone_number
                                     );
@@ -637,8 +585,7 @@ server.post(
                             );
 
                             if (equalList.trigger) {
-                                var tknStatus =
-                                    reachFiveHelper.verifySessionAccessTkn(
+                                var tknStatus = reachFiveHelper.verifySessionAccessTkn(
                                         true
                                     );
 
@@ -650,8 +597,7 @@ server.post(
                                         );
                                     }
                                     if (!equalList.profile) {
-                                        var profileRequestObj =
-                                            customerModel.getUserProfileObj(
+                                        var profileRequestObj = customerModel.getUserProfileObj(
                                                 profileFields
                                             );
                                         reachFiveApiHelper.updateReachFiveProfile(
@@ -681,8 +627,7 @@ server.post(
                         }
                     } else {
                         formInfo.profileForm.customer.email.valid = false;
-                        formInfo.profileForm.customer.email.error =
-                            Resource.msg(
+                        formInfo.profileForm.customer.email.error = Resource.msg(
                                 'error.message.unable.to.create.account',
                                 'login',
                                 null
@@ -723,8 +668,7 @@ server.post(
 server.post('UserUpdate', function (req, res, next) {
     try {
         var userObj = JSON.parse(req.body);
-        var reachFiveUserCustomObjectType =
-            reachFiveHelper.getReachFiveUserCustomObjectType();
+        var reachFiveUserCustomObjectType = reachFiveHelper.getReachFiveUserCustomObjectType();
         var user = userObj.user;
 
         if (empty(user.id)) {
@@ -769,12 +713,11 @@ server.get('UncachedContext', function (req, res, next) {
     // If the user has not been authenticated within "SSO_FORCED_AUTH_SESSION_ATTEMPT" attempts,
     // there is no point in continuing
     if (
-        session.privacy.reachFiveSSOAuthCounter <=
-        SSO_FORCED_AUTH_SESSION_ATTEMPT
+        session.privacy.reachFiveSSOAuthCounter
+        <= SSO_FORCED_AUTH_SESSION_ATTEMPT
     ) {
-        isSessionAuthRequired =
-            reachFiveHelper.isReachFiveSessionForcedAuth() &&
-            !req.currentCustomer.raw.authenticated;
+        isSessionAuthRequired = reachFiveHelper.isReachFiveSessionForcedAuth()
+            && !req.currentCustomer.raw.authenticated;
         session.privacy.reachFiveSSOAuthCounter += 1;
     }
 

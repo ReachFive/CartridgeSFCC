@@ -1,9 +1,18 @@
 'use strict';
 
 var configureService = require('./serviceConfig').configureService;
-var reachFiveHelper = require('~/cartridge/scripts/helpers/reachFiveHelper');
 var generateTokenForManagementAPI = require('./tokenManagement').generateTokenForManagementAPI;
 
+var reachFiveHelper = require('~/cartridge/scripts/helpers/reachFiveHelper');
+var reachfiveSettings = require('~/cartridge/models/reachfiveSettings');
+var mergeObjects = require('~/cartridge/scripts/helpers/util').mergeObjects;
+
+/**
+ * Sends a verification email.
+ * @param {string} managementToken - The management token.
+ * @param {string} reachFiveExternalID - The ReachFive external ID.
+ * @returns {Object} The result of the service call.
+ */
 function sendVerificationEmail(managementToken, reachFiveExternalID) {
     var service = configureService('reachfive.verifyemail.post', { user_id: reachFiveExternalID });
     service.addHeader('Authorization', 'Bearer ' + managementToken);
@@ -15,6 +24,12 @@ function sendVerificationEmail(managementToken, reachFiveExternalID) {
     };
 }
 
+/**
+ * Sends a verification phone message.
+ * @param {string} managementToken - The management token.
+ * @param {string} reachFiveExternalID - The ReachFive external ID.
+ * @returns {Object} The result of the service call.
+ */
 function sendVerificationPhone(managementToken, reachFiveExternalID) {
     var service = configureService('reachfive.verifyphone.post', { user_id: reachFiveExternalID });
     service.addHeader('Authorization', 'Bearer ' + managementToken);
@@ -26,6 +41,13 @@ function sendVerificationPhone(managementToken, reachFiveExternalID) {
     };
 }
 
+/**
+ * Signs up a new user.
+ * @param {string} login - The user's login.
+ * @param {string} password - The user's password.
+ * @param {Object} profile - The user's profile.
+ * @returns {Object} The result of the service call.
+ */
 function signUp(login, password, profile) {
     var requestParams = {
         client_id: reachfiveSettings.reach5ApiKey,
@@ -59,6 +81,14 @@ function signUp(login, password, profile) {
     };
 }
 
+/**
+ * Updates the user's password.
+ * @param {string} email - The user's email.
+ * @param {string} newPassword - The new password.
+ * @param {string} oldPassword - The old password.
+ * @param {string} [clientId] - The client ID.
+ * @returns {Object} The result of the service call.
+ */
 function updatePassword(email, newPassword, oldPassword, clientId) {
     var requestParams = {
         client_id: clientId || reachFiveHelper.getReachFiveApiKey(),
@@ -79,6 +109,11 @@ function updatePassword(email, newPassword, oldPassword, clientId) {
     };
 }
 
+/**
+ * Logs in a user with a password.
+ * @param {Object} requestFields - The request fields.
+ * @returns {Object} The result of the service call.
+ */
 function passwordLogin(requestFields) {
     var baseFields = {
         client_id: reachfiveSettings.reach5ApiKey
@@ -97,6 +132,11 @@ function passwordLogin(requestFields) {
     };
 }
 
+/**
+ * Deletes a user.
+ * @param {Object} customer - The customer object.
+ * @returns {Object|null} The result of the service call or null if clientId is not found.
+ */
 function deleteUser(customer) {
     var managementToken = generateTokenForManagementAPI();
 
@@ -115,6 +155,11 @@ function deleteUser(customer) {
     return null;
 }
 
+/**
+ * Gets user fields.
+ * @param {string} clientId - The client ID.
+ * @returns {Object} The result of the service call.
+ */
 function getUserFields(clientId) {
     var managementTokenObj = generateTokenForManagementAPI();
     if (!clientId || !managementTokenObj.ok) {

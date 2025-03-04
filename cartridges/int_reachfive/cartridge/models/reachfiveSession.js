@@ -1,3 +1,4 @@
+/* eslint-disable */
 'use strict';
 
 var Site = require('dw/system/Site');
@@ -14,7 +15,7 @@ const removeLongStrings = (obj) => {
         }
     }
     return obj;
-}
+};
 
 /**
  * @constructor
@@ -171,14 +172,14 @@ ReachfiveSession.prototype = {
             this.profile = externalProfile;
             if (Site.getCurrent().getCustomPreferenceValue('enableKakaoTalkNameSplit')) {
                 try {
-                    if ( Object.hasOwnProperty.call(externalProfile, 'auth_type') && !empty(externalProfile) && !empty(externalProfile.auth_type) && externalProfile.auth_type === 'kakaotalk') {
+                    if (Object.hasOwnProperty.call(externalProfile, 'auth_type') && !empty(externalProfile) && !empty(externalProfile.auth_type) && externalProfile.auth_type === 'kakaotalk') {
                         if (!empty(externalProfile.name)) {
                             var fullName = externalProfile.name;
-        
+
                             // Split the name into the first letter and the rest
                             var lastName = fullName.substring(0, 1); // First letter
-                            var firstName = fullName.substring(1);   // Rest of the name
-        
+                            var firstName = fullName.substring(1); // Rest of the name
+
                             this.profile.family_name = lastName;
                             this.profile.given_name = firstName;
                         }
@@ -189,7 +190,6 @@ ReachfiveSession.prototype = {
                 }
             }
         }
-
     },
     isAccessToken5MinLimit: function () {
         var DURATION_HORIZON = 290; // 5 min - 10sec

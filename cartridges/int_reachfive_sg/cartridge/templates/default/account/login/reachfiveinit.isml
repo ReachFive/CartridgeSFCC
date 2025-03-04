@@ -13,12 +13,12 @@
         });
     </script>
 
-    <iscomment>	load JQuery lib - if not already loaded.
-    !!!! This include concurent with existing one jquery, so we can not use it
-    <script src="${URLUtils.staticURL('/js/lib/jquery-2.1.1.min.js')}"></script>
+    <iscomment> load JQuery lib - if not already loaded.
+        !!!! This include concurent with existing one jquery, so we can not use it
+        <script src="${URLUtils.staticURL('/js/lib/jquery-2.1.1.min.js')}"></script>
     </iscomment>
 
-    <iscomment>	load client side R5 lib </iscomment>
+    <iscomment> load client side R5 lib </iscomment>
     <script src="${URLUtils.staticURL('/js/reachfive.js')}"></script>
 
     <script type="text/javascript">
@@ -59,9 +59,7 @@
                 ]
             });
         }
-        
         var el_signup = document.getElementById("load-social-connect");
-
         if(el_signup && ${!pdict.disableSocialLogin}) {
 
             sdkUiClient.showSocialLogin({

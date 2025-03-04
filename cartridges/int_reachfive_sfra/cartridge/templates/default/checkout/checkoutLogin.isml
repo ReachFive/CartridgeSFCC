@@ -42,13 +42,13 @@
                         <h4>${Resource.msg('heading.returning.customers', 'checkout', null)}</h4>
                     </div>
                     <isif condition="${(!dw.system.Site.getCurrent().getCustomPreferenceValue('isReachFiveEnabled')) || (pdict.ShowStandardLoginToLinkAccount != null && pdict.ShowStandardLoginToLinkAccount)}">
-	                    <div class="card-body">
-	                        <isinclude template="account/components/loginForm" />
-	                        <isinclude template="account/components/oauth" />
-	                    </div>
-	                <iselse>
-	                	<isinclude template="account/login/reachfiveincludebuttons" />
-	                </isif>
+                        <div class="card-body">
+                            <isinclude template="account/components/loginForm" />
+                            <isinclude template="account/components/oauth" />
+                        </div>
+                    <iselse>
+                        <isinclude template="account/login/reachfiveincludebuttons" />
+                    </isif>
                 </div>
                 <div class="card">
                     <div class="card-header">

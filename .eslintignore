@@ -10,3 +10,6 @@ cartridges/int_reachfive/cartridge/static/
 cartridges/app_storefront_controllers/
 cartridges/app_storefront_core/
 cartridges/app_storefront_pipelines/
+
+# dev_template_tool cartridges
+cartridges/dev_template_tool/
