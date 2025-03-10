@@ -4,7 +4,6 @@ var configureService = require('./serviceConfig').configureService;
 var generateTokenForManagementAPI = require('./tokenManagement').generateTokenForManagementAPI;
 
 var reachFiveHelper = require('~/cartridge/scripts/helpers/reachFiveHelper');
-var reachFiveServiceInterface = require('int_reachfive/cartridge/scripts/interfaces/reachFiveInterface');
 var reachfiveSettings = require('~/cartridge/models/reachfiveSettings');
 var { mergeObjects } = require('~/cartridge/scripts/helpers/utils');
 
@@ -152,7 +151,7 @@ function passwordLogin(requestFields) {
 function deleteUser(customer) {
     var managementToken = generateTokenForManagementAPI();
 
-    var clientId = reachFiveServiceInterface.getReachFiveExternalID(
+    var clientId = reachFiveHelper.getReachFiveExternalID(
         customer.profile
     );
     if (clientId) {

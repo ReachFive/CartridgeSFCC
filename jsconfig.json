@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
-        "lib": ["es6", "dom"],
-        "target": "es6",
+        "noLib": true,
+        "target": "es5",
         "baseUrl": "./",
         "typeRoots" : ["./@types/", "./node_modules/sfcc-dts/**/*.*"],
         "paths": {
@@ -16,7 +16,10 @@
     "typeAcquisition": {
         "enable": true,
         "include": [
-            "node_modules/sfcc-dts/**/*"
+            "node_modules/sfcc-dts/**/*",
+            "@types/**/*.d.ts",
+            "types/**/*.d.ts",
+            "cartridges/**/*.ts"
         ]
     },
     "include": [

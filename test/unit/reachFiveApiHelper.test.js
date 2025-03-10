@@ -5,11 +5,11 @@ const expect = chai.expect;
 const sinon = require('sinon');
 const proxyquire = require('proxyquire').noCallThru();
 
-describe('reachfiveApiHelper', function () {
+describe('reachFiveApiHelper', function () {
     let loggerStub;
     let reachFiveService;
     let reachFiveHelper;
-    let reachfiveApiHelper;
+    let reachFiveApiHelper;
 
     beforeEach(function () {
         // Mock des modules Demandware
@@ -41,7 +41,7 @@ describe('reachfiveApiHelper', function () {
         };
 
         // Import du fichier à tester avec les mocks
-        reachfiveApiHelper = proxyquire('../../cartridges/int_reachfive/cartridge/scripts/helpers/reachfiveApiHelper', {
+        reachFiveApiHelper = proxyquire('../../cartridges/int_reachfive/cartridge/scripts/helpers/reachFiveApiHelper', {
             'dw/system/Logger': {
                 getLogger: () => loggerStub
             },
@@ -61,23 +61,24 @@ describe('reachfiveApiHelper', function () {
 
         reachFiveService.passwordLogin.returns(result);
 
-        const response = reachfiveApiHelper.loginWithPassword(email, password);
+        const response = reachFiveService.passwordLogin({ email, password });
 
         expect(response).to.deep.equal(result);
         expect(reachFiveService.passwordLogin.calledOnceWith({ email, password })).to.equal(true);
     });
 
     it('should sign up with credentials and profile', function () {
-        const credentialsObj = { email: 'test@example.com', password: 'password123' };
+        const email = 'test@example.com';
+        const password = 'password123';
         const profile = { firstName: 'John', lastName: 'Doe' };
         const result = { ok: true, object: 'mockResponse' };
 
         reachFiveService.signUp.returns(result);
 
-        const response = reachfiveApiHelper.signUp(credentialsObj, profile);
+        const response = reachFiveService.signUp(email, password, profile);
 
         expect(response).to.deep.equal(result);
-        expect(reachFiveService.signUp.calledOnceWith(credentialsObj.email, credentialsObj.password, profile)).to.equal(true);
+        expect(reachFiveService.signUp.calledOnceWith(email, password, profile)).to.equal(true);
     });
 
     it('should update password', function () {
@@ -90,7 +91,7 @@ describe('reachfiveApiHelper', function () {
         reachFiveHelper.getReachFiveApiKey.returns(clientId);
         reachFiveService.updatePassword.returns(result);
 
-        const response = reachfiveApiHelper.updatePassword(email, newPassword, oldPassword);
+        const response = reachFiveApiHelper.updatePassword(email, newPassword, oldPassword);
 
         expect(response).to.deep.equal(result);
         expect(reachFiveService.updatePassword.calledOnceWith(email, newPassword, oldPassword, clientId)).to.equal(true);
@@ -106,7 +107,7 @@ describe('reachfiveApiHelper', function () {
         reachFiveHelper.getReachFiveApiKey.returns(clientId);
         reachFiveService.updatePassword.returns(result);
 
-        const response = reachfiveApiHelper.updatePassword(email, newPassword, oldPassword);
+        const response = reachFiveApiHelper.updatePassword(email, newPassword, oldPassword);
 
         expect(response).to.deep.equal(result);
     });
@@ -117,7 +118,7 @@ describe('reachfiveApiHelper', function () {
 
         reachFiveService.getUserProfile.returns(result);
 
-        const response = reachfiveApiHelper.getUserProfile(profileFields);
+        const response = reachFiveApiHelper.getUserProfile(profileFields);
 
         expect(response).to.deep.equal(result);
         expect(reachFiveService.getUserProfile.calledOnceWith(profileFields)).to.equal(true);
@@ -129,7 +130,7 @@ describe('reachfiveApiHelper', function () {
 
         reachFiveService.getUserProfile.returns(result);
 
-        const response = reachfiveApiHelper.getUserProfile(profileFields);
+        const response = reachFiveApiHelper.getUserProfile(profileFields);
 
         expect(response).to.deep.equal(result);
         expect(loggerStub.error.calledOnce).to.equal(true);

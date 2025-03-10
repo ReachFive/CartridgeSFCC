@@ -1,19 +1,11 @@
 'use strict';
 
-/*
-TODO: This variable should be moved in external files and split on 2 part "system" and "custom"
+/**
+ * @typedef {import('@types/models/profile/action.d.ts').ActionsObject} ActionsObject
+ * @typedef {import('@types/models/profile/action.d.ts').ActionDescriptor} ActionDescriptor
+ */
 
-This variable used as object action descriptor for Reachfive profile object (https://developer.reachfive.com/docs/models-user-profile.html#the-user-profile-object).
-Each element has specific structure:
-'given_name' : { - Profile pointer, may contain words separated by spaces (this is how nesting is described).
-    data: 'profile', - name of the Salesforce system object, to which the function will be applied
-    type: 'simpleMethod', - pointer to the operation type, can take the following values: 'simpleMethod', 'customProperty', 'function'
-    set: 'setFirstName', - name of the function to write the value
-    get: 'getFirstName' - name of the function to read the value
-}
-This object was created as an instruction for a program to save data from the standard Reachfive user profile object into a Salesforce profile object
-*/
-var actionsObj = {
+const actionsObj = {
     given_name: {
         data: 'profile',
         type: 'simpleMethod',
@@ -58,87 +50,192 @@ var actionsObj = {
     }
 };
 
+const ACTION_TYPES = {
+    SIMPLE_METHOD: 'simpleMethod',
+    CUSTOM_PROPERTY: 'customProperty',
+    FUNCTION: 'function'
+};
+
 /**
- * @function
- * @description Action object constructor
- * */
+ * @constructor
+ * @classdesc Manages actions for ReachFive profile data.
+ */
 function Actions() {
     this.actionsContent = actionsObj;
 }
 
 Actions.prototype = {
     /**
-     * @function
-     * @description BACKBONE METHOD, please !!! IN CASE OVERRIDE DO WITH CARE !!!
-     * @description Run appropriate profile data setter for a value
-     * @param {dw.customer.Customer} customer Salesforce customer
-     * @param {dw.customer.Profile} profile Salesforce customer profile
-     * @param {string} profilePointer reachfive profile property pointer
-     * @param {string|Object} value value to update
-     * */
+     * Runs the appropriate profile data setter for a value.
+     *
+     * @param {dw.customer.Customer} customer - Salesforce customer.
+     * @param {dw.customer.Profile} profile - Salesforce customer profile.
+     * @param {string} profilePointer - ReachFive profile property pointer.
+     * @param {string|Object} value - The value to update.
+     */
     set: function (customer, profile, profilePointer, value) {
-        var Transaction = require('dw/system/Transaction');
-
-        var action = this.actionsContent[profilePointer];
+        const action = this.actionsContent[profilePointer];
 
         if (action) {
-            var ormObject;
-
-            if (action.data === 'profile') {
-                ormObject = profile;
-            } else if (action.data === 'address') {
-                ormObject = customer.getAddressBook();
-            } else {
-                ormObject = customer;
-            }
-
-            if (action.type === 'simpleMethod') {
-                // Prevent redundant identical save in database
-                if (ormObject[action.get].call(ormObject) !== value) {
-                    Transaction.wrap(function () {
-                        ormObject[action.set].call(ormObject, value);
-                    });
-                }
-            } else if (action.type === 'customProperty') {
-                if (ormObject.custom[action.get] !== value) {
-                    Transaction.wrap(function () {
-                        ormObject.custom[action.set] = value;
-                    });
-                }
-            } else if (action.type === 'function') {
-                var that = this;
-                Transaction.wrap(function () {
-                    that[action.set].call(that, ormObject, value);
-                });
-            }
+            const ormObject = this.getORMObject(customer, profile, action.data);
+            this.updateValue(ormObject, action, value);
         }
     },
+
+    /**
+     * Retrieves the appropriate ORM object based on the data type.
+     *
+     * @param {dw.customer.Customer} customer - Salesforce customer.
+     * @param {dw.customer.Profile} profile - Salesforce customer profile.
+     * @param {string} dataType - The data type ('profile', 'address', etc.).
+     * @returns {Object} - The ORM object.
+     */
+    getORMObject: function (customer, profile, dataType) {
+        switch (dataType) {
+            case 'profile':
+                return profile;
+            case 'address':
+                return customer.getAddressBook();
+            default:
+                return customer;
+        }
+    },
+
+    /**
+     * Updates the value based on the action type.
+     *
+     * @param {Object} ormObject - The ORM object.
+     * @param {ActionDescriptor} action - The action descriptor.
+     * @param {string|Object} value - The value to update.
+     */
+    updateValue: function (ormObject, action, value) {
+        switch (action.type) {
+            case ACTION_TYPES.SIMPLE_METHOD:
+                this.updateSimpleMethod(ormObject, action, value);
+                break;
+            case ACTION_TYPES.CUSTOM_PROPERTY:
+                this.updateCustomProperty(ormObject, action, value);
+                break;
+            case ACTION_TYPES.FUNCTION:
+                this.updateFunction(ormObject, action, value);
+                break;
+            default:
+                throw new Error('Invalid action type');
+        }
+    },
+
+    /**
+     * Updates a value using a simple method.
+     *
+     * @param {Object} ormObject - The ORM object.
+     * @param {ActionDescriptor} action - The action descriptor.
+     * @param {string|Object} value - The value to update.
+     */
+    updateSimpleMethod: function (ormObject, action, value) {
+        const Transaction = require('dw/system/Transaction');
+        if (ormObject[action.get].call(ormObject) !== value) {
+            Transaction.wrap(() => {
+                ormObject[action.set].call(ormObject, value);
+            });
+        }
+    },
+
+    /**
+     * Updates a custom property value.
+     *
+     * @param {Object} ormObject - The ORM object.
+     * @param {ActionDescriptor} action - The action descriptor.
+     * @param {string|Object} value - The value to update.
+     */
+    updateCustomProperty: function (ormObject, action, value) {
+        const Transaction = require('dw/system/Transaction');
+        if (ormObject.custom[action.get] !== value) {
+            Transaction.wrap(() => {
+                ormObject.custom[action.set] = value;
+            });
+        }
+    },
+
+    /**
+     * Updates a value using a custom function.
+     *
+     * @param {Object} ormObject - The ORM object.
+     * @param {ActionDescriptor} action - The action descriptor.
+     * @param {string|Object} value - The value to update.
+     */
+    updateFunction: function (ormObject, action, value) {
+        const Transaction = require('dw/system/Transaction');
+        Transaction.wrap(() => {
+            this[action.set].call(this, ormObject, value);
+        });
+    },
+
+    /**
+     * Sets the birthdate for a profile.
+     *
+     * @param {dw.customer.Profile} profile - The profile object.
+     * @param {string} value - The birthdate value.
+     */
     setBirthdate: function (profile, value) {
-        var Calendar = require('dw/util/Calendar');
-        var calendar = new Calendar();
+        const Calendar = require('dw/util/Calendar');
+        const calendar = new Calendar();
         calendar.parseByFormat(value, 'yyyy-MM-dd');
         profile.setBirthday(calendar.getTime());
     },
-    getBirthdate: function (profile) {
-        var dwStringUtils = require('dw/util/StringUtils');
-        var Calendar = require('dw/util/Calendar');
-        var birthdayCal = new Calendar(profile.birthday);
 
+    /**
+     * Gets the birthdate for a profile.
+     *
+     * @param {dw.customer.Profile} profile - The profile object.
+     * @returns {string} - The formatted birthdate.
+     */
+    getBirthdate: function (profile) {
+        const dwStringUtils = require('dw/util/StringUtils');
+        const Calendar = require('dw/util/Calendar');
+        const birthdayCal = new Calendar(profile.birthday);
         return dwStringUtils.formatCalendar(birthdayCal, 'yyyy-MM-dd');
     },
+
+    /**
+     * Sets the newsletter consent for a profile.
+     *
+     * @param {dw.customer.Profile} profile - The profile object.
+     * @param {Object} value - The consent value.
+     */
     setConsentsNewsletter: function (profile, value) {
         if (value && this.getConsentsNewsletter(profile) !== value.granted) {
             profile.custom.isNewsletter = value.granted;
         }
     },
+
+    /**
+     * Gets the newsletter consent for a profile.
+     *
+     * @param {dw.customer.Profile} profile - The profile object.
+     * @returns {boolean} - The consent status.
+     */
     getConsentsNewsletter: function (profile) {
         return profile.custom.isNewsletter;
     },
+
+    /**
+     * Sets the verified email for a profile.
+     *
+     * @param {dw.customer.Profile} profile - The profile object.
+     * @param {Array} value - The verified email value.
+     */
     setEmailVerified: function (profile, value) {
         if (value && this.getEmailVerified(profile) !== value[0]) {
             profile.setEmail(value[0]);
         }
     },
+
+    /**
+     * Gets the verified email for a profile.
+     *
+     * @param {dw.customer.Profile} profile - The profile object.
+     * @returns {string} - The verified email.
+     */
     getEmailVerified: function (profile) {
         return profile.email;
     }

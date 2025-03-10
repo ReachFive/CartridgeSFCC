@@ -7,14 +7,21 @@ var csrfProtection = require('*/cartridge/scripts/middleware/csrf');
 var userLoggedIn = require('*/cartridge/scripts/middleware/userLoggedIn');
 var consentTracking = require('*/cartridge/scripts/middleware/consentTracking');
 
-// var Site = require('dw/system/Site');
 var Transaction = require('dw/system/Transaction');
 var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 var CustomerMgr = require('dw/customer/CustomerMgr');
 var URLUtils = require('dw/web/URLUtils');
 
 var reachFiveHelper = require('*/cartridge/scripts/helpers/reachFiveHelper');
-var reachFiveApiHelper = require('*/cartridge/scripts/helpers/reachfiveApiHelper');
+var reachFiveApiHelper = require('*/cartridge/scripts/helpers/reachFiveApiHelper');
+var apiHelper = require('*/cartridge/scripts/helpers/reachFiveApiHelper');
+/**
+ * @type {Object} reachfiveSettings - The settings for ReachFive integration.
+ * @property {string} clientId - The client ID for ReachFive.
+ * @property {string} domain - The domain for ReachFive.
+ * @property {string} redirectUri - The redirect URI for ReachFive.
+ * @property {Array<string>} scope - The scopes for ReachFive.
+ */
 var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
 var reachFiveInterface = require('*/cartridge/scripts/interfaces/reachFiveInterface');
 
@@ -27,7 +34,6 @@ server.append('Login', function (req, res, next) {
         var authenticatedCustomer = viewData.authenticatedCustomer;
 
         if (authenticatedCustomer) {
-            var apiHelper = require('*/cartridge/scripts/helpers/reachfiveApiHelper');
             var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
 
             var email = req.form.loginEmail;
@@ -39,7 +45,7 @@ server.append('Login', function (req, res, next) {
                 + '] was not created because of:';
 
             // Check does the customer profile already contain reachfive account
-            var customerReachFiveProfile = reachFiveApiHelper.getCustomerReachFiveExtProfile(
+            var customerReachFiveProfile = apiHelper.getCustomerReachFiveExtProfile(
                 authenticatedCustomer
             );
 
@@ -48,14 +54,9 @@ server.append('Login', function (req, res, next) {
                     + email
                     + '] was not logged in because of:';
 
-                authResult = apiHelper.loginWithPassword(email, password);
+                authResult = reachFiveInterface.passwordLogin({ email, password });
             } else {
-                var credentialsObject = {
-                    email: email,
-                    password: password
-                };
-
-                authResult = apiHelper.signUp(credentialsObject, profile);
+                authResult = reachFiveInterface.signUp(email, password, profile);
 
                 if (authResult.ok) {
                     var reachFiveProviderId = reachfiveSettings.reachFiveProviderId;
@@ -247,7 +248,7 @@ server.replace(
                     reachfiveSettings.isReachFiveEnabled
                     && reachfiveSettings.isReachFiveLoginAllowed
                 ) {
-                    response = reachFiveApiHelper.updatePassword(
+                    response = apiHelper.updatePassword(
                         customer.profile.credentials.login,
                         formInfo.newPassword,
                         formInfo.currentPassword

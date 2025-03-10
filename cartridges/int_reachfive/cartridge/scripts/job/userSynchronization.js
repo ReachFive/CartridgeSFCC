@@ -13,7 +13,7 @@ var Transaction = require('dw/system/Transaction');
  * Script Modules
  */
 var reachFiveHelper = require('int_reachfive/cartridge/scripts/helpers/reachFiveHelper');
-var libReachFiveSynchronization = require('int_reachfive/cartridge/scripts/job/libReachFiveSynchronization');
+var reachFiveService = require('int_reachfive/cartridge/scripts/interfaces/reachFiveInterface');
 
 /**
  * Globals
@@ -70,7 +70,7 @@ module.exports.process = function (reachFiveUserUpdateCO) {
         var currentCustomerProfile = CustomerMgr.getExternallyAuthenticatedCustomerProfile(reachFiveProviderId, reachFiveUser.id);
 
         if (!empty(currentCustomerProfile)) {
-            libReachFiveSynchronization.updateSFCCProfile(profileFieldsObj, currentCustomerProfile, reachFiveUser, 'user');
+            reachFiveService.updateSFCCProfile(profileFieldsObj, currentCustomerProfile, reachFiveUser, 'user');
 
             Transaction.wrap(function () {
                 CustomObjectMgr.remove(reachFiveUserUpdateCO);

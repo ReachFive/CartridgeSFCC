@@ -6,60 +6,6 @@ var reachFiveHelper = require('*/cartridge/scripts/helpers/reachFiveHelper');
 
 /**
  * @function
- * @description Get Reach Five External Profile ID
- * @param {dw.customer.Profile} profile сurrent Customer Profile
- * @return {string|null} Reach Five External Profile ID
- * */
-function getReachFiveExternalID(profile) {
-    var externalProfiles = profile.customer.getExternalProfiles();
-    var reachFiveProviderId = reachFiveHelper.getReachFiveProviderId();
-
-    var externalProfile = externalProfiles.toArray().filter(function (extProfile) {
-        return (extProfile && extProfile.externalID && extProfile.authenticationProviderID === reachFiveProviderId);
-    });
-    // @TODO need to check if we have more than one external profile
-    return externalProfile ? externalProfile[0].externalID : null;
-}
-
-/**
- * @description Login with reachfive password interface
- * @param {string} email - reachfive customer login
- * @param {string} password - reachfive customer password
- * @returns {Object} prepared result object
- */
-function loginWithPassword(email, password) {
-    var requestObj = {
-        email: email,
-        password: password
-    };
-
-    var result = reachFiveService.passwordLogin(requestObj);
-
-    return result;
-}
-
-// TODO: obviously that this function should be refactored after splitting Reachfvie helper
-/**
- * @description Signup with login and password interface
- * @param {Object} credentialsObj - Object with credentials data
- * @param {string} [credentialsObj.email] - Customer email
- * @param {string} [credentialsObj.phone_number] - Customer phone number
- * @param {string} [credentialsObj.custom_identifier] - Customer custom identifier
- * @param {string} credentialsObj.password - Customer password
- * @param {Object} profile - Customer profile data
- * @returns {Object} Signup result
- */
-function signUp(credentialsObj, profile) {
-    var login = credentialsObj.email;
-    var password = credentialsObj.password;
-
-    var result = reachFiveService.signUp(login, password, profile);
-
-    return result;
-}
-
-/**
- * @function
  * @description Compare phones number on digits basis.
  * @param {string|undefined} oldPhone old phone number
  * @param {string|undefined} newPhone new phone number
@@ -261,7 +207,7 @@ function updateReachFiveProfile(customerObj) {
 function getCustomerReachFiveExtProfile(thatCustomer) {
     var reachFiveProviderId = reachFiveHelper.getReachFiveProviderId();
     var customerReachFiveProfile = null;
-    if (thatCustomer && thatCustomer.externalProfiles.length) {
+    if (thatCustomer && thatCustomer.getExternalProfiles().length) {
         var externalProfiles = thatCustomer.getExternalProfiles();
         externalProfiles.toArray().forEach(function (profile) {
             if (profile.authenticationProviderID === reachFiveProviderId) {
@@ -287,7 +233,7 @@ function passwordUpdateManagementAPI(profile, newPassword) {
             var managementToken = managementTokenObj.token;
             var resetPassRsp;
 
-            var reachFiveCustomerId = getReachFiveExternalID(profile);
+            var reachFiveCustomerId = reachFiveHelper.getReachFiveExternalID(profile);
             if (reachFiveCustomerId) {
                 var reqBody = {
                     password: newPassword
@@ -334,8 +280,6 @@ function passwordResetManagementAPI(reachFiveUserID, newPassword) {
     return resetPassRsp;
 }
 
-module.exports.loginWithPassword = loginWithPassword;
-module.exports.signUp = signUp;
 module.exports.isNewPhone = isNewPhone;
 module.exports.getReachfiveProfileFields = getReachfiveProfileFields;
 module.exports.getTokenWithPassword = getTokenWithPassword;
@@ -347,4 +291,3 @@ module.exports.updateReachFiveProfile = updateReachFiveProfile;
 module.exports.getCustomerReachFiveExtProfile = getCustomerReachFiveExtProfile;
 module.exports.passwordUpdateManagementAPI = passwordUpdateManagementAPI;
 module.exports.passwordResetManagementAPI = passwordResetManagementAPI;
-module.exports.getReachFiveExternalID = getReachFiveExternalID;

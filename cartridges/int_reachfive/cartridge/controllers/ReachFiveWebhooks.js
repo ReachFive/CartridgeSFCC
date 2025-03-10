@@ -3,7 +3,6 @@
 var server = require('server');
 var LOGGER = require('dw/system/Logger').getLogger('reachfive');
 var CustomerMgr = require('dw/customer/CustomerMgr');
-var libReachFiveSynchronization = require('~/cartridge/scripts/job/libReachFiveSynchronization');
 var salesforceInterface = require('~/cartridge/scripts/interfaces/salesforceInterface');
 
 server.post('UpdateUser', function (req, res, next) {
@@ -42,7 +41,7 @@ server.post('UpdateUser', function (req, res, next) {
         return next();
     }
 
-    libReachFiveSynchronization.updateSFCCProfile(profileFieldsObj, profile, reachFiveUser, reach5ObjType);
+    salesforceInterface.updateSFCCProfile(profileFieldsObj, profile, reachFiveUser, reach5ObjType);
 
     res.setStatusCode(200);
     res.json({ success: true });

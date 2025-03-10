@@ -9,7 +9,7 @@ var consentTracking = require('*/cartridge/scripts/middleware/consentTracking');
  * Reach Five Modules
  * */
 var reachFiveHelper = require('*/cartridge/scripts/helpers/reachFiveHelper');
-var reachFiveApiHelper = require('*/cartridge/scripts/helpers/reachfiveApiHelper');
+var reachFiveApiHelper = require('*/cartridge/scripts/helpers/reachFiveApiHelper');
 var ReachFiveModel = require('*/cartridge/models/ReachFiveModel');
 
 /**
@@ -103,7 +103,7 @@ server.get('CallbackReachFiveRequest', function (req, res, next) {
     var loggedCustomer, existingCustomer;
     var reachFiveConsents = null;
 
-    var stateObj = getStateData(req);
+    var stateObj = reachFiveHelper.getStateData(req);
     var target = stateObj.target;
 
     // Get the data from the state object
@@ -442,8 +442,6 @@ server.get(
     csrfProtection.generateToken,
     function (req, res, next) {
         var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
-        var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
-
         if (
             reachfiveSettings.isReachFiveEnabled
             && session.privacy.prefill_register

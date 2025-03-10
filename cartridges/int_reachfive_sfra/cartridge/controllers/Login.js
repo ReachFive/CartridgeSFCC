@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @type {Object} reachfiveSettings - The settings for ReachFive integration.
+ */
+
 var server = require('server');
 server.extend(module.superModule);
 
@@ -19,8 +23,8 @@ server.append('Logout', function (req, res, next) {
 });
 
 server.prepend('Show', function (req, res, next) {
-    var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
     var reachFiveHelper = require('*/cartridge/scripts/helpers/reachFiveHelper');
+    var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
 
     var context = {
         isReachFivePasswordReset: false,
@@ -51,13 +55,13 @@ server.prepend('Show', function (req, res, next) {
  * @name Base/Login-OAuthLogin
  * @function
  * @memberof Login
- * @param {middleware} - server.middleware.https
- * @param {middleware} - consentTracking.consent
- * @param {querystringparameter} - oauthProvider - ID of the OAuth Provider. e.g. Facebook, Google
- * @param {querystringparameter} - oauthLoginTargetEndPoint - Valid values for this parameter are 1 or 2. These values are mapped in oAuthRenentryRedirectEndpoints.js
- * @param {category} - sensitive
- * @param {renders} - isml if there is an error
- * @param {serverfunction} - get
+ * @param {typeof server.middleware} httpsMiddleware - server.middleware.https
+ * @param {typeof server.middleware} consentMiddleware - consentTracking.consent
+ * @param {dw.web.HttpParameter} oauthProvider - ID of the OAuth Provider. e.g. Facebook, Google
+ * @param {dw.web.HttpParameter} oauthLoginTargetEndPoint - Valid values for this parameter are 1 or 2. These values are mapped in oAuthRenentryRedirectEndpoints.js
+ * @param {string} category - sensitive
+ * @param {string} renders - isml if there is an error
+ * @param {string} serverfunction - get
  */
 server.replace(
     'OAuthLogin',
@@ -70,6 +74,7 @@ server.replace(
         // see default OAuthLogin endpoint
         if (req.querystring.oauthProvider) {
             var oauthProvider = req.querystring.oauthProvider;
+            oauthProvider = Array.isArray(oauthProvider) ? oauthProvider[0] : oauthProvider;
             var result = oauthLoginFlowMgr.initiateOAuthLogin(oauthProvider);
             req.session.privacyCache.set('OAuthProviderId', oauthProvider);
             session.custom.OAuthProviderID = oauthProvider;
@@ -108,13 +113,13 @@ server.replace(
  * @name Base/Login-OAuthReentry
  * @function
  * @memberof Login
- * @param {middleware} - server.middleware.https
- * @param {middleware} - consentTracking.consent
- * @param {querystringparameter} - code - given by facebook
- * @param {querystringparameter} - state - given by facebook
- * @param {category} - sensitive
- * @param {renders} - isml only if there is a error
- * @param {serverfunction} - get
+ * @param {typeof server.middleware} httpsMiddleware - server.middleware.https
+ * @param {typeof server.middleware} consentMiddleware - consentTracking.consent
+ * @param {dw.web.HttpParameter} code - given by facebook
+ * @param {dw.web.HttpParameter} state - given by facebook
+ * @param {string} category - sensitive
+ * @param {string} renders - isml only if there is a error
+ * @param {string} serverfunction - get
  */
 server.replace(
     'OAuthReentry',
@@ -225,13 +230,16 @@ server.replace(
 
         if (!authenticatedCustomerProfile) {
             // Create new profile
-            Transaction.wrap(function () {
+            Transaction.wrap(() => {
                 var newCustomer = CustomerMgr.createExternallyAuthenticatedCustomer(
                     oauthProviderID,
                     userID
                 );
 
                 authenticatedCustomerProfile = newCustomer.getProfile();
+                if (!authenticatedCustomerProfile) {
+                    throw new Error('Could not get authenticated customer profile');
+                }
                 var firstName;
                 var lastName;
                 var email;
@@ -267,7 +275,20 @@ server.replace(
             });
         }
 
+        if (!authenticatedCustomerProfile) {
+            res.render('/error', {
+                message: Resource.msg(
+                    'error.oauth.login.failure',
+                    'login',
+                    null
+                )
+            });
+
+            return next();
+        }
+
         var credentials = authenticatedCustomerProfile.getCredentials();
+        var email = authenticatedCustomerProfile.getEmail();
         if (credentials.isEnabled()) {
             Transaction.wrap(function () {
                 CustomerMgr.loginExternallyAuthenticatedCustomer(
@@ -278,11 +299,9 @@ server.replace(
                 // did we handle this behavior here ?
                 // perhaps better in hooks/shopAuth.js
                 if (
-                    credentials.getLogin() !== authenticatedCustomerProfile.getEmail()
+                    credentials.getLogin() !== email
                 ) {
-                    credentials.setLogin(
-                        authenticatedCustomerProfile.getEmail()
-                    );
+                    credentials.setLogin(email);
                 }
             });
         } else {

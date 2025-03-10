@@ -14,7 +14,6 @@ describe('reachFiveSynchronization', function () {
     let customerMgrStub;
     let calendarStub;
     let reachFiveHelperStub;
-    let reachFiveApiHelperStub;
     let libReachFiveSynchronizationStub;
     let reachFiveServiceInterfaceStub;
     let reachFiveSynchronization;
@@ -33,9 +32,7 @@ describe('reachFiveSynchronization', function () {
             this.time = new Date();
         };
         reachFiveHelperStub = {
-            getReachFiveProfileFieldsJSON: sinon.stub()
-        };
-        reachFiveApiHelperStub = {
+            getReachFiveProfileFieldsJSON: sinon.stub(),
             getReachFiveExternalID: sinon.stub()
         };
         libReachFiveSynchronizationStub = {
@@ -64,9 +61,7 @@ describe('reachFiveSynchronization', function () {
                 'dw/util/Calendar': calendarStub,
                 'int_reachfive/cartridge/scripts/helpers/reachFiveHelper':
                     reachFiveHelperStub,
-                'int_reachfive/cartridge/scripts/helpers/reachfiveApiHelper':
-                    reachFiveApiHelperStub,
-                'int_reachfive/cartridge/scripts/job/libReachFiveSynchronization':
+                'int_reachfive/cartridge/scripts/helpers/reachFiveSynchronization':
                     libReachFiveSynchronizationStub,
                 'int_reachfive/cartridge/scripts/interfaces/reachFiveInterface':
                     reachFiveServiceInterfaceStub
@@ -207,7 +202,7 @@ describe('reachFiveSynchronization', function () {
             getPhoneMobile: sinon.stub().returns('mockPhone'),
             getEmail: sinon.stub().returns('mockEmail')
         };
-        reachFiveApiHelperStub.getReachFiveExternalID.returns('mockExternalID');
+        reachFiveHelperStub.getReachFiveExternalID.returns('mockExternalID');
         reachFiveServiceInterfaceStub.getUserFields.returns({
             ok: true,
             object: { email: 'mockEmail', phone_number: 'mockPhone' }
@@ -241,7 +236,7 @@ describe('reachFiveSynchronization', function () {
             getPhoneMobile: sinon.stub().returns('mockPhone'),
             getEmail: sinon.stub().returns('mockEmail')
         };
-        reachFiveApiHelperStub.getReachFiveExternalID.throws(
+        reachFiveHelperStub.getReachFiveExternalID.throws(
             new Error('mockError')
         );
         const result = reachFiveSynchronization.process(profileStub);

@@ -17,7 +17,7 @@
  * Reach Five Modules
  * */
 var reachFiveHelper = require('*/cartridge/scripts/helpers/reachFiveHelper');
-var reachFiveApiHelper = require('*/cartridge/scripts/helpers/reachfiveApiHelper');
+var reachFiveApiHelper = require('*/cartridge/scripts/helpers/reachFiveApiHelper');
 var ReachFiveModel = require('*/cartridge/models/ReachFiveModel');
 var Transaction = require('dw/system/Transaction');
 var URLUtils = require('dw/web/URLUtils');

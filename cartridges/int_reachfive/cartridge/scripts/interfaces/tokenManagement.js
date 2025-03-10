@@ -10,6 +10,10 @@ var Resource = require('dw/web/Resource');
 var configureService = require('./serviceConfig').configureService;
 
 /**
+ * @typedef {import('types/reachFiveSettings')} ReachFiveSettings
+ */
+
+/**
  * Generates an OAuth token using the provided request object.
  *
  * @param {Object} requestObj - The request object containing additional parameters for the token request.

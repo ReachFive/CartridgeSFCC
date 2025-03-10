@@ -1,6 +1,15 @@
 {
     "root": true,
-    "extends": "airbnb-base/legacy",
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "extends": [
+        "airbnb-base/legacy",
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
     "parserOptions": {
         "ecmaVersion": 2015
     },
@@ -21,6 +30,10 @@
         "dw": true
     },
     "rules": {
+        "@typescript-eslint/no-unused-vars": "warn",
+        "@typescript-eslint/no-require-imports": "off",
+        "@typescript-eslint/triple-slash-reference": "off",
+        "strict": "off",
         "import/no-unresolved": "off",
         "indent": ["error", 4, { "SwitchCase": 1, "VariableDeclarator": 1 }],
         "func-names": "off",

@@ -165,7 +165,7 @@ function isFieldExist(externalProfile, key) {
  * @function
  * @description return an encoded String as URL Safe Base64. Note: This function encodes to the RFC 4648 Spec where '+' is encoded  as '-' and '/' is encoded as '_'. The padding character '=' is removed.
  * @param {string} key Key to encode
- * @return {string} encoded key value
+ * @return {string|null} encoded key value
  */
 function encodeBase64UrlSafe(key) {
     if (!key) {
@@ -501,11 +501,29 @@ function getStateData(req) {
 }
 
 /**
+ * @function
+ * @description Get Reach Five External Profile ID
+ * @param {dw.customer.Profile} profile сurrent Customer Profile
+ * @return {string|null} Reach Five External Profile ID
+ * */
+function getReachFiveExternalID(profile) {
+    var externalProfiles = profile.customer.getExternalProfiles();
+    var reachFiveProviderId = getReachFiveProviderId();
+
+    var externalProfile = externalProfiles.toArray().filter(function (extProfile) {
+        return (extProfile && extProfile.externalID && extProfile.authenticationProviderID === reachFiveProviderId);
+    });
+    // @TODO need to check if we have more than one external profile
+    return externalProfile ? externalProfile[0].externalID : null;
+}
+
+/**
  * Export modules
  * */
 module.exports.getStateData = getStateData;
 module.exports.getReachFiveDomain = getReachFiveDomain;
 module.exports.getReachFiveApiKey = getReachFiveApiKey;
+module.exports.getReachFiveExternalID = getReachFiveExternalID;
 module.exports.getReachFiveClientSecret = getReachFiveClientSecret;
 module.exports.getReachFiveProviderId = getReachFiveProviderId;
 module.exports.isReachFiveEnabled = isReachFiveEnabled;

@@ -12,8 +12,7 @@ var Calendar = require('dw/util/Calendar');
  * Script Modules
  */
 var reachFiveHelper = require('int_reachfive/cartridge/scripts/helpers/reachFiveHelper');
-var reachFiveApiHelper = require('int_reachfive/cartridge/scripts/helpers/reachfiveApiHelper');
-var libReachFiveSynchronization = require('int_reachfive/cartridge/scripts/job/libReachFiveSynchronization');
+var reachFiveSynchHelper = require('int_reachfive/cartridge/scripts/helpers/reachFiveSynchronization');
 var reachFiveServiceInterface = require('int_reachfive/cartridge/scripts/interfaces/reachFiveInterface');
 
 /**
@@ -103,7 +102,7 @@ module.exports.read = function () {
  */
 module.exports.process = function (profile) {
     try {
-        var reachFiveExternalID = reachFiveApiHelper.getReachFiveExternalID(profile);
+        var reachFiveExternalID = reachFiveHelper.getReachFiveExternalID(profile);
         if (!reachFiveExternalID) {
             LOGGER.warn('External ID not find for this profil.');
             return new Status(Status.ERROR);
@@ -111,17 +110,17 @@ module.exports.process = function (profile) {
 
         var managementToken = managementTokenObj.token;
 
-        libReachFiveSynchronization.cleanUpProfileErrorAttr(profile);
+        reachFiveSynchHelper.cleanUpProfileErrorAttr(profile);
 
         if (profile.custom.reachfiveSendVerificationEmail) {
-            libReachFiveSynchronization.sendVerificationEmail(
+            reachFiveSynchHelper.sendVerificationEmail(
                 profile,
                 managementToken,
                 reachFiveExternalID
             );
         }
         if (profile.custom.reachfiveSendVerificationPhone) {
-            libReachFiveSynchronization.sendVerificationPhone(
+            reachFiveSynchHelper.sendVerificationPhone(
                 profile,
                 managementToken,
                 reachFiveExternalID
@@ -139,13 +138,13 @@ module.exports.process = function (profile) {
             phoneNumberFromAPI !== profile.getPhoneMobile()
             || emailFromAPI !== profile.getEmail()
         ) {
-            libReachFiveSynchronization.updatePhoneAndEmail(
+            reachFiveSynchHelper.updatePhoneAndEmail(
                 profile,
                 managementToken,
                 reachFiveExternalID
             );
         }
-        libReachFiveSynchronization.updateProfile(
+        reachFiveSynchHelper.updateProfile(
             profileFieldsObj,
             profile,
             managementToken,
