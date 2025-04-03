@@ -1,11 +1,12 @@
 'use strict';
 
 var server = require('server');
+
 server.extend(module.superModule);
 
 server.prepend('Show', function (req, res, next) {
-    var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
     var reachFiveHelper = require('*/cartridge/scripts/helpers/reachFiveHelper');
+    var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
 
     var context = {
         isReachFivePasswordReset: false,

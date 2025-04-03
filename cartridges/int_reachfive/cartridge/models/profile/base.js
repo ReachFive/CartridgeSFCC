@@ -1,7 +1,7 @@
 'use strict';
 
 // TODO: change next request into settings model
-var PROVIDER_ID = require('*/cartridge/scripts/helpers/reachFiveHelper').getReachFiveProviderId();
+var PROVIDER_ID = require('*/cartridge/models/reachfiveSettings').getReachFiveProviderId();
 var PATH_DELIMITER = ' ';
 // TODO: Mock object need to be transferred in preferences
 var propertyObj = {

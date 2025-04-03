@@ -1,0 +1,36 @@
+<!--- TEMPLATENAME: r5-callback --->
+<div class="background">
+    <div class="loader"></div>
+</div>
+<script>
+    function getSearchParams() {
+      return new URLSearchParams(window.location.search);
+    }
+
+    function authCallback() {
+      const searchParams = getSearchParams();
+      const code = searchParams.get('code');
+      const state = searchParams.get('state');
+      const redirectUri = '${URLUtils.url('ReachFiveController-CallbackReachFiveRequest').toString()}';
+      //  const redirectUri = '${URLUtils.url('Login-OAuthReentry').toString()}';
+
+      const codeVerifier = localStorage.getItem('verifier_key');
+      const params = new URLSearchParams({
+        ...(code ? { code } : {}),
+        ...(codeVerifier ? { codeVerifier } : {}),
+        ...(state ? { state } : {}),
+        redirectUri: redirectUri
+      });
+      localStorage.setItem('fdr', 'some_test');
+      const redirTo = redirectUri + '?' + params.toString();
+      if (codeVerifier) {
+        window.location.assign(redirTo);
+      } else {
+        window.location.assign("${URLUtils.url('Error-ErrorCode', 'err', 'cv-null').toString()}");
+      }
+    }
+
+    // Appel de la fonction authCallback lorsque le DOM est chargé
+    document.addEventListener('DOMContentLoaded', authCallback);
+  </script>
+

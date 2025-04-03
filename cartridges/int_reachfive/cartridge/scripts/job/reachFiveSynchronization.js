@@ -12,8 +12,7 @@ var Calendar = require('dw/util/Calendar');
  * Script Modules
  */
 var reachFiveHelper = require('int_reachfive/cartridge/scripts/helpers/reachFiveHelper');
-var reachFiveApiHelper = require('int_reachfive/cartridge/scripts/helpers/reachfiveApiHelper');
-var libReachFiveSynchronization = require('int_reachfive/cartridge/scripts/job/libReachFiveSynchronization');
+var reachFiveSynchHelper = require('int_reachfive/cartridge/scripts/helpers/reachFiveSynchronization');
 var reachFiveServiceInterface = require('int_reachfive/cartridge/scripts/interfaces/reachFiveInterface');
 
 /**
@@ -30,35 +29,36 @@ var profileFieldsObj = null;
  */
 module.exports.beforeStep = function () {
     try {
-        var profileFields = reachFiveHelper.getReachFiveProfileFieldsJSON();
-        if (!profileFields) {
-            LOGGER.error('Error - "reach5ProfileFieldsJSON" Site Preference is missing');
-            return new Status(Status.ERROR);
-        }
-        profileFieldsObj = JSON.parse(profileFields);
+        profileFieldsObj = reachFiveHelper.getReachFiveProfileFieldsJSON();
 
         var yesterdayCalendar = new Calendar();
-            yesterdayCalendar.add(Calendar.DATE, -1); 
-            var yesterdayDate = yesterdayCalendar.time; 
-            
-            var dateString = [
-                yesterdayDate.getFullYear(),
-                ('0' + (yesterdayDate.getMonth() + 1)).slice(-2),
-                ('0' + yesterdayDate.getDate()).slice(-2)
-            ].join('-');
-            
-            var query = "lastModified >= {0}";
-            var sortString = "lastModified asc"; 
-            
-            profilesIterator = CustomerMgr.searchProfiles(query, sortString, dateString);
-            
-       if (profilesIterator.hasNext()) {
+        yesterdayCalendar.add(Calendar.DATE, -1);
+        var yesterdayDate = yesterdayCalendar.time;
+
+        var dateString = [
+            yesterdayDate.getFullYear(),
+            ('0' + (yesterdayDate.getMonth() + 1)).slice(-2),
+            ('0' + yesterdayDate.getDate()).slice(-2)
+        ].join('-');
+
+        var query = 'lastModified >= {0}';
+        var sortString = 'lastModified asc';
+
+        profilesIterator = CustomerMgr.searchProfiles(
+            query,
+            sortString,
+            dateString
+        );
+
+        if (profilesIterator.hasNext()) {
             managementTokenObj = reachFiveServiceInterface.generateTokenForManagementAPI();
             if (!managementTokenObj.ok) {
-                LOGGER.error('Error during ReachFive Management token call: {0}', managementTokenObj.errorMessage);
+                LOGGER.error(
+                    'Error during ReachFive Management token call: {0}',
+                    managementTokenObj.errorMessage
+                );
                 return new Status(Status.ERROR);
             }
-        
         }
 
         return new Status(Status.OK);
@@ -102,35 +102,54 @@ module.exports.read = function () {
  */
 module.exports.process = function (profile) {
     try {
-        var reachFiveExternalID = reachFiveApiHelper.getReachFiveExternalID(profile);
+        var reachFiveExternalID = reachFiveHelper.getReachFiveExternalID(profile);
         if (!reachFiveExternalID) {
-            LOGGER.warn("External ID not find for this profil.");
+            LOGGER.warn('External ID not find for this profil.');
             return new Status(Status.ERROR);
         }
 
         var managementToken = managementTokenObj.token;
 
-        libReachFiveSynchronization.cleanUpProfileErrorAttr(profile);
+        reachFiveSynchHelper.cleanUpProfileErrorAttr(profile);
 
         if (profile.custom.reachfiveSendVerificationEmail) {
-            libReachFiveSynchronization.sendVerificationEmail(profile, managementToken, reachFiveExternalID);
+            reachFiveSynchHelper.sendVerificationEmail(
+                profile,
+                managementToken,
+                reachFiveExternalID
+            );
         }
         if (profile.custom.reachfiveSendVerificationPhone) {
-            libReachFiveSynchronization.sendVerificationPhone(profile, managementToken, reachFiveExternalID);
+            reachFiveSynchHelper.sendVerificationPhone(
+                profile,
+                managementToken,
+                reachFiveExternalID
+            );
         }
         var userDataResult = reachFiveServiceInterface.getUserFields(reachFiveExternalID);
         if (!userDataResult.ok || !userDataResult.object) {
-            LOGGER.error("not possible to get user fields");
+            LOGGER.error('not possible to get user fields');
             return new Status(Status.ERROR);
         }
 
         var emailFromAPI = userDataResult.object.email;
         var phoneNumberFromAPI = userDataResult.object.phone_number;
-        if((phoneNumberFromAPI != profile.getPhoneMobile()) || (emailFromAPI != profile.getEmail())){
-            libReachFiveSynchronization.updatePhoneAndEmail(profile, managementToken, reachFiveExternalID);
-        } 
-            libReachFiveSynchronization.updateProfile(profileFieldsObj, profile, managementToken, reachFiveExternalID);
-        
+        if (
+            phoneNumberFromAPI !== profile.getPhoneMobile()
+            || emailFromAPI !== profile.getEmail()
+        ) {
+            reachFiveSynchHelper.updatePhoneAndEmail(
+                profile,
+                managementToken,
+                reachFiveExternalID
+            );
+        }
+        reachFiveSynchHelper.updateProfile(
+            profileFieldsObj,
+            profile,
+            managementToken,
+            reachFiveExternalID
+        );
 
         return new Status(Status.OK);
     } catch (e) {
@@ -149,9 +168,7 @@ module.exports.process = function (profile) {
 /**
  * Does nothing
  */
-module.exports.write = function () {
-
-};
+module.exports.write = function () {};
 
 /**
  * Closes all system resources associated with this iterator

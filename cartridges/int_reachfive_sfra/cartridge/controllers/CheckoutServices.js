@@ -8,6 +8,8 @@ var Transaction = require('dw/system/Transaction');
 var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
 var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 
+var reachFiveInterface = require('*/cartridge/scripts/interfaces/reachFiveInterface');
+
 server.prepend(
     'LoginCustomer',
     server.middleware.https,
@@ -28,7 +30,7 @@ server.prepend(
                 var authenticatedCustomer = viewData.customerLoginResult.authenticatedCustomer;
 
                 if (!viewData.customerLoginResult.error && authenticatedCustomer) {
-                    var apiHelper = require('*/cartridge/scripts/helpers/reachfiveApiHelper');
+                    var apiHelper = require('*/cartridge/scripts/helpers/reachFiveApiHelper');
                     var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
 
                     var email = viewData.reachFiveCache.loginEmail;
@@ -46,7 +48,7 @@ server.prepend(
                             + email
                             + '] was not logged in because of:';
 
-                        authResult = apiHelper.loginWithPassword(email, password);
+                        authResult = reachFiveInterface.passwordLogin({ email, password });
                     } else {
                         var credentialsObject = {
                             email: email,
@@ -60,6 +62,7 @@ server.prepend(
 
                             Transaction.wrap(function () {
                                 customerReachFiveProfile = authenticatedCustomer.createExternalProfile(reachFiveProviderId, authResult.object.id);
+                                customerReachFiveProfile.setEmail(email);
                             });
                         }
                     }

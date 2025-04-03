@@ -3,7 +3,7 @@
         <h4 class="pull-left">${Resource.msg('reachfive.account.link.title','reachfive',null)}</h4>
     </div>
     <div class="card-body">
-		<div id="re-auth-container"></div>
-		<div id="social-accounts-container"></div>
+        <div id="re-auth-container"></div>
+        <div id="social-accounts-container"></div>
     </div>
 </div>

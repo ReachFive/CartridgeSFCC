@@ -1,0 +1,44 @@
+{
+  "linterOptions": {
+      "exclude": [
+          "@types/dw/attrs.d.ts"
+      ]
+  },
+  "compilerOptions": {
+    "baseUrl": "./",
+    "plugins": [
+      {
+        "name": "sfcc-dts"
+      }
+    ],
+    "module": "NodeNext",
+    "target": "ES5",
+    "moduleResolution": "nodenext",
+    "sourceMap": true,
+    "paths": {
+      "@types/*": [
+        "./@types/*"
+      ],
+      "types/*": [
+        "./types/*"
+      ],
+      "dw/*": [
+        "./node_modules/sfcc-dts/@types/sfcc/dw/*"
+      ],
+      "~/*": [
+        "cartridges/int_reachfive/*",
+        "cartridges/int_reachfive_sfra/*",
+        "cartridges/int_reachfive_sg/*"
+      ],
+      "int_reachfive/*": [
+        "cartridges/int_reachfive/*"
+      ],
+      "int_reachfive_sfra/*": [
+        "cartridges/int_reachfive_sfra/*"
+      ],
+      "int_reachfive_sg/*": [
+        "cartridges/int_reachfive_sg/*"
+      ]
+    }
+  }
+}

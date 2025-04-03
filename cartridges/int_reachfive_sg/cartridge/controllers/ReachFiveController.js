@@ -5,6 +5,7 @@
 /* eslint-disable one-var */
 /* eslint-disable no-use-before-define */
 /* eslint-disable indent */
+
 'use strict';
 
 /**
@@ -16,7 +17,18 @@
  * Reach Five Modules
  * */
 var reachFiveHelper = require('*/cartridge/scripts/helpers/reachFiveHelper');
-var reachFiveApiHelper = require('*/cartridge/scripts/helpers/reachfiveApiHelper');
+var reachFiveApiHelper = require('*/cartridge/scripts/helpers/reachFiveApiHelper');
+var {
+    isReachFiveEnabled,
+    isReachFiveLoginAllowed,
+    isReachFiveTransitionActive,
+    isReachFiveSessionForcedAuth,
+    getReachFiveDomain,
+    getReachFiveApiKey,
+    getReachFiveUiSdkUrl,
+    getReachFiveLocaleCode,
+    getReachFiveLanguageCode
+} = require('*/cartridge/models/reachfiveSettings');
 var ReachFiveModel = require('*/cartridge/models/ReachFiveModel');
 var Transaction = require('dw/system/Transaction');
 var URLUtils = require('dw/web/URLUtils');
@@ -64,22 +76,20 @@ function initReachFive() {
 
     // Render view
     app.getView({
-        isReachFiveEnabled: reachFiveHelper.isReachFiveEnabled(),
-        isReachFiveLoginAllowed: reachFiveHelper.isReachFiveLoginAllowed(),
-        reachFiveUiSdkUrl: reachFiveHelper.getReachFiveUiSdkUrl(),
-        reachFiveDomain: reachFiveHelper.getReachFiveDomain(),
-        reachFiveApiKey: reachFiveHelper.getReachFiveApiKey(),
-        reachFiveLanguageCode: reachFiveHelper.getReachFiveLanguageCode(),
-        reachFivelocaleCode: reachFiveHelper.getReachFiveLocaleCode(),
+        isReachFiveEnabled: isReachFiveEnabled,
+        isReachFiveLoginAllowed: isReachFiveLoginAllowed,
+        reachFiveUiSdkUrl: getReachFiveUiSdkUrl(),
+        reachFiveDomain: getReachFiveDomain(),
+        reachFiveApiKey: getReachFiveApiKey(),
+        reachFiveLanguageCode: getReachFiveLanguageCode(),
+        reachFivelocaleCode: getReachFiveLocaleCode(),
         callbackUrl: URLUtils.https('ReachFiveController-CallbackReachFiveRequest'),
-        theme: reachFiveHelper.getReachFiveTheme(),
+        theme: getReachFiveTheme(),
         siteID: System.getCurrent().getID(),
         redirectUrl: redirectUrl,
-        reachFiveTransition: reachFiveHelper.isReachFiveTransitionActive(),
+        reachFiveTransition: isReachFiveTransitionActive,
         disableSocialLogin: disableSocialLogin
     }).render('account/login/reachfiveinit');
-
-    return;
 }
 
 /**
@@ -88,32 +98,31 @@ function initReachFive() {
  * */
 function initReachFiveGlobal() {
     var targetPage = request.httpParameterMap.isParameterSubmitted('state') ? request.httpParameterMap.state.value : request.httpReferer;
-    var ignoreSessionAuth = !reachFiveHelper.isReachFiveSessionForcedAuth() || customer.authenticated;
+    var ignoreSessionAuth = !isReachFiveSessionForcedAuth || customer.authenticated;
 
     // Mark Reach Five authentication attempt
     session.privacy.reachfive_auth_attempt = true;
 
-    // Render view
-    app.getView({
-        isReachFiveEnabled: reachFiveHelper.isReachFiveEnabled(),
-        reachFiveCoreSdkUrl: reachFiveHelper.getReachFiveCoreSdkUrl(),
-        reachFiveDomain: reachFiveHelper.getReachFiveDomain(),
-        reachFiveApiKey: reachFiveHelper.getReachFiveApiKey(),
-        reachFiveLanguageCode: reachFiveHelper.getReachFiveLanguageCode(),
-        reachFivelocaleCode: reachFiveHelper.getReachFiveLocaleCode(),
+     // Render view
+     app.getView({
+        isReachFiveEnabled: isReachFiveEnabled,
+        reachFiveCoreSdkUrl: getReachFiveCoreSdkUrl(),
+        reachFiveDomain: getReachFiveDomain(),
+        reachFiveApiKey: getReachFiveApiKey(),
+        reachFiveLanguageCode: getReachFiveLanguageCode(),
+        reachFivelocaleCode: getReachFiveLocaleCode(),
         callbackUrl: URLUtils.https('ReachFiveController-CallbackReachFiveRequest'),
         ajaxLoginUrl: URLUtils.https('ReachFiveController-AjaxLogin'),
         ajaxSignUpUrl: URLUtils.https('ReachFiveController-AjaxSignUp'),
-        reachFiveLogoutUrl: URLUtils.https('Login-Logout'),
         siteID: System.getCurrent().getID(),
-        stateUrl: targetPage ? dwStringUtils.encodeBase64(targetPage) : null,
         checkSessionRedirectUrl: URLUtils.https('ReachFiveController-CallbackCheckSessionRequest'),
-        isSessionAuthRequired: !ignoreSessionAuth,
-        reachFiveCookieName: reachFiveHelper.getReachFiveCookieName(),
-        reachFiveLoginCookieName: reachFiveHelper.getReachFiveLoginCookieName()
-    }).render('components/footer/reachfiveinitglobal');
+        reachFiveLogoutUrl: URLUtils.https('Login-Logout'),
 
-    return;
+        stateUrl: targetPage ? dwStringUtils.encodeBase64(targetPage) : null,
+        isSessionAuthRequired: !ignoreSessionAuth,
+        reachFiveCookieName: getReachFiveCookieName(),
+        reachFiveLoginCookieName: getReachFiveLoginCookieName()
+    }).render('components/footer/reachfiveinitglobal');
 }
 
 /**
@@ -137,22 +146,22 @@ function callbackReachFiveRequest() {
     //  Step 3: Exchange authorization code for ID token
     var authorizationResponse = reachFiveService.exchangeAuthorizationCodeForIDToken({ code: code });
 
-    if (!authorizationResponse) {
+    if (!authorizationResponse.ok) {
         LOGGER.warn('authorization error : for code ' + code);
         return loginFailed('genericerror');
     }
 
-    var idToken = authorizationResponse.id_token;
+    var idToken = authorizationResponse.object.id_token;
 
     var decoded = reachFiveHelper.reachFiveTokenDecode(idToken);
     var externalProfile = JSON.parse(decoded.toString());
 
-    setReachFiveAuthorizationInSession(authorizationResponse);
+    setReachFiveAuthorizationInSession(authorizationResponse.object);
     setExternalProfileInSession(externalProfile);
 
     var email = externalProfile.email;
 
-    if (reachFiveHelper.isReachFiveLoginAllowed() && empty(email)) {
+    if (isReachFiveLoginAllowed() && empty(email)) {
         LOGGER.warn('email empty not allowed : for code ' + code);
         return loginFailed('emailerror');
     }
@@ -161,9 +170,8 @@ function callbackReachFiveRequest() {
     var reachFiveProviderId = reachFiveHelper.getReachFiveProviderId();
     var Customer = app.getModel('Customer');
     var reachFiveLoginForm = app.getForm('reachfivelogin');
-    var isExternalIdSaved = false;
     var target = session.privacy.TargetLocation;
-    var loggedCustomer, existingCustomer, isSavedInR5;
+    var loggedCustomer, existingCustomer;
 
     // Logger debug for profile
     LOGGER.debug('Parsed UserId "{0}" from response: {1}', externalID, externalProfile);
@@ -203,7 +211,7 @@ function callbackReachFiveRequest() {
             if (profile !== null) {
                 // Case : If a user has already an account with provider, so no login and password
                 // Set external ID and provider ID for the profile found
-                isExternalIdSaved = ReachFiveModel.setExternalParams(externalID, profile);
+                ReachFiveModel.setExternalParams(externalID, profile);
             } else {
                 // Case : Create a new customer
                 // Create customer with external profile
@@ -227,7 +235,7 @@ function callbackReachFiveRequest() {
             // If customer was logged, redirect to account show
             if (loggedCustomer) {
                 // Save ID Demandware of customer with Reach Five API Rest.
-                isSavedInR5 = afterLogin();
+                afterLogin();
                 return loginRedirect(target);
             }
         }
@@ -270,16 +278,16 @@ function callbackCheckSessionRequest() {
         redirectUrl: URLUtils.https('ReachFiveController-CallbackCheckSessionRequest').toString()
     });
 
-    if (!authorizationResponse) {
+    if (!authorizationResponse.ok) {
         LOGGER.warn('authorization error : for code ' + code);
         return loginFailed('genericerror');
     }
 
-    var idToken = authorizationResponse.id_token;
+    var idToken = authorizationResponse.object.id_token;
     var decoded = reachFiveHelper.reachFiveTokenDecode(idToken);
     var externalProfile = JSON.parse(decoded.toString());
 
-    setReachFiveAuthorizationInSession(authorizationResponse);
+    setReachFiveAuthorizationInSession(authorizationResponse.object);
     setExternalProfileInSession(externalProfile);
 
     var email = externalProfile.email;
@@ -291,7 +299,6 @@ function callbackCheckSessionRequest() {
 
     var externalID = externalProfile.sub.trim();
     var reachFiveProviderId = reachFiveHelper.getReachFiveProviderId();
-    var loggedCustomer;
 
     // Logger debug for profile
     LOGGER.debug('Parsed UserId "{0}" from response: {1}', externalID, externalProfile);
@@ -302,7 +309,7 @@ function callbackCheckSessionRequest() {
     if (profile) {
         // Case : Login a customer with reachfive provider
         // Login externally customer
-        loggedCustomer = ReachFiveModel.loginReachFiveCustomer(externalID, profile);
+        ReachFiveModel.loginReachFiveCustomer(externalID, profile);
         reachFiveHelper.setReachFiveLoginCookie();
 
         return loginRedirect(stateUrl);
@@ -357,7 +364,6 @@ function initLinkAccount() {
         ShowStandardLoginToLinkAccount: true,
         ContinueURL: URLUtils.https('ReachFiveController-HandleLinkForm')
     }).render('account/login/reachfivelinkform');
-    return;
 }
 
 /**
@@ -389,13 +395,12 @@ function handleLinkForm() {
             // Save external id and Provider ID for the next social login
             var externalID = reachFiveLogin.getValue('externalid');
             var redirectURL = session.privacy.TargetLocation;
-            var isExternalIdSaved = false;
 
             if (externalID) {
                 // Set external ID and provider ID on customer credentials
-                isExternalIdSaved = ReachFiveModel.setExternalParams(externalID, customer.getProfile());
+                ReachFiveModel.setExternalParams(externalID, customer.getProfile());
                 // Save ID Demandware of customer in Reach Five
-                var isSavedInR5 = afterLogin();
+                afterLogin();
                 // Clear Form after login
                 reachFiveLogin.clear();
             }
@@ -405,12 +410,9 @@ function handleLinkForm() {
             }
             // Redirect customer
             response.redirect(redirectURL);
-
-            return;
         },
         error: function () {
             app.getView('Login').render();
-            return;
         }
     });
 }
@@ -437,7 +439,6 @@ function loginRedirect(targetUrl) {
         targetUrl = URLUtils.https('Account-Show').toString();
     }
     response.redirect(targetUrl);
-    return;
 }
 
 /**
@@ -464,7 +465,6 @@ function afterLogin() {
     }
     return true;
 }
-
 
 /**
  * @function
@@ -535,21 +535,17 @@ function afterPrefillSave() {
  * Show Social Accounts
  */
 function showSocialAccounts() {
-    var isReachFiveEnabled = reachFiveHelper.isReachFiveEnabled();
-    var isReachFiveLoginAllowed = reachFiveHelper.isReachFiveLoginAllowed();
-    var reachFiveLogin = app.getForm('reachfivelogin');
     var externalID = customer.getExternalProfiles().iterator().next.getExternalID();
     var accessToken = reachFiveService.generateToken();
     var callbackUrl = URLUtils.https('Account-EditProfile');
     // Render view
     app.getView({
-        IsReachFiveEnabled: isReachFiveEnabled,
-        IsReachFiveLoginAllowed: isReachFiveLoginAllowed,
+        IsReachFiveEnabled,
+        IsReachFiveLoginAllowed,
         AccessToken: accessToken,
         ExternalID: externalID,
         CallbackUrl: callbackUrl
     }).render('account/login/showreachfivesociallogincomponent');
-    return;
 }
 
 /**
@@ -640,7 +636,6 @@ function ajaxLogin() {
 
     // Render view
     app.getView({ data: jsonObj }).render('account/login/reachfivejson');
-    return;
 }
 
 /**
@@ -648,7 +643,7 @@ function ajaxLogin() {
  * For ajax requests, renders the account/login/reachfivejson
  */
 function ajaxSignUp() {
-    var email, emailConfirmation, orderNo, profileValidation, password, passwordConfirmation, existingCustomer, Customer, target;
+    var email, emailConfirmation, orderNo, profileValidation, password, passwordConfirmation, existingCustomer, Customer;
 
     Customer = app.getModel('Customer');
     email = app.getForm('profile.customer.email').value();
@@ -699,8 +694,12 @@ function ajaxSignUp() {
         profileValidation = Customer.createAccount(email, password, app.getForm('profile'));
 
         if (orderNo) {
-            var orders = OrderMgr.searchOrders('orderNo={0} AND status!={1}', 'creationDate desc', orderNo,
-                dw.order.Order.ORDER_STATUS_REPLACED);
+            var orders = OrderMgr.searchOrders(
+'orderNo={0} AND status!={1}',
+'creationDate desc',
+orderNo,
+dw.order.Order.ORDER_STATUS_REPLACED
+);
             if (orders) {
                 var foundOrder = orders.next();
                 Transaction.wrap(function () {
@@ -737,7 +736,6 @@ function ajaxSignUp() {
 
     // Render view
     app.getView({ data: jsonObj }).render('account/login/reachfivejson');
-    return;
 }
 
 /*
