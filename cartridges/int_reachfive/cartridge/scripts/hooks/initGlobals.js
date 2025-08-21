@@ -60,7 +60,7 @@ initGlobal.afterFooter = function (pdict) {
         }
 
         var data = request.httpParameterMap.data.value; //Get the query param data in order to store it in the state value
-        var stateObjBase64 = reachFiveHelper.getStateObjBase64(targetPage.toString(), pdict.action, handleCustomerRoute, data);
+        var state = reachFiveHelper.getState(targetPage.toString(), pdict.action, handleCustomerRoute, data);
         var signUpStateObjBase64 = reachFiveHelper.getStateObjBase64(signUpTargetPage.toString(), pdict.action, handleCustomerRoute);
 
         if (pdict.disableSSOLogin) {
@@ -77,7 +77,7 @@ initGlobal.afterFooter = function (pdict) {
         context.reachFiveLogoutUrl = URLUtils.https('Login-Logout');
         context.siteID = System.getCurrent().getID();
         context.stateUrl = targetPage;
-        context.stateObjBase64 = stateObjBase64;
+        context.state = state;
         context.reachFiveCookieName = reachFiveHelper.getReachFiveCookieName();
         context.reachFiveLoginCookieName = reachFiveHelper.getReachFiveLoginCookieName();
         context.reachFiveAccess_token = reachfiveSession.access_token;

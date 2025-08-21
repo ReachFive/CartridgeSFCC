@@ -16,7 +16,9 @@ var Resource = require('dw/web/Resource');
 var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 var StringUtils = require('dw/util/StringUtils');
 var URLUtils = require('dw/web/URLUtils');
-
+var CustomObjectMgr = require('dw/object/CustomObjectMgr');
+var Transaction = require('dw/system/Transaction');
+var UUIDUtils = require('dw/util/UUIDUtils');
 var reachFiveService = require('*/cartridge/scripts/interfaces/reachFiveInterface');
 var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
 
@@ -408,6 +410,14 @@ function getStateObjBase64(redirectURL, action, handleCustomerRoute, data) {
     return StringUtils.encodeBase64(JSON.stringify(stateObj));
 }
 
+function getState(redirectURL, action, handleCustomerRoute, data) {
+    var uniqueID = UUIDUtils.createUUID(); // ID unique
+    var stateObject = {redirectURL, action, handleCustomerRoute, data}
+
+    session.custom[uniqueID] = JSON.stringify(stateObject); 
+
+    return uniqueID; 
+}
 
 /**
  * @function
@@ -535,6 +545,7 @@ module.exports.getReachFiveLoginCookieName = getReachFiveLoginCookieName;
 module.exports.setReachFiveLoginCookie = setReachFiveLoginCookie;
 module.exports.getReachFiveUserCustomObjectType = getReachFiveUserCustomObjectType;
 module.exports.getStateObjBase64 = getStateObjBase64;
+module.exports.getState = getState;
 module.exports.createLoginRedirectUrl = createLoginRedirectUrl;
 module.exports.verifySessionAccessTkn = verifySessionAccessTkn;
 module.exports.isReachFiveEnableKakaoTalkNameSplit = isReachFiveEnableKakaoTalkNameSplit;

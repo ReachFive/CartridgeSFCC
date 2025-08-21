@@ -79,7 +79,19 @@ function getStateData(req) {
         handleCustomerRoute: false
     };
     if (req.httpParameterMap.isParameterSubmitted('state')) {
-        var stateObjStr = dwStringUtils.decodeBase64(req.httpParameterMap.state.value);
+        // var stateObjStr = dwStringUtils.decodeBase64(req.httpParameterMap.state.value);
+        var stateObjStr = '';
+        var state = req.httpParameterMap.state.value
+        if (
+            session.custom[state]
+        ) {
+            stateObjStr = session.custom[state];
+
+        } else {
+            LOGGER.error('No state data');
+        }
+
+        
         try {
             stateObj = JSON.parse(stateObjStr);
         } catch (err) {
@@ -103,6 +115,9 @@ function getStateData(req) {
             stateData.data = stateObj.data;
         }
     }
+
+
+
 
     return stateData;
 }
