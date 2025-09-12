@@ -445,8 +445,19 @@ server.post(
                 profileForm.customer.emailconfirm.error = Resource.msg('error.message.mismatch.email', 'forms', null);
             }
 
+            var customerCheck = CustomerMgr.getCustomerByLogin(profileForm.customer.email.value); // ← login == email dans SFCC B2C
+
+            if (customerCheck) {
+                res.json({
+                    success: true,
+                    action: 'logoutReachFive',
+                    redirectUrl: URLUtils.https('Login-Show', 'prefillEmailExists', 'true').toString()
+                });
+                return next();   
+            }
+
             var result = {
-                profileFields: 'given_name,family_name',
+                profileFields: 'given_name,family_name,email',
                 firstName: profileForm.customer.firstname.value,
                 lastName: profileForm.customer.lastname.value,
                 phone: profileForm.customer.phone.value,

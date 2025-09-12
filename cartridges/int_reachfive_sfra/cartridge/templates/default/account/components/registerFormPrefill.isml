@@ -2,7 +2,7 @@
 
 <form
     action="${pdict.actionUrl}"
-    class="registration"
+    class="registration ${customerHasEmail ? '': 'prefill-form-ajax'}"
     method="POST"
     name="${pdict.profileForm.htmlName}">
     <div class="form-group

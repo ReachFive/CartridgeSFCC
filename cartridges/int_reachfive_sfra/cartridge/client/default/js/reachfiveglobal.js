@@ -8,7 +8,8 @@ $(function () {
     };
 
     var TARGET = {
-        BODY: document.querySelector('body')
+        BODY: document.querySelector('body'),
+        PREFILL_FORM: document.querySelector('.prefill-form-ajax')
     };
 
     // Check session handler
@@ -44,6 +45,37 @@ $(function () {
             });
         }
     });
+    
+    if(TARGET.PREFILL_FORM) {
+        TARGET.PREFILL_FORM.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+            
+            fetch('ReachFiveController-SubmitProfileSocialLogin', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if(data.action === 'logoutReachFive'){
+                        sdkCoreClient.logout({
+                            redirectTo: data.redirectUrl
+                        });
+                    }
+                    
+                }
+            })
+            .catch(err => console.error(err));
+        });
+    }
+
+
+    var params = new URLSearchParams(window.location.search);
+    
+    if (params.has('prefillEmailExists')) {
+        document.querySelector('.prefill-email-exists').removeAttribute('hidden')
+    }
 
     // TARGET.BODY.addEventListener('reachfive-profile-update', function (event) {
     //     var data = event.detail;
