@@ -451,7 +451,7 @@ server.post(
                 profileForm.customer.emailconfirm.error = Resource.msg('error.message.mismatch.email', 'forms', null);
             }
 
-            var customerCheck = CustomerMgr.getCustomerByLogin(profileForm.customer.email.value); // ← login == email dans SFCC B2C
+            var customerCheck = CustomerMgr.getCustomerByLogin(profileForm.customer.email.value);
 
             if (customerCheck) {
                 var socialProvider = !empty(reachfiveSession.profile.auth_type) ? reachfiveSession.profile.auth_type : '';
