@@ -58,10 +58,8 @@ $(function () {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    if(data.action === 'logoutReachFive'){
-                        sdkCoreClient.logout({
-                            redirectTo: data.redirectUrl
-                        });
+                    if(data.action === 'loginRedirect'){
+                        window.location.href = data.redirectUrl
                     }
                     
                 }
