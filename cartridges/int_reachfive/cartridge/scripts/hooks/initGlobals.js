@@ -75,6 +75,7 @@ initGlobal.afterFooter = function (pdict) {
         context.reachFivelocaleCode = reachFiveHelper.getReachFiveLocaleCode();
         context.callbackUrl = URLUtils.https('ReachFiveController-CallbackReachFiveRequest');
         context.reachFiveLogoutUrl = URLUtils.https('Login-Logout');
+        context.reachFiveLoginUrl = URLUtils.https('Login-Show');
         context.siteID = System.getCurrent().getID();
         context.stateUrl = targetPage;
         context.stateObjBase64 = stateObjBase64;

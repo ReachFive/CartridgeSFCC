@@ -19,6 +19,7 @@
             window.reach5Const = {
                 callbackUrl: '${pdict.callbackUrl}',
                 reachFiveLogoutUrl: '${pdict.reachFiveLogoutUrl}',
+                reachFiveLoginUrl: '${pdict.reachFiveLoginUrl}',
                 siteID: '${pdict.siteID}',
                 stateUrl: '${pdict.stateUrl}',
                 stateObjBase64: '${pdict.stateObjBase64}',

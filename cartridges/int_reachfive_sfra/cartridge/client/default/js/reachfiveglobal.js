@@ -9,7 +9,9 @@ $(function () {
 
     var TARGET = {
         BODY: document.querySelector('body'),
-        PREFILL_FORM: document.querySelector('.prefill-form-ajax')
+        PREFILL_FORM: document.querySelector('.prefill-form-ajax'),
+        LOGIN_LINK: document.querySelector('a[href*="Login-Show"]')
+
     };
 
     // Check session handler
@@ -61,13 +63,23 @@ $(function () {
                     if(data.action === 'loginRedirect'){
                         window.location.href = data.redirectUrl
                     }
-                    
                 }
             })
             .catch(err => console.error(err));
         });
     }
 
+    sdkCoreClient.getSessionInfo()
+    .then(function (sessionInfo) {
+        if (sessionInfo && sessionInfo.isAuthenticated) {
+            TARGET.LOGIN_LINK.addEventListener('click', function(e) {
+                e.preventDefault()
+                sdkCoreClient.logout({
+                    redirectTo: reach5Const.reachFiveLoginUrl
+                });
+            });
+        }
+    })
 
     var params = new URLSearchParams(window.location.search);
     
