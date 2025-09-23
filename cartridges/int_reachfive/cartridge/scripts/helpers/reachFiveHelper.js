@@ -16,7 +16,9 @@ var Resource = require('dw/web/Resource');
 var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 var StringUtils = require('dw/util/StringUtils');
 var URLUtils = require('dw/web/URLUtils');
-
+var CustomObjectMgr = require('dw/object/CustomObjectMgr');
+var Transaction = require('dw/system/Transaction');
+var UUIDUtils = require('dw/util/UUIDUtils');
 var reachFiveService = require('*/cartridge/scripts/interfaces/reachFiveInterface');
 var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
 
@@ -380,34 +382,22 @@ function getProfileRequestObjFromForm(customerForm) {
     return requestObj;
 }
 
-
-
 /**
- * @function
- * @description Prepare BASE64 string object for redirect
- * @param {string} redirectURL redirect url
- * @param {string} action Controller endpoint action
- * @param {boolean} [handleCustomerRoute] handle flag
- * @return {string} result
- * */
-function getStateObjBase64(redirectURL, action, handleCustomerRoute, data) {
-    var stateObj = {
-        redirectURL: redirectURL,
-        action: action
-    };
+ * @description Creates a state object, stores it in the session, and returns a unique ID for it. This is used to pass data through the OAuth flow.
+ * @param {string} redirectURL - The URL to redirect to after authentication.
+ * @param {string} action - The action being performed.
+ * @param {boolean} handleCustomerRoute - A flag to indicate if the customer route should be handled.
+ * @param {string|Object} [data] - Optional data to be stored in the state.
+ * @returns {string} A unique ID representing the state stored in the session.
+ */
+function getState(redirectURL, action, handleCustomerRoute, data) {
+    var uniqueID = UUIDUtils.createUUID();
+    var stateObject = {redirectURL, action, handleCustomerRoute, data}
 
-    if (handleCustomerRoute) {
-        stateObj.handleCustomerRoute = handleCustomerRoute;
-    }
+    session.custom[uniqueID] = JSON.stringify(stateObject); 
 
-    //Put the data query param as a JSON object in the state
-    if (data) {
-        stateObj.data = data;
-    }
-
-    return StringUtils.encodeBase64(JSON.stringify(stateObj));
+    return uniqueID; 
 }
-
 
 /**
  * @function
@@ -438,7 +428,7 @@ function createLoginRedirectUrl(tkn, stateTarget) {
     });
 
     // No need additional encoding
-    queryObjEncoded.state = getStateObjBase64(stateTarget);
+    queryObjEncoded.state = getState(stateTarget);
     queryObjEncoded.tkn = tkn;
 
     Object.keys(queryObjEncoded).forEach(function (key) {
@@ -534,7 +524,7 @@ module.exports.getReachFiveCookieName = getReachFiveCookieName;
 module.exports.getReachFiveLoginCookieName = getReachFiveLoginCookieName;
 module.exports.setReachFiveLoginCookie = setReachFiveLoginCookie;
 module.exports.getReachFiveUserCustomObjectType = getReachFiveUserCustomObjectType;
-module.exports.getStateObjBase64 = getStateObjBase64;
+module.exports.getState = getState;
 module.exports.createLoginRedirectUrl = createLoginRedirectUrl;
 module.exports.verifySessionAccessTkn = verifySessionAccessTkn;
 module.exports.isReachFiveEnableKakaoTalkNameSplit = isReachFiveEnableKakaoTalkNameSplit;
