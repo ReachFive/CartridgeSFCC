@@ -79,13 +79,12 @@ function getStateData(req) {
         handleCustomerRoute: false
     };
     if (req.httpParameterMap.isParameterSubmitted('state')) {
-        // var stateObjStr = dwStringUtils.decodeBase64(req.httpParameterMap.state.value);
         var stateObjStr = '';
         var state = req.httpParameterMap.state.value
-        if (
-            session.custom[state]
-        ) {
+
+        if (session.custom[state]) {
             stateObjStr = session.custom[state];
+            delete session.custom[state];
 
         } else {
             LOGGER.error('No state data');
@@ -115,9 +114,6 @@ function getStateData(req) {
             stateData.data = stateObj.data;
         }
     }
-
-
-
 
     return stateData;
 }
