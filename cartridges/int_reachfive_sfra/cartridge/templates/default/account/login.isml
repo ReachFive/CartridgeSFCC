@@ -22,7 +22,6 @@
                                 	<isif condition="${!empty(pdict.errorMsg)}">
                                 		<div class="error-form">${pdict.errorMsg}</div>
                                 	</isif>
-                                    <div class="prefill-email-exists" hidden>${Resource.msg('reachfive.email.exists', 'reachfive', null)}</div>
                                     <isif condition="${pdict.isReachFiveEnabled}">
                                         <isif condition="${pdict.isReachFiveLoginAllowed && pdict.isReachFiveConversionMute}">
                                                 <isif condition="${pdict.isReachFivePasswordReset}">

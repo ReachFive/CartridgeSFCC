@@ -81,12 +81,6 @@ $(function () {
         }
     })
 
-    var params = new URLSearchParams(window.location.search);
-    
-    if (params.has('prefillEmailExists')) {
-        document.querySelector('.prefill-email-exists').removeAttribute('hidden')
-    }
-
     // TARGET.BODY.addEventListener('reachfive-profile-update', function (event) {
     //     var data = event.detail;
 
