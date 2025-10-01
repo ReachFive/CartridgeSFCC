@@ -69,17 +69,19 @@ $(function () {
         });
     }
 
-    sdkCoreClient.getSessionInfo()
-    .then(function (sessionInfo) {
-        if (sessionInfo && sessionInfo.isAuthenticated) {
-            TARGET.LOGIN_LINK.addEventListener('click', function(e) {
-                e.preventDefault()
-                sdkCoreClient.logout({
-                    redirectTo: reach5Const.reachFiveLoginUrl
+    if(TARGET.LOGIN_LINK) {
+        sdkCoreClient.getSessionInfo()
+        .then(function (sessionInfo) {
+            if (sessionInfo && sessionInfo.isAuthenticated) {
+                TARGET.LOGIN_LINK.addEventListener('click', function(e) {
+                    e.preventDefault()
+                    sdkCoreClient.logout({
+                        redirectTo: reach5Const.reachFiveLoginUrl
+                    });
                 });
-            });
-        }
-    })
+            }
+        })
+    }
 
     // TARGET.BODY.addEventListener('reachfive-profile-update', function (event) {
     //     var data = event.detail;
