@@ -21,7 +21,7 @@ $(function () {
             if (sessionInfo && sessionInfo.isAuthenticated) {
                 sdkCoreClient.loginFromSession({
                     redirectUri: reach5Const.callbackUrl,
-                    state: reach5Const.stateObjBase64
+                    state: reach5Const.state
                 });
             }
         });
