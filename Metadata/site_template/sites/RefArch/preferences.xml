@@ -49,6 +49,31 @@
                 <value>it</value>
                 <value>nl</value>
             </preference>
+            <preference preference-id="reach5SupportedSocialNames">
+                <value>akamai</value>
+                <value>amazon</value>
+                <value>apple</value>
+                <value>bconnect</value>
+                <value>facebook</value>
+                <value>franceconnect</value>
+                <value>google</value>
+                <value>kakaotalk</value>
+                <value>line</value>
+                <value>linkedin</value>
+                <value>mailru</value>
+                <value>microsoft</value>
+                <value>naver</value>
+                <value>okta</value>
+                <value>oney</value>
+                <value>paypal</value>
+                <value>ping</value>
+                <value>qq</value>
+                <value>tiktok</value>
+                <value>twitter</value>
+                <value>vkontakte</value>
+                <value>wechat</value>
+                <value>weibo</value>
+            </preference>
             <preference preference-id="authenticated">sdkUiClient.showSocialAccounts({
                             accessToken: accessToken,
                             container: 'social-accounts-container'

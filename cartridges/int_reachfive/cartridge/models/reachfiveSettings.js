@@ -25,6 +25,7 @@ var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
  * @property {string} reach5CoreSdkUrl - Web Core SDK Url
  * @property {Array} reach5SupportedLanguageCodes - Supported ReachFive LanguageCodes
  * @property {string} reach5DefaulLanguageCode - Default ReachFive LanguageCode
+ * @property {Array} reach5SupportedSocialNames - Supported ReachFive Social Provider Names
  * @property {string} reachFiveCheckCredentials - Check credentials method
  * @property {boolean} isReachFiveEmailAsLogin - Create profile with login as an email
  * @property {boolean} isReachFiveReturnProviderToken - Retrieve the provider token in the SFCC session
@@ -102,6 +103,9 @@ function Settings() {
         },
         reach5DefaulLanguageCode: {
             get: function () { return currentSite.getCustomPreferenceValue('reach5DefaulLanguageCode'); }
+        },
+        reach5SupportedSocialNames: {
+            get: function () { return currentSite.getCustomPreferenceValue('reach5SupportedSocialNames'); }
         },
         reachFiveCheckCredentials: {
             get: function () {
