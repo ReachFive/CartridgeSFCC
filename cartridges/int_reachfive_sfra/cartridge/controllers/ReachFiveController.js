@@ -78,8 +78,8 @@ function getStateData(req) {
         action: false,
         handleCustomerRoute: false
     };
-    if (req.httpParameterMap.isParameterSubmitted('state')) {
-        var stateObjStr = dwStringUtils.decodeBase64(req.httpParameterMap.state.value);
+    if (req.querystring.state) {
+        var stateObjStr = dwStringUtils.decodeBase64(req.querystring.state);
         try {
             stateObj = JSON.parse(stateObjStr);
         } catch (err) {
@@ -114,12 +114,12 @@ server.get(
         var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
 
         //  Step 2: Handle the Authorization Response
-        var code = req.httpParameterMap.code.value;
-        var error = req.httpParameterMap.error.value;
+        var code = req.querystring.code;
+        var error = req.querystring.error;
 
         //  session.privacy.TargetLocation = request.httpParameterMap.redirectUrl.value;
         if (error || error === '') {
-            var message = !!req.httpParameterMap.error_description.value ? req.httpParameterMap.error_description.value : '';
+            var message = req.querystring.error_description ? req.querystring.error_description : '';
             LOGGER.warn('access denied: reach5 response: ' + message);
 
             loginFailedNoCode(message, res);
