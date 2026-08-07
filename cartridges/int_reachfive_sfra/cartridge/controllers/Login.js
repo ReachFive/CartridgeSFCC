@@ -21,7 +21,7 @@ server.prepend('Show', function (req, res, next) {
         context.isReachFiveTransitionActive = reachfiveSettings.isReachFiveTransitionActive;
         context.isReachFiveConversionMute = reachFiveHelper.getReachFiveConversionMute();
 
-        if (req.httpParameterMap.isParameterSubmitted('verification_code')) {
+        if (req.querystring.verification_code) {
             context.isReachFivePasswordReset = true;
         }
     }
