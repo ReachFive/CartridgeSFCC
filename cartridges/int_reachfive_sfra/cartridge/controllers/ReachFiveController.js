@@ -254,6 +254,7 @@ server.get(
     'InitLinkAccount',
     csrfProtection.generateToken,
     function (req, res, next) {
+        var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
         var userName, rememberMe, ReachFivesocialName;
         // Prefill login form if the user is registered
         if (req.querystring.email) {
@@ -261,8 +262,10 @@ server.get(
             rememberMe = true;
         }
 
-        if (req.querystring.ReachFivesocialName) {
-            ReachFivesocialName = req.querystring.ReachFivesocialName;
+        var inputSocialName = req.querystring.ReachFivesocialName;
+        var supportedSocialNames = reachfiveSettings.reach5SupportedSocialNames || [];
+        if (inputSocialName && supportedSocialNames.indexOf(inputSocialName) !== -1) {
+            ReachFivesocialName = inputSocialName;
         }
 
         var rurl = req.querystring.rurl || '1';
