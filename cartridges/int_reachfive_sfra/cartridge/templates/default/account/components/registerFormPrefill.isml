@@ -1,6 +1,8 @@
+<isset name="customerHasEmail" value="${!!pdict.profileForm.customer.email.htmlValue}" scope="page" />
+
 <form
     action="${pdict.actionUrl}"
-    class="registration"
+    class="registration ${customerHasEmail ? '': 'prefill-form-ajax'}"
     method="POST"
     name="${pdict.profileForm.htmlName}">
     <div class="form-group
@@ -53,13 +55,13 @@
         <div class="invalid-feedback" id="form-phone-error"></div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group ${customerHasEmail ? '' : 'required'}">
         <label class="form-control-label" for="registration-form-email">
              <isprint value="${pdict.profileForm.customer.email.label}" encoding="htmlcontent" />
         </label>
         <input
             type="text"
-            readonly="readonly"
+            ${customerHasEmail ? readonly="readonly" : ''}
             class="form-control"
             id="registration-form-email"
             data-missing-error="${Resource.msg('error.message.required','forms',null)}"
@@ -71,9 +73,14 @@
     </div>
 
     <div class="form-group required">
+        <isif condition="${!customerHasEmail}">
+                <label class="form-control-label" for="registration-form-email-confirm">
+                    <isprint value="${pdict.profileForm.customer.emailconfirm.label}" encoding="htmlcontent" />
+            </label>      
+        </isif>
         <input
-            type="hidden"
-            readonly="readonly"
+            type="${customerHasEmail ? 'hidden' : 'text'}"
+            ${customerHasEmail ? readonly="readonly" : ''}
             class="form-control"
             id="registration-form-email-confirm"
             data-missing-error="${Resource.msg('error.message.required','forms',null)}"

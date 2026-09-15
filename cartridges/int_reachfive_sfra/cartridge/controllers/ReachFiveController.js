@@ -78,9 +78,9 @@ function getStateData(req) {
         action: false,
         handleCustomerRoute: false
     };
-    if (req.httpParameterMap.isParameterSubmitted('state')) {
+    if (req.querystring.state) {
         var stateObjStr = '';
-        var state = req.httpParameterMap.state.value
+        var state = req.querystring.state.value
 
         if (session.custom[state]) {
             stateObjStr = session.custom[state];
@@ -90,7 +90,7 @@ function getStateData(req) {
             LOGGER.error('No state data');
         }
 
-        
+
         try {
             stateObj = JSON.parse(stateObjStr);
         } catch (err) {
@@ -125,12 +125,12 @@ server.get(
         var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
 
         //  Step 2: Handle the Authorization Response
-        var code = req.httpParameterMap.code.value;
-        var error = req.httpParameterMap.error.value;
+        var code = req.querystring.code;
+        var error = req.querystring.error;
 
         //  session.privacy.TargetLocation = request.httpParameterMap.redirectUrl.value;
         if (error || error === '') {
-            var message = !!req.httpParameterMap.error_description.value ? req.httpParameterMap.error_description.value : '';
+            var message = req.querystring.error_description ? req.querystring.error_description : '';
             LOGGER.warn('access denied: reach5 response: ' + message);
 
             loginFailedNoCode(message, res);
@@ -296,11 +296,13 @@ server.post(
     'HandleLinkForm',
     csrfProtection.generateToken,
     function (req, res, next) {
-        var reachFiveLoginForm = server.forms.getForm('reachfivelogin');
+        var ReachfiveProfile = require('*/cartridge/models/profile/customerOrigin');
+        var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
         var email = req.form.loginEmail;
         var password = req.form.loginPassword;
         var rememberMe = req.form.loginRememberMe ? (!!req.form.loginRememberMe) : false;
         var authenticatedCustomer;
+        var reachfiveSession = new ReachfiveSessionModel();
 
         Transaction.wrap(function () {
             authenticatedCustomer = CustomerMgr.loginCustomer(email, password, rememberMe);
@@ -308,12 +310,16 @@ server.post(
         if (authenticatedCustomer && authenticatedCustomer.authenticated) {
             var afterAuth = require('*/cartridge/models/afterAuthUrl');
 
-            var externalID = reachFiveLoginForm.externalid.value;
+            var externalID = reachfiveSession.profile.sub.trim();
 
             if (externalID) {
                 // Set external ID and provider ID on customer credentials
                 ReachFiveModel.setExternalParams(externalID, customer.getProfile());
             }
+
+            var reachfiveProfile = new ReachfiveProfile(customer);
+            var profileRequestObj = reachfiveProfile.getUserProfileObj('email,given_name,family_name');
+            reachFiveApiHelper.updateReachFiveProfile(profileRequestObj);
 
             var target = afterAuth.getLoginRedirectURL(req.querystring.rurl, req.session.privacyCache, true);
 
@@ -456,8 +462,23 @@ server.post(
                 profileForm.customer.emailconfirm.error = Resource.msg('error.message.mismatch.email', 'forms', null);
             }
 
+            var customerCheck = CustomerMgr.getCustomerByLogin(profileForm.customer.email.value);
+
+            if (customerCheck) {
+                var socialProvider = !empty(reachfiveSession.profile.auth_type) ? reachfiveSession.profile.auth_type : '';
+                var target = URLUtils.https('ReachFiveController-InitLinkAccount',
+                        'ReachFivesocialName', socialProvider,
+                        'email', profileForm.customer.email.value).toString();
+                res.json({
+                    success: true,
+                    action: 'loginRedirect',
+                    redirectUrl: target
+                });
+                return next();
+            }
+
             var result = {
-                profileFields: 'given_name,family_name',
+                profileFields: 'given_name,family_name,email',
                 firstName: profileForm.customer.firstname.value,
                 lastName: profileForm.customer.lastname.value,
                 phone: profileForm.customer.phone.value,
