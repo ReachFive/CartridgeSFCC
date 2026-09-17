@@ -9,9 +9,12 @@ var consentTracking = require('*/cartridge/scripts/middleware/consentTracking');
 
 // var Site = require('dw/system/Site');
 var Transaction = require('dw/system/Transaction');
+var URLUtils = require('dw/web/URLUtils');
+var CustomerMgr = require('dw/customer/CustomerMgr');
 var reachFiveHelper = require('*/cartridge/scripts/helpers/reachFiveHelper');
 var reachFiveApiHelper = require('*/cartridge/scripts/helpers/reachfiveApiHelper');
 var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
+var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
 var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 
 server.append('Login', function (req, res, next) {
@@ -21,7 +24,6 @@ server.append('Login', function (req, res, next) {
 
         if (authenticatedCustomer) {
             var apiHelper = require('*/cartridge/scripts/helpers/reachfiveApiHelper');
-            var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
 
             var email = req.form.loginEmail;
             var password = req.form.loginPassword;
@@ -63,6 +65,42 @@ server.append('Login', function (req, res, next) {
                 reachfiveSession.one_time_token = authResult.object.tkn;
             } else {
                 LOGGER.error(errorMessagePrefix + authResult.errorMessage);
+            }
+        } else if (reachFiveHelper.isReachFiveTransitionActive()) {
+            // Native SFCC login failed. If this email actually belongs to a customer that's
+            // already linked to ReachFive, the native password check was always going to
+            // fail - those accounts have no usable native SFCC password. Rather than leave
+            // the customer stuck on a dead-end "Invalid login or password" error (or make
+            // them re-enter the same credentials a second time in the widget), try the same
+            // submitted credentials directly against ReachFive right here, reusing the same
+            // one-time-token mechanism the success branch above already uses to complete a
+            // real ReachFive session with no extra input from the customer. This also covers
+            // the case where the conversion cookie was lost for any reason (cleared, new
+            // device/browser, expired), not just the specific Full-CIAM-signup-then-
+            // transition-mode scenario.
+            var failedEmail = req.form.loginEmail;
+            var failedPassword = req.form.loginPassword;
+            var candidateCustomer = !empty(failedEmail) ? CustomerMgr.getCustomerByLogin(failedEmail) : null;
+            var candidateReachFiveProfile = candidateCustomer
+                ? reachFiveApiHelper.getCustomerReachFiveExtProfile(candidateCustomer)
+                : null;
+
+            if (candidateReachFiveProfile) {
+                var candidateAuthResult = reachFiveApiHelper.loginWithPassword(failedEmail, failedPassword);
+
+                if (candidateAuthResult.ok) {
+                    var candidateReachfiveSession = new ReachfiveSessionModel();
+                    candidateReachfiveSession.one_time_token = candidateAuthResult.object.tkn;
+
+                    reachFiveHelper.setReachFiveConversionCookie();
+
+                    res.json({
+                        success: true,
+                        redirectUrl: URLUtils.url('Account-Show').toString()
+                    });
+                }
+                // else: genuinely wrong password even for the ReachFive account - let the
+                // native "Invalid login or password" response from the base route stand.
             }
         }
     }
