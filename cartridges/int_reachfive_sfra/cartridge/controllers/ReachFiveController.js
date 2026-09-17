@@ -82,9 +82,9 @@ function getStateData(req) {
         var stateObjStr = '';
         var state = req.querystring.state.value
 
-        if (session.custom[state]) {
-            stateObjStr = session.custom[state];
-            delete session.custom[state];
+        if (session.privacy[state]) {
+            stateObjStr = session.privacy[state];
+            delete session.privacy[state];
 
         } else {
             LOGGER.error('No state data');

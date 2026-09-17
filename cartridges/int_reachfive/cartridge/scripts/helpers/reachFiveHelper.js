@@ -394,7 +394,7 @@ function getState(redirectURL, action, handleCustomerRoute, data) {
     var uniqueID = UUIDUtils.createUUID();
     var stateObject = {redirectURL, action, handleCustomerRoute, data}
 
-    session.custom[uniqueID] = JSON.stringify(stateObject); 
+    session.privacy[uniqueID] = JSON.stringify(stateObject);
 
     return uniqueID; 
 }
