@@ -332,18 +332,18 @@ function getReachFiveLocaleCode() {
 
 /**
  * @function
- * @description Set Reach Five Conversion period cookie.
+ * @description Set Reach Five Conversion period cookie. Always set on a successful ReachFive
+ * login/signup regardless of transition mode, so a customer created while transition mode is
+ * off (Full CIAM) is still recognized as already-migrated if transition mode is turned on later.
  * @return {void}
  * */
  function setReachFiveConversionCookie() {
-    if (isReachFiveTransitionActive()) {
-        var cookie = new Cookie(getReachFiveCookieName(), '1');
-        var CONVERSION_COOKIE_AGE = getReachFivePreferences('reachFiveTransitionCookieDuration') * 24 * 60 * 60;
-        cookie.setPath('/');
-        cookie.setMaxAge(CONVERSION_COOKIE_AGE);
+    var cookie = new Cookie(getReachFiveCookieName(), '1');
+    var CONVERSION_COOKIE_AGE = getReachFivePreferences('reachFiveTransitionCookieDuration') * 24 * 60 * 60;
+    cookie.setPath('/');
+    cookie.setMaxAge(CONVERSION_COOKIE_AGE);
 
-        response.addHttpCookie(cookie);
-    }
+    response.addHttpCookie(cookie);
 }
 
 /**
