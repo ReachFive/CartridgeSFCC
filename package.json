@@ -67,6 +67,7 @@
     "globalize": "^1.4.2",
     "husky": "^4.2.5",
     "isml-linter": "^5.26.4",
+    "lint-staged": "^13.3.0",
     "lodash": "^4.17.15",
     "mini-css-extract-plugin": "^2.7.6",
     "minimist": "^1.2.6",
@@ -115,8 +116,12 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint",
+      "pre-commit": "lint-staged",
       "pre-push": "npm run test"
     }
+  },
+  "lint-staged": {
+    "**/*.js": "eslint",
+    "**/*.isml": "./node_modules/.bin/isml-linter"
   }
 }
