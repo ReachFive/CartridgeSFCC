@@ -9,6 +9,8 @@ var consentTracking = require('*/cartridge/scripts/middleware/consentTracking');
 
 // var Site = require('dw/system/Site');
 var Transaction = require('dw/system/Transaction');
+var URLUtils = require('dw/web/URLUtils');
+var CustomerMgr = require('dw/customer/CustomerMgr');
 var reachFiveHelper = require('*/cartridge/scripts/helpers/reachFiveHelper');
 var reachFiveApiHelper = require('*/cartridge/scripts/helpers/reachfiveApiHelper');
 var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
@@ -63,6 +65,29 @@ server.append('Login', function (req, res, next) {
                 reachfiveSession.one_time_token = authResult.object.tkn;
             } else {
                 LOGGER.error(errorMessagePrefix + authResult.errorMessage);
+            }
+        } else if (reachFiveHelper.isReachFiveTransitionActive()) {
+            // Native SFCC login failed. If this email actually belongs to a customer that's
+            // already linked to ReachFive, the native password check was always going to
+            // fail - those accounts have no usable native SFCC password. Rather than leave
+            // the customer stuck on a dead-end "Invalid login or password" error, repair the
+            // conversion cookie now (so getReachFiveConversionMute() picks them up correctly
+            // from here on) and redirect back to the login page, which will now show the
+            // ReachFive widget instead of the native form. This also covers the case where
+            // the cookie was lost for any reason (cleared, new device/browser, expired), not
+            // just the specific Full-CIAM-signup-then-transition-mode scenario.
+            var failedEmail = req.form.loginEmail;
+            var candidateCustomer = !empty(failedEmail) ? CustomerMgr.getCustomerByLogin(failedEmail) : null;
+            var candidateReachFiveProfile = candidateCustomer
+                ? reachFiveApiHelper.getCustomerReachFiveExtProfile(candidateCustomer)
+                : null;
+
+            if (candidateReachFiveProfile) {
+                reachFiveHelper.setReachFiveConversionCookie();
+                res.json({
+                    success: true,
+                    redirectUrl: URLUtils.url('Login-Show').toString()
+                });
             }
         }
     }
