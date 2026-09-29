@@ -22,7 +22,7 @@
                 reachFiveLoginUrl: '${pdict.reachFiveLoginUrl}',
                 siteID: '${pdict.siteID}',
                 stateUrl: '${pdict.stateUrl}',
-                stateObjBase64: '${pdict.stateObjBase64}',
+                state: '${pdict.state}',
                 reachFiveCookieName: '${pdict.reachFiveCookieName}',
                 reachFiveLoginCookieName: '${pdict.reachFiveLoginCookieName}'
             }
@@ -74,7 +74,7 @@
             let allowForgotPassword = ${!pdict.isTransitionActive};
             let redirectUri = '${pdict.callbackUrl}';
             let origin ='${pdict.siteID}';
-            let state = '${pdict.stateObjBase64}';
+            let state = '${pdict.state}';
             let loginLink = '${pdict.resetPassLoginUrl}';
             let accessToken = '${pdict.reachFiveAccess_token}';
             let providerAccessToken = '${pdict.reachFiveProviderAccessToken}';

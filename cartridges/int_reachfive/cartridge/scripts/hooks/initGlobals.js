@@ -60,8 +60,8 @@ initGlobal.afterFooter = function (pdict) {
         }
 
         var data = request.httpParameterMap.data.value; //Get the query param data in order to store it in the state value
-        var stateObjBase64 = reachFiveHelper.getStateObjBase64(targetPage.toString(), pdict.action, handleCustomerRoute, data);
-        var signUpStateObjBase64 = reachFiveHelper.getStateObjBase64(signUpTargetPage.toString(), pdict.action, handleCustomerRoute);
+        var state = reachFiveHelper.getState(targetPage.toString(), pdict.action, handleCustomerRoute, data);
+        var signUpStateObj = reachFiveHelper.getState(signUpTargetPage.toString(), pdict.action, handleCustomerRoute);
 
         if (pdict.disableSSOLogin) {
             context.isSessionAuthRequired = false;
@@ -78,7 +78,7 @@ initGlobal.afterFooter = function (pdict) {
         context.reachFiveLoginUrl = URLUtils.https('Login-Show');
         context.siteID = System.getCurrent().getID();
         context.stateUrl = targetPage;
-        context.stateObjBase64 = stateObjBase64;
+        context.state = state;
         context.reachFiveCookieName = reachFiveHelper.getReachFiveCookieName();
         context.reachFiveLoginCookieName = reachFiveHelper.getReachFiveLoginCookieName();
         context.reachFiveAccess_token = reachfiveSession.access_token;
@@ -87,7 +87,7 @@ initGlobal.afterFooter = function (pdict) {
         if (isLoadUISDK) {
             context.isReachFiveLoginAllowed = reachFiveHelper.isReachFiveLoginAllowed();
             context.reachFiveUiSdkUrl = reachFiveHelper.getReachFiveUiSdkUrl();
-            context.signUpStateObjBase64 = signUpStateObjBase64;
+            context.signUpStateObj = signUpStateObj;
             context.resetPassLoginUrl = URLUtils.https('Login-Show');
             context.isTransitionActive = reachFiveHelper.isReachFiveTransitionActive();
             context.updateProfileUrl = URLUtils.url('ReachFiveController-UpdateCustomer');
