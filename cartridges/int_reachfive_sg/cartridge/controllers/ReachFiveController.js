@@ -350,10 +350,19 @@ function initLinkAccount() {
         loginForm.setValue('rememberme', true);
     }
 
+    var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
+    var validatedSocialName;
+
+    var inputSocialName = request.httpParameterMap.ReachFivesocialName.stringValue;
+    var supportedSocialNames = reachfiveSettings.reach5SupportedSocialNames || [];
+    if (inputSocialName && supportedSocialNames.indexOf(inputSocialName) !== -1) {
+        validatedSocialName = inputSocialName;
+    }
+
     // Prepare view and render
     app.getView({
         RegistrationStatus: false,
-        ReachFivesocialName: request.httpParameterMap.ReachFivesocialName.stringValue,
+        ReachFivesocialName: validatedSocialName,
         ShowStandardLoginToLinkAccount: true,
         ContinueURL: URLUtils.https('ReachFiveController-HandleLinkForm')
     }).render('account/login/reachfivelinkform');

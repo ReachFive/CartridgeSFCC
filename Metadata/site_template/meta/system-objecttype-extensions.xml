@@ -216,6 +216,13 @@
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
+            <attribute-definition attribute-id="reach5SupportedSocialNames">
+                <display-name xml:lang="x-default">Supported ReachFive Social Provider Names</display-name>
+                <description xml:lang="x-default">Whitelist of allowed social provider names.</description>
+                <type>set-of-string</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
             <attribute-definition attribute-id="reach5UiSdkUrl">
                 <display-name xml:lang="x-default">Web UI SDK Url</display-name>
                 <description xml:lang="x-default">ReachFive Web UI SDK Url.</description>
@@ -471,6 +478,7 @@
                 <attribute attribute-id="reach5CoreSdkUrl"/>
                 <attribute attribute-id="reach5SupportedLanguageCodes"/>
                 <attribute attribute-id="reach5DefaulLanguageCode"/>
+                <attribute attribute-id="reach5SupportedSocialNames"/>
                 <attribute attribute-id="reachFiveCheckCredentials"/>
                 <attribute attribute-id="load-social-connect"/>
                 <attribute attribute-id="load-social-connect2"/>
