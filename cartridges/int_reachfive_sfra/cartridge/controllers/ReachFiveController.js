@@ -79,7 +79,18 @@ function getStateData(req) {
         handleCustomerRoute: false
     };
     if (req.querystring.state) {
-        var stateObjStr = dwStringUtils.decodeBase64(req.querystring.state);
+        var stateObjStr = '';
+        var state = req.querystring.state.value
+
+        if (session.privacy[state]) {
+            stateObjStr = session.privacy[state];
+            delete session.privacy[state];
+
+        } else {
+            LOGGER.error('No state data');
+        }
+
+
         try {
             stateObj = JSON.parse(stateObjStr);
         } catch (err) {
@@ -463,7 +474,7 @@ server.post(
                     action: 'loginRedirect',
                     redirectUrl: target
                 });
-                return next();    
+                return next();
             }
 
             var result = {
