@@ -8,6 +8,7 @@ var Transaction = require('dw/system/Transaction');
  * Script Modules
  */
 var reachFiveServiceInterface = require('int_reachfive/cartridge/scripts/interfaces/reachFiveInterface');
+var customAttributes = require('int_reachfive/cartridge/scripts/util/customAttributes');
 
 
 /**
@@ -115,7 +116,7 @@ function updateProfileField(profile, managementToken, reachFiveExternalID) {
     }
 
     Transaction.wrap(function () {
-        profile.custom.reachfiveUpdateEmailAddress = false;
+        customAttributes.setCustomAttribute(profile, 'reachfiveUpdateEmailAddress', false);
     });
 }
 /**
@@ -258,7 +259,7 @@ function updateProfile(profileFieldsObj, profile, managementToken, reachFiveExte
     }
 
     Transaction.wrap(function () {
-        profile.custom.reachfiveUpdateProfile = false;
+        customAttributes.setCustomAttribute(profile, 'reachfiveUpdateProfile', false);
     });
 }
 

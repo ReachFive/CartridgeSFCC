@@ -15,6 +15,7 @@ var reachFiveHelper = require('*/cartridge/scripts/helpers/reachFiveHelper');
 var reachFiveApiHelper = require('*/cartridge/scripts/helpers/reachfiveApiHelper');
 var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
 var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
+var customAttributes = require('*/cartridge/scripts/util/customAttributes');
 var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
 
 server.append('Login', function (req, res, next) {
@@ -408,14 +409,14 @@ server.append('SaveNewPassword', function (req, res, next) {
                 reachFiveApiHelper.passwordUpdateManagementAPI(tokenCustomer.profile, data.newPassword);
 
                 //If the password is not set by the customer
-                if( tokenCustomer.profile.custom.reachfiveHasTechnicalPassword )
+                if( customAttributes.getCustomAttribute(tokenCustomer.profile, 'reachfiveHasTechnicalPassword') )
                 {
                   var profile = tokenCustomer.getProfile();
 
                   Transaction.begin();
 
                   try {
-                    profile.custom.reachfiveHasTechnicalPassword = false; //Update the flag value as the password is now a real one
+                    customAttributes.setCustomAttribute(profile, 'reachfiveHasTechnicalPassword', false); //Update the flag value as the password is now a real one
                     Transaction.commit();
                   } catch (error) {
                       LOGGER.error('Error during modify the reachfiveHasTechnicalPassword value to false : {0}', error);

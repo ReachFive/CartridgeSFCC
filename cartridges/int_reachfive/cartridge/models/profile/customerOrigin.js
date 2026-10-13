@@ -1,6 +1,7 @@
 'use strict';
 
 var BaseProfile = require('~/cartridge/models/profile/base');
+var customAttributes = require('*/cartridge/scripts/util/customAttributes');
 
 /**
  * Internal class function returns Reachfive profile id from customer profiles
@@ -37,7 +38,7 @@ function CustomerProfile(customer) {
         this.customerNo = customer.profile.getCustomerNo();
         this.login = customer.profile.credentials.getLogin();
         this.salesforcePasswordSet = customer.profile.credentials.isPasswordSet();
-        this.hasTechnicalPassword = customer.profile.custom.reachfiveHasTechnicalPassword;
+        this.hasTechnicalPassword = customAttributes.getCustomAttribute(customer.profile, 'reachfiveHasTechnicalPassword');
 
         // Base class variables
         this.profile = {

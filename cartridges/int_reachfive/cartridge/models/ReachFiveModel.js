@@ -19,6 +19,8 @@ var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
  *  */
 var reachFiveHelper = require('~/cartridge/scripts/helpers/reachFiveHelper');
 var reachfiveSettings = require('*/cartridge/models/reachfiveSettings');
+var customAttributes = require('*/cartridge/scripts/util/customAttributes');
+var technicalPassword = require('*/cartridge/scripts/util/technicalPassword');
 
 /**
  * ReachFive helper providing enhanced profile functionality
@@ -48,7 +50,7 @@ var ReachFiveModel = ({
 			//Create an internal profile linked to the customer in order to avoid the duplicate profiles
 			if ( reachFiveHelper.isFieldExist(externalProfile, 'email') && reachfiveSettings.isReachFiveEmailAsLogin )
 			{
-				var temporaryPassword = Math.random().toString(36).substr(2, 8) + '!O)';
+				var temporaryPassword = technicalPassword.generate();
 
 				var newCustomer = CustomerMgr.createCustomer(externalProfile.email, temporaryPassword);
 
@@ -75,7 +77,7 @@ var ReachFiveModel = ({
 			}
 
 			if( !has_password ) {
-				profile.custom.reachfiveHasTechnicalPassword = true;
+				customAttributes.setCustomAttribute(profile, 'reachfiveHasTechnicalPassword', true);
 			}
 			// Complete customer's profile with firstname, lastname, email and birthday if exists
 
@@ -126,6 +128,7 @@ var ReachFiveModel = ({
 			return profile;
 		} catch (e) {
 			Transaction.rollback();
+			LOGGER.error('createReachFiveCustomer failed for external ID {0}: {1}\n{2}', externalID, e.message, e.stack);
 			return null;
 		}
     },
