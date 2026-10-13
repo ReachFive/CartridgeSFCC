@@ -117,7 +117,7 @@ function generateToken() {
 /**
  * @function
  * @description Call Service to have access_token for management API
- * @return {Object} result Obj which contains response.auth.accessToken or errorMessage
+ * @return {Object} result Obj with ok, object (the token response), token (the access token) and errorMessage
  * */
 /* function generateTokenForManagementAPI() {
     var requestParams = {
@@ -145,7 +145,10 @@ function generateTokenForManagementAPI() {
         client_secret: reachFiveHelper.getReachFiveManagementClientSecret(),
         scope: reachFiveHelper.getReachFiveManagementScope()
     };
-    return oauthToken(requestObj);
+    var result = oauthToken(requestObj);
+    // Callers send `result.token` as the Bearer token of Management API requests.
+    result.token = result.object && result.object.access_token;
+    return result;
 }
 
 
