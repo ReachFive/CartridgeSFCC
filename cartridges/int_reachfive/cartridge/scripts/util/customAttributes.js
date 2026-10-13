@@ -11,10 +11,15 @@ var LOGGER = require('dw/system/Logger').getLogger('loginReachFive');
  * @returns {*} The attribute value, or null if the attribute is not declared
  */
 function getCustomAttribute(object, attributeId) {
-    if (object && object.custom && attributeId in object.custom) {
-        return object.custom[attributeId];
+    if (!object || !object.custom) {
+        return null;
     }
-    return null;
+    // No `in` check: on a real custom attributes object it is false for a declared attribute without a value.
+    try {
+        return object.custom[attributeId];
+    } catch (e) {
+        return null;
+    }
 }
 
 /**
@@ -26,9 +31,13 @@ function getCustomAttribute(object, attributeId) {
  * @returns {boolean} true if the value was stored, false if the attribute is not declared
  */
 function setCustomAttribute(object, attributeId, value) {
-    if (object && object.custom && attributeId in object.custom) {
-        object.custom[attributeId] = value;
-        return true;
+    if (object && object.custom) {
+        try {
+            object.custom[attributeId] = value;
+            return true;
+        } catch (e) {
+            // Writing an undeclared attribute throws.
+        }
     }
     LOGGER.warn('Custom attribute {0} is not declared on this instance, value not stored. Import the cartridge metadata (system-objecttype-extensions.xml).', attributeId);
     return false;
