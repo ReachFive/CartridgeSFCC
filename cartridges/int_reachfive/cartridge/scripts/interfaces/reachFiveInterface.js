@@ -104,13 +104,19 @@ function mergeObjects(obj1, obj2) {
     return result.object.access_token;
 } */
 
+/**
+ * @function
+ * @description Get an access token with the client credentials of the ReachFive API key
+ * @return {string|null} The access token, or null if the token call fails
+ * */
 function generateToken() {
     var requestObj = {
         grant_type: 'client_credentials',
         client_id: reachFiveHelper.getReachFiveApiKey(),
         client_secret: reachFiveHelper.getReachFiveClientSecret()
     };
-    return oauthToken(requestObj).then(result => result.object.access_token);
+    var result = oauthToken(requestObj);
+    return (result.ok && result.object) ? result.object.access_token : null;
 }
 
 
@@ -515,20 +521,23 @@ function passwordLogin(requestFields) {
  */
 function deleteUser(customer) {
     var managementToken = generateTokenForManagementAPI();
+    if (!managementToken.ok) {
+        return { ok: false, errorMessage: managementToken.errorMessage };
+    }
 
-            var clientId = reachFiveHelper.getReachFiveExternalID(customer);
-            if(clientId){
-                var service = configureService('reachfive.deleteuser', { user_id: clientId });
-                service.setRequestMethod('DELETE');
-                service.addHeader('Authorization', 'Bearer ' + managementToken.token);
-    
-                var serviceResult = service.call();
-                var result = {
-                    ok: serviceResult.ok,
-                    errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : null
-                };
-                return result;
-            }
+    var clientId = reachFiveHelper.getReachFiveExternalID(customer);
+    if (clientId) {
+        var service = configureService('reachfive.deleteuser', { user_id: clientId });
+        service.setRequestMethod('DELETE');
+        service.addHeader('Authorization', 'Bearer ' + managementToken.token);
+
+        var serviceResult = service.call();
+        var result = {
+            ok: serviceResult.ok,
+            errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : null
+        };
+        return result;
+    }
     return null;
 }
 
