@@ -566,7 +566,7 @@ server.post(
 
                         res.json({
                             success: false,
-                            redirectUrl: formErrors.getFormErrors(profileForm)
+                            fields: formErrors.getFormErrors(profileForm)
                         });
                     }
                 });
