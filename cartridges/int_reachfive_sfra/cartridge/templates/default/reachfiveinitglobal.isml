@@ -80,6 +80,15 @@
             let providerAccessToken = '${pdict.reachFiveProviderAccessToken}';
             let stateUrl = decodeURIComponent('${dw.crypto.Encoding.toURI(pdict.stateUrl)}')
 
+            // The link of the reset password email must lead back to the Login-Show page of this site, which displays
+            // the "Reset your password" form (see isReachFivePasswordReset in Login.js). Without a redirectUrl, ReachFive
+            // uses the "Redirect to" of the email template of the account, which is not always the storefront.
+            // A showAuth call (site preferences "load-social-connect-*") can still set its own redirectUrl.
+            const showAuthWithoutRedirect = window.sdkUiClient.showAuth.bind(window.sdkUiClient);
+            window.sdkUiClient.showAuth = function (options) {
+                return showAuthWithoutRedirect(Object.assign({ redirectUrl: loginLink }, options));
+            };
+
             if(document.getElementById("load-social-connect-login")) {
                 console.log('load-social-connect-login');
                 <isprint value="${dw.system.Site.getCurrent().getCustomPreferenceValue('load-social-connect-login')}" encoding="off">
