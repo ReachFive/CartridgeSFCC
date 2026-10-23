@@ -3,10 +3,10 @@
 <isdecorate template="account/pt_account">
 	<isinclude template="util/modules"/>
 
-	<h1><isprint value="${Resource.msg('account.header','account',null)}" encoding="jshtml" /> Login</h1>
+	<h1><isprint value="${Resource.msg('account.header','account',null)}" encoding="htmlcontent" /> Login</h1>
 	<div class="col-1">
 		<isif condition="${!empty(pdict.ReachFivesocialName)}">
-			<p><isprint value="${Resource.msgf('reachfive.accountfound','reachfive',null, pdict.ReachFivesocialName)}" encoding="jshtml" /></p>
+			<p><isprint value="${Resource.msgf('reachfive.accountfound','reachfive',null, pdict.ReachFivesocialName)}" encoding="htmlcontent" /></p>
 		</isif>
 		<isinclude template="account/login/logininclude"/>
 	</div><!-- END: page column -->
