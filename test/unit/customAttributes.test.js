@@ -1,6 +1,6 @@
 const chai = require('chai');
 const sinon = require('sinon');
-var proxyquire = require('proxyquire').noCallThru();
+const proxyquire = require('proxyquire').noCallThru();
 
 const expect = chai.expect;
 
@@ -24,6 +24,16 @@ describe('customAttributes', function () {
 
         it('should return null for an attribute that is not declared', function () {
             const profile = { custom: {} };
+            Object.defineProperty(profile.custom, 'reachfiveHasTechnicalPassword', {
+                get: function () { throw new ReferenceError('Unknown dynamic property'); }
+            });
+
+            expect(customAttributes.getCustomAttribute(profile, 'reachfiveHasTechnicalPassword')).to.equal(null);
+        });
+
+        it('should return null for a declared attribute without a value, even if `in` is false', function () {
+            // A real custom attributes object answers false to `in` for a declared attribute without a value.
+            const profile = { custom: new Proxy({}, { has: function () { return false; }, get: function () { return null; } }) };
 
             expect(customAttributes.getCustomAttribute(profile, 'reachfiveHasTechnicalPassword')).to.equal(null);
         });
@@ -44,13 +54,30 @@ describe('customAttributes', function () {
             expect(warn.called).to.equal(false);
         });
 
+        it('should store the value of a declared attribute without a value, even if `in` is false', function () {
+            const stored = {};
+            const profile = {
+                custom: new Proxy(stored, {
+                    has: function () { return false; },
+                    set: function (target, key, value) { target[key] = value; return true; }
+                })
+            };
+
+            expect(customAttributes.setCustomAttribute(profile, 'reachfiveHasTechnicalPassword', true)).to.equal(true);
+            expect(stored.reachfiveHasTechnicalPassword).to.equal(true);
+            expect(warn.called).to.equal(false);
+        });
+
         it('should not store anything and should warn for an attribute that is not declared', function () {
-            const profile = { custom: {} };
+            const profile = {
+                custom: new Proxy({}, {
+                    set: function () { throw new ReferenceError('Unknown dynamic property'); }
+                })
+            };
 
             const stored = customAttributes.setCustomAttribute(profile, 'reachfiveHasTechnicalPassword', true);
 
             expect(stored).to.equal(false);
-            expect('reachfiveHasTechnicalPassword' in profile.custom).to.equal(false);
             expect(warn.calledOnce).to.equal(true);
         });
     });
