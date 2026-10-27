@@ -24,6 +24,10 @@ initGlobal.afterFooter = function (pdict) {
     }
 
     var context = {};
+    // isReachFiveEnabled() is already true here (see the early return above);
+    // the SiteGenesis footer template (reachfiveinitglobal.isml) gates all of its
+    // output on pdict.isReachFiveEnabled, so this needs to be passed through.
+    context.isReachFiveEnabled = true;
     var handleCustomerRoute = false;
     var targetPage = request.httpURL.https();
     var reachfiveSession = new ReachfiveSessionModel();
@@ -59,7 +63,7 @@ initGlobal.afterFooter = function (pdict) {
             signUpTargetPage = URLUtils.url('Account-Show', 'registration', 'submitted').relative();
         }
 
-        var data = request.httpParameterMap.data.value; //Get the query param data in order to store it in the state value
+        var data = request.httpParameterMap.data.value; // Get the query param data in order to store it in the state value
         var state = reachFiveHelper.getState(targetPage.toString(), pdict.action, handleCustomerRoute, data);
         var signUpStateObj = reachFiveHelper.getState(signUpTargetPage.toString(), pdict.action, handleCustomerRoute);
 
