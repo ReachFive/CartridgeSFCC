@@ -72,8 +72,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Conversion functions
     document.addEventListener('submit', function(event) {
-        event.preventDefault();
         var form = event.target.closest('.reach5-login-ajax');
+        if (!form) {
+            return;
+        }
+
+        event.preventDefault();
         var formData = new FormData(form);
     
         fetch(reach5Const.ajaxLoginUrl, {
