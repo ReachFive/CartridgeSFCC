@@ -45,9 +45,4 @@
     This is everything else from the original SiteGenesis footer.isml, unchanged, plus
     this one addition at the end.
 </iscomment>
-<!-- CA-7092-FOOTER-OVERRIDE-ACTIVE: if you can see this comment in View Page Source,
-     this override file IS being used; if the ReachFive script still doesn't appear
-     right after it, the problem is inside the hook call below, not the override
-     itself. If you can't even find this comment, the override isn't being picked up
-     at all (cartridge path / deployment issue). -->
 ${dw.system.HookMgr.callHook('app.template.afterFooter', 'afterFooter', pdict) || ''}
