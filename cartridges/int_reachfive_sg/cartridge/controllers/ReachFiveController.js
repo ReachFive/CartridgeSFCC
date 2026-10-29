@@ -5,6 +5,7 @@
 /* eslint-disable one-var */
 /* eslint-disable no-use-before-define */
 /* eslint-disable indent */
+
 'use strict';
 
 /**
@@ -78,8 +79,6 @@ function initReachFive() {
         reachFiveTransition: reachFiveHelper.isReachFiveTransitionActive(),
         disableSocialLogin: disableSocialLogin
     }).render('account/login/reachfiveinit');
-
-    return;
 }
 
 /**
@@ -111,9 +110,7 @@ function initReachFiveGlobal() {
         isSessionAuthRequired: !ignoreSessionAuth,
         reachFiveCookieName: reachFiveHelper.getReachFiveCookieName(),
         reachFiveLoginCookieName: reachFiveHelper.getReachFiveLoginCookieName()
-    }).render('components/footer/reachfiveinitglobal');
-
-    return;
+    }).render('reachfiveinitglobal');
 }
 
 /**
@@ -366,7 +363,6 @@ function initLinkAccount() {
         ShowStandardLoginToLinkAccount: true,
         ContinueURL: URLUtils.https('ReachFiveController-HandleLinkForm')
     }).render('account/login/reachfivelinkform');
-    return;
 }
 
 /**
@@ -414,12 +410,9 @@ function handleLinkForm() {
             }
             // Redirect customer
             response.redirect(redirectURL);
-
-            return;
         },
         error: function () {
             app.getView('Login').render();
-            return;
         }
     });
 }
@@ -446,7 +439,6 @@ function loginRedirect(targetUrl) {
         targetUrl = URLUtils.https('Account-Show').toString();
     }
     response.redirect(targetUrl);
-    return;
 }
 
 /**
@@ -473,7 +465,6 @@ function afterLogin() {
     }
     return true;
 }
-
 
 /**
  * @function
@@ -558,7 +549,6 @@ function showSocialAccounts() {
         ExternalID: externalID,
         CallbackUrl: callbackUrl
     }).render('account/login/showreachfivesociallogincomponent');
-    return;
 }
 
 /**
@@ -649,7 +639,6 @@ function ajaxLogin() {
 
     // Render view
     app.getView({ data: jsonObj }).render('account/login/reachfivejson');
-    return;
 }
 
 /**
@@ -708,8 +697,12 @@ function ajaxSignUp() {
         profileValidation = Customer.createAccount(email, password, app.getForm('profile'));
 
         if (orderNo) {
-            var orders = OrderMgr.searchOrders('orderNo={0} AND status!={1}', 'creationDate desc', orderNo,
-                dw.order.Order.ORDER_STATUS_REPLACED);
+            var orders = OrderMgr.searchOrders(
+'orderNo={0} AND status!={1}',
+'creationDate desc',
+orderNo,
+dw.order.Order.ORDER_STATUS_REPLACED
+);
             if (orders) {
                 var foundOrder = orders.next();
                 Transaction.wrap(function () {
@@ -746,7 +739,6 @@ function ajaxSignUp() {
 
     // Render view
     app.getView({ data: jsonObj }).render('account/login/reachfivejson');
-    return;
 }
 
 /*
