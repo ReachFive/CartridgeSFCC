@@ -269,7 +269,11 @@ function getCustomerReachFiveExtProfile(thatCustomer) {
  * @return {boolean} true when the identities were moved
  * */
 function moveSocialIdentities(socialProfileId, profileId) {
-    if (!socialProfileId || !profileId || socialProfileId === profileId) {
+    if (!socialProfileId) {
+        LOGGER.warn('No social profile in session to merge into {0}', profileId);
+        return false;
+    }
+    if (!profileId || socialProfileId === profileId) {
         return false;
     }
 

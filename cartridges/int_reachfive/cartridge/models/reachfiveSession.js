@@ -80,6 +80,14 @@ function ReachfiveSession(authRespObj) {
         }
     });
 
+    // ID of the Purse Identity profile of the session. The decoded profile is lost when the id_token is too long to
+    // be kept in session (as with KakaoTalk), so the ID is also kept on its own.
+    Object.defineProperty(this, 'profile_id', {
+        get: function () {
+            return (this.profile && this.profile.sub) || session.privacy.profile_id || null;
+        }
+    });
+
     Object.defineProperty(this, 'has_password', {
         get: function () {
             return !!session.privacy.has_password;
@@ -151,6 +159,7 @@ ReachfiveSession.prototype = {
             externalProfile = decodeIdToken(authRespObj.id_token);
 
             if (externalProfile) {
+                session.privacy.profile_id = externalProfile.sub;
                 session.privacy.access_token = authRespObj.access_token;
                 session.privacy.access_token_exp = externalProfile.exp;
                 session.privacy.access_token_iat = externalProfile.iat;

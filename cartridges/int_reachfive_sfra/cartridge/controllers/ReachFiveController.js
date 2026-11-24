@@ -316,7 +316,7 @@ server.post(
             email,
             password,
             afterAuth.getLoginRedirectURL(req.querystring.rurl, req.session.privacyCache, true),
-            reachfiveSession.profile && reachfiveSession.profile.sub
+            reachfiveSession.profile_id
         );
 
         if (purseIdentityLoginUrl) {
