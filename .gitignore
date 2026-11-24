@@ -2,3 +2,4 @@
 .vscode/system-objecttype-extensions.d.ts
 .env
 build/
+.idea/
