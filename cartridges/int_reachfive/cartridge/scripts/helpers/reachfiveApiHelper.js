@@ -259,25 +259,100 @@ function getCustomerReachFiveExtProfile(thatCustomer) {
 
 /**
  * @function
+ * @description Moves the social identities of the profile that a social login created to the
+ * profile the customer is linked to, then deletes the former, with the Management API. A failure
+ * is logged and changes nothing for the customer, who is logged in either way.
+ * The social profile is deleted first: Purse Identity refuses an identity that another profile
+ * still holds.
+ * @param {string} socialProfileId Purse Identity profile created by the social login
+ * @param {string} profileId Purse Identity profile the customer is linked to
+ * @return {boolean} true when the identities were moved
+ * */
+function moveSocialIdentities(socialProfileId, profileId) {
+    if (!socialProfileId || !profileId || socialProfileId === profileId) {
+        return false;
+    }
+
+    // Deleting a profile an SFCC customer is linked to would delete that customer: the DeleteUser
+    // webhook deletes the customer of a deleted profile.
+    var CustomerMgr = require('dw/customer/CustomerMgr');
+    if (CustomerMgr.getExternallyAuthenticatedCustomerProfile(reachFiveHelper.getReachFiveProviderId(), socialProfileId)) {
+        LOGGER.warn('Social profile {0} not merged into {1}: a customer is linked to it', socialProfileId, profileId);
+        return false;
+    }
+
+    var managementToken = reachFiveService.generateTokenForManagementAPI();
+    if (!managementToken.ok) {
+        LOGGER.error('Social profile {0} not merged into {1}: no Management API token: {2}', socialProfileId, profileId, managementToken.errorMessage);
+        return false;
+    }
+
+    var socialProfile = reachFiveService.getManagementUser(managementToken.token, socialProfileId, 'has_password,identities{user_id,provider,provider_variant}');
+    if (!socialProfile.ok || !socialProfile.object) {
+        LOGGER.error('Social profile {0} not merged into {1}: cannot read it: {2}', socialProfileId, profileId, socialProfile.errorMessage);
+        return false;
+    }
+
+    // A profile with a password is an account of its own, not one that a social login created.
+    if (socialProfile.object.has_password) {
+        LOGGER.warn('Social profile {0} not merged into {1}: it has a password', socialProfileId, profileId);
+        return false;
+    }
+
+    var identities = (socialProfile.object.identities || []).filter(function (identity) {
+        return identity.user_id && identity.provider && identity.provider !== 'local' && identity.provider !== 'lite';
+    });
+    if (!identities.length) {
+        LOGGER.warn('Social profile {0} not merged into {1}: it has no social identity', socialProfileId, profileId);
+        return false;
+    }
+
+    var deletion = reachFiveService.deleteManagementUser(managementToken.token, socialProfileId);
+    if (!deletion.ok) {
+        LOGGER.error('Social profile {0} not merged into {1}: cannot delete it: {2}', socialProfileId, profileId, deletion.errorMessage);
+        return false;
+    }
+
+    var moved = true;
+    identities.forEach(function (identity) {
+        var addition = reachFiveService.addManagementIdentity(managementToken.token, profileId, {
+            provider: identity.provider,
+            provider_variant: identity.provider_variant,
+            user_id: identity.user_id
+        });
+        if (!addition.ok) {
+            moved = false;
+            LOGGER.error('Identity {0} of deleted social profile {1} not added to {2}: {3}', identity.provider, socialProfileId, profileId, addition.errorMessage);
+        }
+    });
+
+    return moved;
+}
+
+/**
+ * @function
  * @description Checks the password of the link form against Purse Identity, for a customer
  * already linked to a Purse Identity profile. Such a customer has no usable SFCC password in
  * Full CIAM mode, so the SFCC check alone always fails.
- * The customer stays linked to that profile: the social profile of the session is not linked.
+ * The customer stays linked to that profile, which receives the social identities of the profile
+ * that the social login created.
  * @param {string} email Email entered in the link form
  * @param {string} password Password entered in the link form
  * @param {string} target URL to open once logged in
+ * @param {string} socialProfileId Purse Identity profile created by the social login
  * @return {string|null} URL that opens the Purse Identity session and comes back to the
  * callback, or null when the customer is not linked to Purse Identity or the password is wrong
  * */
-function getLinkFormLoginRedirectUrl(email, password, target) {
+function getLinkFormLoginRedirectUrl(email, password, target, socialProfileId) {
     if (!reachFiveHelper.isReachFiveLoginAllowed() || empty(email) || empty(password)) {
         return null;
     }
 
     var CustomerMgr = require('dw/customer/CustomerMgr');
     var existingCustomer = CustomerMgr.getCustomerByLogin(email);
+    var reachFiveProfile = getCustomerReachFiveExtProfile(existingCustomer);
 
-    if (!getCustomerReachFiveExtProfile(existingCustomer)) {
+    if (!reachFiveProfile) {
         return null;
     }
 
@@ -286,6 +361,8 @@ function getLinkFormLoginRedirectUrl(email, password, target) {
     if (!authResult.ok || !authResult.object || !authResult.object.tkn) {
         return null;
     }
+
+    moveSocialIdentities(socialProfileId, reachFiveProfile.externalID);
 
     return reachFiveHelper.createLoginRedirectUrl(authResult.object.tkn, target);
 }

@@ -310,12 +310,13 @@ server.post(
         var authenticatedCustomer;
         var reachfiveSession = new ReachfiveSessionModel();
 
-        // A customer linked to Purse Identity logs in with the Purse Identity password. The callback then
-        // logs the customer in on that profile, which stays the one the customer is linked to.
+        // A customer linked to Purse Identity logs in with the Purse Identity password. That profile receives
+        // the social identity, and the callback logs the customer in on it.
         var purseIdentityLoginUrl = reachFiveApiHelper.getLinkFormLoginRedirectUrl(
             email,
             password,
-            afterAuth.getLoginRedirectURL(req.querystring.rurl, req.session.privacyCache, true)
+            afterAuth.getLoginRedirectURL(req.querystring.rurl, req.session.privacyCache, true),
+            reachfiveSession.profile && reachfiveSession.profile.sub
         );
 
         if (purseIdentityLoginUrl) {

@@ -375,12 +375,13 @@ function handleLinkForm() {
 
     loginForm.handleAction({
         login: function () {
-            // A customer linked to Purse Identity logs in with the Purse Identity password. The callback then
-            // logs the customer in on that profile, which stays the one the customer is linked to.
+            // A customer linked to Purse Identity logs in with the Purse Identity password. That profile receives
+            // the social identity, and the callback logs the customer in on it.
             var purseIdentityLoginUrl = reachFiveApiHelper.getLinkFormLoginRedirectUrl(
                 loginForm.getValue('username'),
                 loginForm.getValue('password'),
-                session.privacy.TargetLocation || URLUtils.https('Account-Show').toString()
+                session.privacy.TargetLocation || URLUtils.https('Account-Show').toString(),
+                reachFiveLogin.getValue('externalid')
             );
 
             if (purseIdentityLoginUrl) {
