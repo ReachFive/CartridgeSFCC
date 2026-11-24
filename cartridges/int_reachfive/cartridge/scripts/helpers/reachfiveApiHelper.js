@@ -259,6 +259,39 @@ function getCustomerReachFiveExtProfile(thatCustomer) {
 
 /**
  * @function
+ * @description Checks the password of the link form against Purse Identity, for a customer
+ * already linked to a Purse Identity profile. Such a customer has no usable SFCC password in
+ * Full CIAM mode, so the SFCC check alone always fails.
+ * The customer stays linked to that profile: the social profile of the session is not linked.
+ * @param {string} email Email entered in the link form
+ * @param {string} password Password entered in the link form
+ * @param {string} target URL to open once logged in
+ * @return {string|null} URL that opens the Purse Identity session and comes back to the
+ * callback, or null when the customer is not linked to Purse Identity or the password is wrong
+ * */
+function getLinkFormLoginRedirectUrl(email, password, target) {
+    if (!reachFiveHelper.isReachFiveLoginAllowed() || empty(email) || empty(password)) {
+        return null;
+    }
+
+    var CustomerMgr = require('dw/customer/CustomerMgr');
+    var existingCustomer = CustomerMgr.getCustomerByLogin(email);
+
+    if (!getCustomerReachFiveExtProfile(existingCustomer)) {
+        return null;
+    }
+
+    var authResult = loginWithPassword(email, password);
+
+    if (!authResult.ok || !authResult.object || !authResult.object.tkn) {
+        return null;
+    }
+
+    return reachFiveHelper.createLoginRedirectUrl(authResult.object.tkn, target);
+}
+
+/**
+ * @function
  * @description Reset customer password with managment API
  * @param {dw.customer.Profile} profile Customer Profile
  * @param {string} newPassword New customer password
@@ -353,6 +386,7 @@ module.exports.updateReachfivePhoneWithTnk = updateReachfivePhoneWithTnk;
 module.exports.updateReachfiveLoginWithTkn = updateReachfiveLoginWithTkn;
 module.exports.updateReachFiveProfile = updateReachFiveProfile;
 module.exports.getCustomerReachFiveExtProfile = getCustomerReachFiveExtProfile;
+module.exports.getLinkFormLoginRedirectUrl = getLinkFormLoginRedirectUrl;
 module.exports.passwordUpdateManagementAPI = passwordUpdateManagementAPI;
 module.exports.passwordResetManagementAPI = passwordResetManagementAPI;
 module.exports.getReachFiveExternalID = getReachFiveExternalID;

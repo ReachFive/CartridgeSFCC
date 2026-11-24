@@ -297,22 +297,37 @@ server.get(
  */
 server.post(
     'HandleLinkForm',
+    server.middleware.https,
+    csrfProtection.validateRequest,
     csrfProtection.generateToken,
     function (req, res, next) {
         var ReachfiveProfile = require('*/cartridge/models/profile/customerOrigin');
         var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
+        var afterAuth = require('*/cartridge/models/afterAuthUrl');
         var email = req.form.loginEmail;
         var password = req.form.loginPassword;
         var rememberMe = req.form.loginRememberMe ? (!!req.form.loginRememberMe) : false;
         var authenticatedCustomer;
         var reachfiveSession = new ReachfiveSessionModel();
 
+        // A customer linked to Purse Identity logs in with the Purse Identity password. The callback then
+        // logs the customer in on that profile, which stays the one the customer is linked to.
+        var purseIdentityLoginUrl = reachFiveApiHelper.getLinkFormLoginRedirectUrl(
+            email,
+            password,
+            afterAuth.getLoginRedirectURL(req.querystring.rurl, req.session.privacyCache, true)
+        );
+
+        if (purseIdentityLoginUrl) {
+            res.redirect(purseIdentityLoginUrl);
+            return next();
+        }
+
+        // Otherwise, the SFCC password: customers not linked to Purse Identity yet, in Transition mode.
         Transaction.wrap(function () {
             authenticatedCustomer = CustomerMgr.loginCustomer(email, password, rememberMe);
         });
         if (authenticatedCustomer && authenticatedCustomer.authenticated) {
-            var afterAuth = require('*/cartridge/models/afterAuthUrl');
-
             var externalID = reachfiveSession.profile.sub.trim();
 
             if (externalID) {
