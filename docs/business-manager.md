@@ -91,20 +91,11 @@ To add a few services only, import a file that holds just those services, their 
 
 ## Logs
 
-The cartridges log with `Logger.getLogger('loginReachFive')` and `Logger.getLogger('reachfive')`. These are categories,
-not file names: the messages go to the common custom log files.
+Search the logs in the **Log Center**, opened from Business Manager, by the text of the message: for example
+`Social profile`, or `service=reachfive.rest.auth` for a failed call to Purse Identity.
 
-| Messages | Where |
-|---|---|
-| errors | `customerror-*.log` |
-| warnings | `customwarn-*.log`, depending on the level set in **Administration > Operations > Custom Log Settings** |
-| service calls (`comm-log-enabled`) | `service-reachfive-*.log` |
-
-To read them:
-
-- **Log Center**, from Business Manager, searches the messages of every log file: search for a message text, such as
-  `Social profile` or `service=reachfive`.
-- **Administration > Site Development > Development Setup > Log Files** lists the files of the day.
+The cartridges log in the `loginReachFive` and `reachfive` categories. Whether the warnings are written depends on the
+level set in **Administration > Operations > Custom Log Settings**.
 
 ## Customers
 
