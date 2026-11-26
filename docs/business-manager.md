@@ -9,6 +9,8 @@ reads the IDs ([`reachfiveSettings.js`](../cartridges/int_reachfive/cartridge/mo
 
 | Label | ID | Value |
 |---|---|---|
+| Is ReachFive Enabled | `isReachFiveEnabled` | `Yes`, or the cartridges do nothing |
+| ReachFive Login utilities | `isReachFiveLoginAllowed` | `Yes`: a login through the SFCC forms, the account link form included, also logs in on Purse Identity |
 | ReachFive Domain | `reach5Domain` | `<account>.reach5.net` |
 | ReachFive Identity API client ID | `reach5ApiKey` | ID of the Identity client |
 | ReachFive Identity API client secret | `reach5ClientSecret` | secret of the Identity client |

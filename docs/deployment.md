@@ -28,7 +28,8 @@ downloaded), replaces `int_reachfive` and `int_reachfive_sfra` in the copy, and 
       ]
     }
     ```
-  Add the client to the existing `clients` list, without removing the other ones.
+  Add the client to the existing `clients` list, without removing the other ones. A new OCAPI permission takes up to
+  3 minutes to apply.
 - The cartridge path of the site lists the cartridges before `app_storefront_base`, for example
   `int_reachfive_sfra:int_reachfive:app_storefront_base` (**Administration > Sites > Manage Sites > Settings**).
 

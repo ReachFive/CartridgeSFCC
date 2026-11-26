@@ -9,6 +9,7 @@ These pages are for the developers of the cartridges. The integration guide for 
 | [Deploying to a sandbox](deployment.md) | the `Makefile`, and the Account Manager API client it needs |
 | [Purse Identity console](purse-identity-console.md) | the Identity and Management clients, the allowed URLs, the social providers |
 | [Business Manager](business-manager.md) | the site preferences, the cartridge path, the services, the logs, the customers |
+| [Testing](testing.md) | the unit tests, and how to test a flow on a sandbox |
 | [Troubleshooting](troubleshooting.md) | common errors, their cause and their fix |
 
 To start from scratch, follow [Setting up a sandbox](sandbox-setup.md).
