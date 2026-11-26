@@ -6,7 +6,7 @@ ReachFive is a CIAM (Customer Idendity and Access Management), providing social 
 With ReachFive, customers can simplify their authentication process and improve their customer identity management. 
 Currently, more than 30 social networks authentications are managed by ReachFive but the number of social networks supported is continuously growing.
 
-As described in the ReachFive website (https://purse.eu/), ReachFive provide the following functionalities:
+As described in the ReachFive website (https://purse.eu/en/products/purse-identity), ReachFive provide the following functionalities:
 * Single Sign On: sets of API and widget to allow the user to signup, login, manage social account profiles
 * Social Login:  allows merchants to integrate OAuth providers registering and login functionalities, manage social account profiles
 
