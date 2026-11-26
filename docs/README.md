@@ -1,7 +1,7 @@
 # Developer documentation
 
 These pages are for the developers of the cartridges. The integration guide for merchants is the
-[Salesforce integration documentation](https://developer.reachfive.com/docs/integration/salesforce.html).
+[Salesforce integration documentation](https://docs.identity.purse.eu/docs/integration/salesforce.html).
 
 | Page | Covers |
 |---|---|
