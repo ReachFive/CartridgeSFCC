@@ -16,8 +16,8 @@ The browser SDK and the storefront server share this client: `reach5ApiKey` and 
 | Allowed Origins (CORS) | `https://<storefront>` |
 | Allowed Callback URLs | `https://<storefront>/on/demandware.store/Sites-<site>-Site/<locale>/ReachFiveController-CallbackReachFiveRequest`<br>`https://<storefront>/on/demandware.store/Sites-<site>-Site/<locale>/Login-Show` (link of the password reset email) |
 | Enable Refresh Tokens | on: the cartridge renews the session with `grant_type=refresh_token` |
-| Disable ROPC flow | off: the password change on the storefront uses `grant_type=password` |
-| Enforce scope | off: that password grant asks for a `test` scope that does not exist |
+| Disable ROPC flow | off: `Account-SaveProfileSocialReachfive` uses `grant_type=password` |
+| Enforce scope | off: that password grant asks for a `test` scope, which an enforced scope may refuse |
 
 `offline_access` is required: without it, no refresh token is issued, and the logs show `Check reachfive client
 preferences scope for "offline_access"`.

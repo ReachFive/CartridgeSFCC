@@ -23,7 +23,8 @@ The clients are described in [Purse Identity console](purse-identity-console.md)
 the next request: no deployment is needed.
 
 The attributes themselves come from [`Metadata/site_template/meta`](../Metadata/site_template/meta), imported with
-**Administration > Site Development > Site Import & Export**.
+**Administration > Site Development > Site Import & Export**. Import `meta` only: `sites` holds site preferences that
+would overwrite the ones of the instance.
 
 ## Cartridge path
 
@@ -84,8 +85,8 @@ To add a few services only, import a file that holds just those services, their 
 
 - `reachfive.verifyphone.post`: its credential is defined, not the service.
 - `reachfive.ocapiOauth` and `reachfive.ocapiDeleteCustomer`, which the `DeleteUser` webhook uses to delete the SFCC
-  customer through OCAPI: create them by hand. `reachfive.ocapiOauth` gets a token with `client_credentials`, its
-  credential holds the ID and the password of the API client. `reachfive.ocapiDeleteCustomer` calls its credential URL
+  customer through OCAPI: create them by hand. `reachfive.ocapiOauth` gets a token with `client_credentials`, with the
+  API client of the `ocapiTokenClientId` and `ocapiTokenClientPassword` site preferences. `reachfive.ocapiDeleteCustomer` calls its credential URL
   followed by `<customer list ID>/customers/<customer number>`.
 
 ## Logs
@@ -96,7 +97,7 @@ not file names: the messages go to the common custom log files.
 | Messages | Where |
 |---|---|
 | errors | `customerror-*.log` |
-| warnings | `customwarn-*.log`, only when **Administration > Operations > Custom Log Settings** enables `WARN` for the category |
+| warnings | `customwarn-*.log`, depending on the level set in **Administration > Operations > Custom Log Settings** |
 | service calls (`comm-log-enabled`) | `service-reachfive-*.log` |
 
 To read them:
