@@ -18,6 +18,8 @@ The latest compatible version of SiteGenesis is 18.3
 # Getting Started
 For detailed instructions on integration and configuration, please refer to our documentation available at [https://docs.identity.purse.eu/docs/integration/salesforce.html](https://docs.identity.purse.eu/docs/integration/salesforce.html). This documentation provides all the necessary information for integrating and configuring the ReachFive Cartridge for Salesforce B2C Commerce, tailored to your site version, whether it's SFRA or SiteGenesis.
 
+For help, see the [Purse Identity support](https://support.identity.purse.eu/support/home).
+
 # Developer documentation
 
 The [`docs`](docs/README.md) folder explains how to deploy the cartridges to a sandbox, where to configure Purse Identity and Business Manager, where to read the logs, and how to diagnose common errors.
