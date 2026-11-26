@@ -259,16 +259,27 @@ function getCustomerReachFiveExtProfile(thatCustomer) {
 
 /**
  * @function
- * @description Moves the social identities of the profile that a social login created to the
- * profile the customer is linked to, then deletes the former, with the Management API. A failure
- * is logged and changes nothing for the customer, who is logged in either way.
- * The social profile is deleted first: Purse Identity refuses an identity that another profile
- * still holds.
+ * @description Finds the social identities of a Purse Identity profile
+ * @param {Object} profile Profile returned by the Management API, with its `identities`
+ * @return {Array} identities with a user ID, except the local and lite ones
+ * */
+function findSocialIdentities(profile) {
+    return (profile.identities || []).filter(function (identity) {
+        return identity.user_id && identity.provider && identity.provider !== 'local' && identity.provider !== 'lite';
+    });
+}
+
+/**
+ * @function
+ * @description Merges the profile that a social login created into the profile the customer is
+ * linked to, with the Management API: deleting the social profile removes its identities, which
+ * are then added to the profile. Purse Identity refuses an identity that another profile still
+ * holds, hence this order. A failure is logged and does not block the login.
  * @param {string} socialProfileId Purse Identity profile created by the social login
  * @param {string} profileId Purse Identity profile the customer is linked to
- * @return {boolean} true when the identities were moved
+ * @return {boolean} true when the profiles were merged
  * */
-function moveSocialIdentities(socialProfileId, profileId) {
+function mergeSocialProfile(socialProfileId, profileId) {
     if (!socialProfileId) {
         LOGGER.warn('No social profile in session to merge into {0}', profileId);
         return false;
@@ -277,10 +288,10 @@ function moveSocialIdentities(socialProfileId, profileId) {
         return false;
     }
 
-    // Deleting a profile an SFCC customer is linked to would delete that customer: the DeleteUser
-    // webhook deletes the customer of a deleted profile.
+    // The DeleteUser webhook deletes the customer of a deleted profile.
     var CustomerMgr = require('dw/customer/CustomerMgr');
-    if (CustomerMgr.getExternallyAuthenticatedCustomerProfile(reachFiveHelper.getReachFiveProviderId(), socialProfileId)) {
+    var linkedCustomerProfile = CustomerMgr.getExternallyAuthenticatedCustomerProfile(reachFiveHelper.getReachFiveProviderId(), socialProfileId);
+    if (linkedCustomerProfile) {
         LOGGER.warn('Social profile {0} not merged into {1}: a customer is linked to it', socialProfileId, profileId);
         return false;
     }
@@ -291,21 +302,20 @@ function moveSocialIdentities(socialProfileId, profileId) {
         return false;
     }
 
-    var socialProfile = reachFiveService.getManagementUser(managementToken.token, socialProfileId, 'has_password,identities{user_id,provider,provider_variant}');
-    if (!socialProfile.ok || !socialProfile.object) {
-        LOGGER.error('Social profile {0} not merged into {1}: cannot read it: {2}', socialProfileId, profileId, socialProfile.errorMessage);
+    var socialProfileResult = reachFiveService.getManagementUser(managementToken.token, socialProfileId, 'has_password,identities{user_id,provider,provider_variant}');
+    if (!socialProfileResult.ok || !socialProfileResult.object) {
+        LOGGER.error('Social profile {0} not merged into {1}: cannot read it: {2}', socialProfileId, profileId, socialProfileResult.errorMessage);
         return false;
     }
+    var socialProfile = socialProfileResult.object;
 
-    // A profile with a password is an account of its own, not one that a social login created.
-    if (socialProfile.object.has_password) {
+    // A profile with a password was not created by a social login.
+    if (socialProfile.has_password) {
         LOGGER.warn('Social profile {0} not merged into {1}: it has a password', socialProfileId, profileId);
         return false;
     }
 
-    var identities = (socialProfile.object.identities || []).filter(function (identity) {
-        return identity.user_id && identity.provider && identity.provider !== 'local' && identity.provider !== 'lite';
-    });
+    var identities = findSocialIdentities(socialProfile);
     if (!identities.length) {
         LOGGER.warn('Social profile {0} not merged into {1}: it has no social identity', socialProfileId, profileId);
         return false;
@@ -317,7 +327,7 @@ function moveSocialIdentities(socialProfileId, profileId) {
         return false;
     }
 
-    var moved = true;
+    var merged = true;
     identities.forEach(function (identity) {
         var addition = reachFiveService.addManagementIdentity(managementToken.token, profileId, {
             provider: identity.provider,
@@ -325,12 +335,12 @@ function moveSocialIdentities(socialProfileId, profileId) {
             user_id: identity.user_id
         });
         if (!addition.ok) {
-            moved = false;
+            merged = false;
             LOGGER.error('Identity {0} of deleted social profile {1} not added to {2}: {3}', identity.provider, socialProfileId, profileId, addition.errorMessage);
         }
     });
 
-    return moved;
+    return merged;
 }
 
 /**
@@ -366,7 +376,7 @@ function getLinkFormLoginRedirectUrl(email, password, target, socialProfileId) {
         return null;
     }
 
-    moveSocialIdentities(socialProfileId, reachFiveProfile.externalID);
+    mergeSocialProfile(socialProfileId, reachFiveProfile.externalID);
 
     return reachFiveHelper.createLoginRedirectUrl(authResult.object.tkn, target);
 }

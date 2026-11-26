@@ -50,7 +50,8 @@ function configureService(serviceName, substObj) {
                         if (String.prototype.indexOf.call(svcUrl, '{' + key + '}') !== -1) {
                             svcUrl = svcUrl.replace('{' + key + '}', substObj[key]);
                         } else {
-                            // A value without a placeholder goes to the query string, which may not exist yet.
+                            // A value without a placeholder is a query parameter, such as the `fields` of
+                            // `GET /api/v2/users/{user_id}`, whose URL has no `?`.
                             var separator = String.prototype.indexOf.call(svcUrl, '?') === -1 ? '?' : '&';
                             svcUrl += separator + key + '=' + encodeURIComponent(substObj[key]);
                         }
@@ -64,11 +65,11 @@ function configureService(serviceName, substObj) {
             return jsonArgs;
         },
         parseResponse: function (svc, client) {
-            var jsonResponse = client.text;
-            // A 204 response, such as a deletion, has no body.
-            if (!jsonResponse) {
+            // A deletion answers 204, without a body.
+            if (client.statusCode === 204) {
                 return null;
             }
+            var jsonResponse = client.text;
             var objResponse = JSON.parse(jsonResponse);
             return objResponse;
         }
