@@ -259,18 +259,6 @@ function getCustomerReachFiveExtProfile(thatCustomer) {
 
 /**
  * @function
- * @description Finds the social identities of a Purse Identity profile
- * @param {Object} profile Profile returned by the Management API, with its `identities`
- * @return {Array} identities with a user ID, except the local and lite ones
- * */
-function findSocialIdentities(profile) {
-    return (profile.identities || []).filter(function (identity) {
-        return identity.user_id && identity.provider && identity.provider !== 'local' && identity.provider !== 'lite';
-    });
-}
-
-/**
- * @function
  * @description Merges the profile that a social login created into the profile the customer is
  * linked to, with the Management API: deleting the social profile removes its identities, which
  * are then added to the profile. Purse Identity refuses an identity that another profile still
@@ -307,15 +295,16 @@ function mergeSocialProfile(socialProfileId, profileId) {
         LOGGER.error('Social profile {0} not merged into {1}: cannot read it: {2}', socialProfileId, profileId, socialProfileResult.errorMessage);
         return false;
     }
-    var socialProfile = socialProfileResult.object;
+    var ReachfiveProfile = require('*/cartridge/models/profile/reachfiveOrigin');
+    var socialProfile = new ReachfiveProfile(socialProfileResult.object);
 
     // A profile with a password was not created by a social login.
-    if (socialProfile.has_password) {
+    if (socialProfile.profile.has_password) {
         LOGGER.warn('Social profile {0} not merged into {1}: it has a password', socialProfileId, profileId);
         return false;
     }
 
-    var identities = findSocialIdentities(socialProfile);
+    var identities = socialProfile.getSocialIdentities();
     if (!identities.length) {
         LOGGER.warn('Social profile {0} not merged into {1}: it has no social identity', socialProfileId, profileId);
         return false;
