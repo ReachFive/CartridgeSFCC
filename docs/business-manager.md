@@ -45,14 +45,46 @@ Every HTTP call of the cartridges to Purse Identity goes through a service: **Ad
 The URLs hold `{reach5Domain}`, which the code replaces with the site preference, so they do not change between
 accounts. A service missing from Business Manager fails at runtime.
 
+| Service | Call | Client | Used for |
+|---|---|---|---|
+| `reachfive.rest.auth` | `POST /oauth/token` | both | tokens: code exchange, refresh, client credentials |
+| `reachfive.signup.post` | `POST /identity/v1/signup` | Identity | signup from the SFCC forms |
+| `reachfive.passwordlogin.post` | `POST /identity/v1/password/login` | Identity | password check: login in Transition mode, account link form |
+| `reachfive.userinfo.get` | `GET /identity/v1/userinfo` | Identity | profile of the logged-in customer |
+| `reachfive.update.profile.post` | `POST /identity/v1/update-profile` | Identity | profile update by the customer |
+| `reachfive.updateemail.post` | `POST /identity/v1/update-email` | Identity | email update |
+| `reachfive.updatephone.post` | `POST /identity/v1/update-phone-number` | Identity | phone update |
+| `reachfive.updatepassword.post` | `POST /identity/v1/update-password` | Identity | password update |
+| `reachfive.updateprofile.put` | `PUT /api/v2/users/{user_id}` | Management | profile synchronization |
+| `reachfive.verifyemail.post` | `POST /api/v2/users/{user_id}/verify-email` | Management | verification email |
+| `reachfive.verifyphone.post` | `POST /api/v2/users/{user_id}/verify-phone-number` | Management | verification SMS |
+| `reachfive.getuser` | `GET /api/v2/users/{user_id}` | Management | account link form: read the social profile |
+| `reachfive.deleteuser` | `DELETE /api/v2/users/{user_id}` | Management | user deletion, account link form |
+| `reachfive.addidentity.post` | `POST /api/v2/users/{user_id}/providers/identity` | Management | account link form: add the social identity |
+
 The services are defined in [`Metadata/site_template/services.xml`](../Metadata/site_template/services.xml). To import
 them:
 
-1. **Administration > Operations > Import & Export**, then **Upload** the file in the upload section at the top.
+1. **Administration > Operations > Import & Export**: **Upload** the file first, in the upload section at the top. The
+   import only lists uploaded files.
 2. **Services > Import**, select the file, **Next** to validate it.
 3. Choose **Merge**: the services of the file are added or updated, and the others are kept.
+4. **Refresh** the status until the import is in **Success**.
+5. **Administration > Operations > Services**: each service of the file is **Live**, with its credential.
 
 The services are configured per instance: deploying a code version does not change them.
+
+A merge also rewrites the existing services of the file, such as a URL or a timeout changed by hand on the instance.
+To add a few services only, import a file that holds just those services, their credentials and the
+`reachfive.profile` service profile.
+
+`services.xml` does not hold every service the code calls:
+
+- `reachfive.verifyphone.post`: its credential is defined, not the service.
+- `reachfive.ocapiOauth` and `reachfive.ocapiDeleteCustomer`, which the `DeleteUser` webhook uses to delete the SFCC
+  customer through OCAPI: create them by hand. `reachfive.ocapiOauth` gets a token with `client_credentials`, its
+  credential holds the ID and the password of the API client. `reachfive.ocapiDeleteCustomer` calls its credential URL
+  followed by `<customer list ID>/customers/<customer number>`.
 
 ## Logs
 
