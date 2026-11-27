@@ -50,7 +50,10 @@ function configureService(serviceName, substObj) {
                         if (String.prototype.indexOf.call(svcUrl, '{' + key + '}') !== -1) {
                             svcUrl = svcUrl.replace('{' + key + '}', substObj[key]);
                         } else {
-                            svcUrl += '&' + key + '=' + substObj[key];
+                            // A value without a placeholder is a query parameter, such as the `fields` of
+                            // `GET /api/v2/users/{user_id}`, whose URL has no `?`.
+                            var separator = String.prototype.indexOf.call(svcUrl, '?') === -1 ? '?' : '&';
+                            svcUrl += separator + key + '=' + encodeURIComponent(substObj[key]);
                         }
                     });
                 }
@@ -62,6 +65,10 @@ function configureService(serviceName, substObj) {
             return jsonArgs;
         },
         parseResponse: function (svc, client) {
+            // A deletion answers 204, without a body.
+            if (client.statusCode === 204) {
+                return null;
+            }
             var jsonResponse = client.text;
             var objResponse = JSON.parse(jsonResponse);
             return objResponse;
@@ -571,6 +578,66 @@ function getUserFields(clientId) {
 
     return result;
 }
+
+/**
+ * @function
+ * @description Calls a Management API service with a Management API token
+ * @param {dw.svc.HTTPService} service Service to call
+ * @param {string} method HTTP method
+ * @param {string} managementToken Management API token
+ * @param {Object} [body] Request body
+ * @return {Object} request result
+ */
+function callManagementService(service, method, managementToken, body) {
+    service.setRequestMethod(method);
+    service.addHeader('Authorization', 'Bearer ' + managementToken);
+
+    var serviceResult = service.call(body);
+
+    return {
+        ok: serviceResult.ok,
+        object: serviceResult.object,
+        errorMessage: (!serviceResult.ok) ? serviceResult.errorMessage : ''
+    };
+}
+
+/**
+ * @function
+ * @description Gets fields of a Purse Identity profile with the Management API
+ * @param {string} managementToken Management API token
+ * @param {string} userId Purse Identity profile ID
+ * @param {string} fields Fields to return, such as `has_password,identities{user_id,provider}`
+ * @return {Object} request result
+ */
+function getManagementUser(managementToken, userId, fields) {
+    var service = configureService('reachfive.getuser', { user_id: userId, fields: fields });
+    return callManagementService(service, 'GET', managementToken);
+}
+
+/**
+ * @function
+ * @description Deletes a Purse Identity profile with the Management API
+ * @param {string} managementToken Management API token
+ * @param {string} userId Purse Identity profile ID
+ * @return {Object} request result
+ */
+function deleteManagementUser(managementToken, userId) {
+    var service = configureService('reachfive.deleteuser', { user_id: userId });
+    return callManagementService(service, 'DELETE', managementToken);
+}
+
+/**
+ * @function
+ * @description Adds a social identity to a Purse Identity profile with the Management API
+ * @param {string} managementToken Management API token
+ * @param {string} userId Purse Identity profile ID
+ * @param {Object} identity Identity, with `provider`, `user_id` and optionally `provider_variant`
+ * @return {Object} request result
+ */
+function addManagementIdentity(managementToken, userId, identity) {
+    var service = configureService('reachfive.addidentity.post', { user_id: userId });
+    return callManagementService(service, 'POST', managementToken, identity);
+}
 /* Expose Methods */
 exports.generateTokenForManagementAPI = generateTokenForManagementAPI;
 exports.exchangeAuthorizationCodeForIDToken = exchangeAuthorizationCodeForIDToken;
@@ -588,4 +655,7 @@ exports.oauthToken = oauthToken;
 exports.passwordLogin = passwordLogin;
 exports.deleteUser = deleteUser;
 exports.getUserFields = getUserFields;
+exports.getManagementUser = getManagementUser;
+exports.deleteManagementUser = deleteManagementUser;
+exports.addManagementIdentity = addManagementIdentity;
 exports.sendVerificationPhone = sendVerificationPhone ;

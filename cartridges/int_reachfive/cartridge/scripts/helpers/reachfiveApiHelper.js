@@ -259,6 +259,119 @@ function getCustomerReachFiveExtProfile(thatCustomer) {
 
 /**
  * @function
+ * @description Merges the profile that a social login created into the profile the customer is
+ * linked to, with the Management API: deleting the social profile removes its identities, which
+ * are then added to the profile. Purse Identity refuses an identity that another profile still
+ * holds, hence this order. A failure is logged and does not block the login.
+ * @param {string} socialProfileId Purse Identity profile created by the social login
+ * @param {string} profileId Purse Identity profile the customer is linked to
+ * @return {boolean} true when the profiles were merged
+ * */
+function mergeSocialProfile(socialProfileId, profileId) {
+    if (!socialProfileId) {
+        LOGGER.warn('No social profile in session to merge into {0}', profileId);
+        return false;
+    }
+    if (!profileId || socialProfileId === profileId) {
+        return false;
+    }
+
+    // The DeleteUser webhook deletes the customer of a deleted profile.
+    var CustomerMgr = require('dw/customer/CustomerMgr');
+    var linkedCustomerProfile = CustomerMgr.getExternallyAuthenticatedCustomerProfile(reachFiveHelper.getReachFiveProviderId(), socialProfileId);
+    if (linkedCustomerProfile) {
+        LOGGER.warn('Social profile {0} not merged into {1}: a customer is linked to it', socialProfileId, profileId);
+        return false;
+    }
+
+    var managementToken = reachFiveService.generateTokenForManagementAPI();
+    if (!managementToken.ok) {
+        LOGGER.error('Social profile {0} not merged into {1}: no Management API token: {2}', socialProfileId, profileId, managementToken.errorMessage);
+        return false;
+    }
+
+    var socialProfileResult = reachFiveService.getManagementUser(managementToken.token, socialProfileId, 'has_password,identities{user_id,provider,provider_variant}');
+    if (!socialProfileResult.ok || !socialProfileResult.object) {
+        LOGGER.error('Social profile {0} not merged into {1}: cannot read it: {2}', socialProfileId, profileId, socialProfileResult.errorMessage);
+        return false;
+    }
+    var ReachfiveProfile = require('*/cartridge/models/profile/reachfiveOrigin');
+    var socialProfile = new ReachfiveProfile(socialProfileResult.object);
+
+    // A profile with a password was not created by a social login.
+    if (socialProfile.profile.has_password) {
+        LOGGER.warn('Social profile {0} not merged into {1}: it has a password', socialProfileId, profileId);
+        return false;
+    }
+
+    var identities = socialProfile.getSocialIdentities();
+    if (!identities.length) {
+        LOGGER.warn('Social profile {0} not merged into {1}: it has no social identity', socialProfileId, profileId);
+        return false;
+    }
+
+    var deletion = reachFiveService.deleteManagementUser(managementToken.token, socialProfileId);
+    if (!deletion.ok) {
+        LOGGER.error('Social profile {0} not merged into {1}: cannot delete it: {2}', socialProfileId, profileId, deletion.errorMessage);
+        return false;
+    }
+
+    var merged = true;
+    identities.forEach(function (identity) {
+        var addition = reachFiveService.addManagementIdentity(managementToken.token, profileId, {
+            provider: identity.provider,
+            provider_variant: identity.provider_variant,
+            user_id: identity.user_id
+        });
+        if (!addition.ok) {
+            merged = false;
+            LOGGER.error('Identity {0} of deleted social profile {1} not added to {2}: {3}', identity.provider, socialProfileId, profileId, addition.errorMessage);
+        }
+    });
+
+    return merged;
+}
+
+/**
+ * @function
+ * @description Checks the password of the link form against Purse Identity, for a customer
+ * already linked to a Purse Identity profile. Such a customer has no usable SFCC password in
+ * Full CIAM mode, so the SFCC check alone always fails.
+ * The customer stays linked to that profile, which receives the social identities of the profile
+ * that the social login created.
+ * @param {string} email Email entered in the link form
+ * @param {string} password Password entered in the link form
+ * @param {string} target URL to open once logged in
+ * @param {string} socialProfileId Purse Identity profile created by the social login
+ * @return {string|null} URL that opens the Purse Identity session and comes back to the
+ * callback, or null when the customer is not linked to Purse Identity or the password is wrong
+ * */
+function getLinkFormLoginRedirectUrl(email, password, target, socialProfileId) {
+    if (!reachFiveHelper.isReachFiveLoginAllowed() || empty(email) || empty(password)) {
+        return null;
+    }
+
+    var CustomerMgr = require('dw/customer/CustomerMgr');
+    var existingCustomer = CustomerMgr.getCustomerByLogin(email);
+    var reachFiveProfile = getCustomerReachFiveExtProfile(existingCustomer);
+
+    if (!reachFiveProfile) {
+        return null;
+    }
+
+    var authResult = loginWithPassword(email, password);
+
+    if (!authResult.ok || !authResult.object || !authResult.object.tkn) {
+        return null;
+    }
+
+    mergeSocialProfile(socialProfileId, reachFiveProfile.externalID);
+
+    return reachFiveHelper.createLoginRedirectUrl(authResult.object.tkn, target);
+}
+
+/**
+ * @function
  * @description Reset customer password with managment API
  * @param {dw.customer.Profile} profile Customer Profile
  * @param {string} newPassword New customer password
@@ -353,6 +466,7 @@ module.exports.updateReachfivePhoneWithTnk = updateReachfivePhoneWithTnk;
 module.exports.updateReachfiveLoginWithTkn = updateReachfiveLoginWithTkn;
 module.exports.updateReachFiveProfile = updateReachFiveProfile;
 module.exports.getCustomerReachFiveExtProfile = getCustomerReachFiveExtProfile;
+module.exports.getLinkFormLoginRedirectUrl = getLinkFormLoginRedirectUrl;
 module.exports.passwordUpdateManagementAPI = passwordUpdateManagementAPI;
 module.exports.passwordResetManagementAPI = passwordResetManagementAPI;
 module.exports.getReachFiveExternalID = getReachFiveExternalID;

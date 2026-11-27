@@ -66,13 +66,18 @@
         <password encrypted="true" encryption-type="common.export">Q93BFhW07Rp8PkExyoAeEW7dmutxSKCLjGbonRiLbsg=</password>
     </service-credential>
 
-    <service-credential service-credential-id="reachfive.deleteuser">
+    <service-credential service-credential-id="reachfive.deleteuser.credentials">
         <url>https://{reach5Domain}/api/v2/users/{user_id}</url>
         <user-id/>
     </service-credential>
 
-    <service-credential service-credential-id="reachfive.getuser">
+    <service-credential service-credential-id="reachfive.getuser.credentials">
         <url>https://{reach5Domain}/api/v2/users/{user_id}</url>
+        <user-id/>
+    </service-credential>
+
+    <service-credential service-credential-id="reachfive.addidentity.post.credentials">
+        <url>https://{reach5Domain}/api/v2/users/{user_id}/providers/identity</url>
         <user-id/>
     </service-credential>
 
@@ -205,6 +210,28 @@
         <mock-mode-enabled>false</mock-mode-enabled>
         <profile-id>reachfive.profile</profile-id>
         <credential-id>reachfive.deleteuser.credentials</credential-id>
+    </service>
+
+    <service service-id="reachfive.getuser">
+        <service-type>HTTP</service-type>
+        <enabled>true</enabled>
+        <log-prefix>reachfive</log-prefix>
+        <comm-log-enabled>true</comm-log-enabled>
+        <force-prd-enabled>false</force-prd-enabled>
+        <mock-mode-enabled>false</mock-mode-enabled>
+        <profile-id>reachfive.profile</profile-id>
+        <credential-id>reachfive.getuser.credentials</credential-id>
+    </service>
+
+    <service service-id="reachfive.addidentity.post">
+        <service-type>HTTP</service-type>
+        <enabled>true</enabled>
+        <log-prefix>reachfive</log-prefix>
+        <comm-log-enabled>true</comm-log-enabled>
+        <force-prd-enabled>false</force-prd-enabled>
+        <mock-mode-enabled>false</mock-mode-enabled>
+        <profile-id>reachfive.profile</profile-id>
+        <credential-id>reachfive.addidentity.post.credentials</credential-id>
     </service>
 
 </services>

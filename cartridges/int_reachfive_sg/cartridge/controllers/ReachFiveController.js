@@ -375,6 +375,23 @@ function handleLinkForm() {
 
     loginForm.handleAction({
         login: function () {
+            // A customer linked to Purse Identity logs in with the Purse Identity password. That profile receives
+            // the social identity, and the callback logs the customer in on it.
+            var purseIdentityLoginUrl = reachFiveApiHelper.getLinkFormLoginRedirectUrl(
+                loginForm.getValue('username'),
+                loginForm.getValue('password'),
+                session.privacy.TargetLocation || URLUtils.https('Account-Show').toString(),
+                reachFiveLogin.getValue('externalid')
+            );
+
+            if (purseIdentityLoginUrl) {
+                loginForm.clear();
+                reachFiveLogin.clear();
+                response.redirect(purseIdentityLoginUrl);
+                return;
+            }
+
+            // Otherwise, the SFCC password: customers not linked to Purse Identity yet, in Transition mode.
             var Customer = app.getModel('Customer');
             var success = Customer.login(loginForm.getValue('username'), loginForm.getValue('password'), loginForm.getValue('rememberme'));
 
@@ -758,7 +775,7 @@ exports.CallbackCheckSessionRequest = guard.ensure(['get', 'https'], callbackChe
 /** @see module:controllers/ReachFiveController~InitLinkAccount */
 exports.InitLinkAccount = guard.ensure(['get', 'https'], initLinkAccount);
 /** @see module:controllers/ReachFiveController~HandleLinkForm */
-exports.HandleLinkForm = guard.ensure(['post', 'https'], handleLinkForm);
+exports.HandleLinkForm = guard.ensure(['post', 'https', 'csrf'], handleLinkForm);
 /** @see {@link module:controllers/ReachFiveController~startPrefillRegister} */
 exports.StartPrefillRegister = guard.ensure(['https'], startPrefillRegister);
 /** @see module:controllers/ReachFiveController~LinkAccounts */

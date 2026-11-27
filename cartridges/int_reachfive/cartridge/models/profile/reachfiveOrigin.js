@@ -9,15 +9,7 @@ var BaseProfile = require('~/cartridge/models/profile/base');
  *
  */
 function ReachfiveProfile(profileObj) {
-    this.profile = null;
-    if (profileObj) {
-        Object.keys(profileObj).forEach(function (prop) {
-            if (!empty(profileObj[prop])) {
-                this[prop] = profileObj[prop];
-            }
-        }, this.profile);
-        this.profile = profileObj;
-    }
+    this.profile = profileObj || null;
 
     BaseProfile.call(this, this.profile);
 }
@@ -25,5 +17,16 @@ function ReachfiveProfile(profileObj) {
 
 ReachfiveProfile.prototype = Object.create(BaseProfile.prototype);
 ReachfiveProfile.prototype.constructor = ReachfiveProfile;
+
+/**
+ * @function
+ * @description Social identities of the profile, as returned by the Management API
+ * @return {Array} identities with a user ID, except the local and lite ones
+ * */
+ReachfiveProfile.prototype.getSocialIdentities = function () {
+    return ((this.profile && this.profile.identities) || []).filter(function (identity) {
+        return identity.user_id && identity.provider && identity.provider !== 'local' && identity.provider !== 'lite';
+    });
+};
 
 module.exports = ReachfiveProfile;

@@ -297,23 +297,40 @@ server.get(
  */
 server.post(
     'HandleLinkForm',
+    server.middleware.https,
+    csrfProtection.validateRequest,
     csrfProtection.generateToken,
     function (req, res, next) {
         var ReachfiveProfile = require('*/cartridge/models/profile/customerOrigin');
         var ReachfiveSessionModel = require('*/cartridge/models/reachfiveSession');
+        var afterAuth = require('*/cartridge/models/afterAuthUrl');
         var email = req.form.loginEmail;
         var password = req.form.loginPassword;
         var rememberMe = req.form.loginRememberMe ? (!!req.form.loginRememberMe) : false;
         var authenticatedCustomer;
         var reachfiveSession = new ReachfiveSessionModel();
 
+        // A customer linked to Purse Identity logs in with the Purse Identity password. That profile receives
+        // the social identity, and the callback logs the customer in on it.
+        var purseIdentityLoginUrl = reachFiveApiHelper.getLinkFormLoginRedirectUrl(
+            email,
+            password,
+            afterAuth.getLoginRedirectURL(req.querystring.rurl, req.session.privacyCache, true),
+            reachfiveSession.profile_id
+        );
+
+        if (purseIdentityLoginUrl) {
+            res.redirect(purseIdentityLoginUrl);
+            return next();
+        }
+
+        // Otherwise, the SFCC password: customers not linked to Purse Identity yet, in Transition mode.
         Transaction.wrap(function () {
             authenticatedCustomer = CustomerMgr.loginCustomer(email, password, rememberMe);
         });
         if (authenticatedCustomer && authenticatedCustomer.authenticated) {
-            var afterAuth = require('*/cartridge/models/afterAuthUrl');
-
-            var externalID = reachfiveSession.profile.sub.trim();
+            // The decoded profile is not in session when its id_token is too long, as with KakaoTalk.
+            var externalID = reachfiveSession.profile_id ? reachfiveSession.profile_id.trim() : null;
 
             if (externalID) {
                 // Set external ID and provider ID on customer credentials
@@ -498,7 +515,17 @@ server.post(
                     var loggedCustomer;
                     var profileFields = formInfo.profileFields;
 
-                    var externalID = reachfiveSession.profile.sub.trim();
+                    // The decoded profile is not in session when its id_token is too long, as with KakaoTalk.
+                    var externalID = reachfiveSession.profile_id ? reachfiveSession.profile_id.trim() : null;
+                    if (!externalID) {
+                        formInfo.profileForm.customer.email.valid = false;
+                        formInfo.profileForm.customer.email.error = Resource.msg('error.message.unable.to.create.account', 'login', null);
+                        res.json({
+                            success: false,
+                            fields: formErrors.getFormErrors(profileForm)
+                        });
+                        return;
+                    }
                     var profile = ReachFiveModel.createReachFiveCustomer(externalID,
                         {
                             given_name: formInfo.firstName,
@@ -527,15 +554,19 @@ server.post(
                             };
 
                             var customerModel = new CustomerReachfiveProfileModel(loggedCustomer);
-                            var sessionModel = new ReachfiveProfileModel(reachfiveSession.profile);
 
-                            // Data freshness check
-                            equalList.profile = sessionModel.equal(customerModel, profileFields);
-                            if (formInfo.phone) {
-                                equalList.phone = !reachFiveApiHelper.isNewPhone(customerModel.profile.phone_number, sessionModel.profile.phone_number);
+                            // Without the decoded profile, there is nothing to compare the customer with.
+                            if (reachfiveSession.profile) {
+                                var sessionModel = new ReachfiveProfileModel(reachfiveSession.profile);
+
+                                // Data freshness check
+                                equalList.profile = sessionModel.equal(customerModel, profileFields);
+                                if (formInfo.phone) {
+                                    equalList.phone = !reachFiveApiHelper.isNewPhone(customerModel.profile.phone_number, sessionModel.profile.phone_number);
+                                }
+
+                                equalList.trigger = !(equalList.profile && equalList.phone);
                             }
-
-                            equalList.trigger = !(equalList.profile && equalList.phone);
 
                             if (equalList.trigger) {
                                 var tknStatus = reachFiveHelper.verifySessionAccessTkn(true);
