@@ -329,7 +329,8 @@ server.post(
             authenticatedCustomer = CustomerMgr.loginCustomer(email, password, rememberMe);
         });
         if (authenticatedCustomer && authenticatedCustomer.authenticated) {
-            var externalID = reachfiveSession.profile.sub.trim();
+            // The decoded profile is not in session when its id_token is too long, as with KakaoTalk.
+            var externalID = reachfiveSession.profile_id ? reachfiveSession.profile_id.trim() : null;
 
             if (externalID) {
                 // Set external ID and provider ID on customer credentials
