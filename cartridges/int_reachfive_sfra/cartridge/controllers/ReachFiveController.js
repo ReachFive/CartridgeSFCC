@@ -515,7 +515,17 @@ server.post(
                     var loggedCustomer;
                     var profileFields = formInfo.profileFields;
 
-                    var externalID = reachfiveSession.profile.sub.trim();
+                    // The decoded profile is not in session when its id_token is too long, as with KakaoTalk.
+                    var externalID = reachfiveSession.profile_id ? reachfiveSession.profile_id.trim() : null;
+                    if (!externalID) {
+                        formInfo.profileForm.customer.email.valid = false;
+                        formInfo.profileForm.customer.email.error = Resource.msg('error.message.unable.to.create.account', 'login', null);
+                        res.json({
+                            success: false,
+                            fields: formErrors.getFormErrors(profileForm)
+                        });
+                        return;
+                    }
                     var profile = ReachFiveModel.createReachFiveCustomer(externalID,
                         {
                             given_name: formInfo.firstName,
@@ -544,15 +554,19 @@ server.post(
                             };
 
                             var customerModel = new CustomerReachfiveProfileModel(loggedCustomer);
-                            var sessionModel = new ReachfiveProfileModel(reachfiveSession.profile);
 
-                            // Data freshness check
-                            equalList.profile = sessionModel.equal(customerModel, profileFields);
-                            if (formInfo.phone) {
-                                equalList.phone = !reachFiveApiHelper.isNewPhone(customerModel.profile.phone_number, sessionModel.profile.phone_number);
+                            // Without the decoded profile, there is nothing to compare the customer with.
+                            if (reachfiveSession.profile) {
+                                var sessionModel = new ReachfiveProfileModel(reachfiveSession.profile);
+
+                                // Data freshness check
+                                equalList.profile = sessionModel.equal(customerModel, profileFields);
+                                if (formInfo.phone) {
+                                    equalList.phone = !reachFiveApiHelper.isNewPhone(customerModel.profile.phone_number, sessionModel.profile.phone_number);
+                                }
+
+                                equalList.trigger = !(equalList.profile && equalList.phone);
                             }
-
-                            equalList.trigger = !(equalList.profile && equalList.phone);
 
                             if (equalList.trigger) {
                                 var tknStatus = reachFiveHelper.verifySessionAccessTkn(true);
